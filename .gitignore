@@ -2,4 +2,5 @@
 *.csv
 __pycache__/
 *.pyc
-conf/vault/*
+conf/login/
+conf/login
