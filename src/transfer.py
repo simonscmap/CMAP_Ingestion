@@ -56,8 +56,8 @@ def single_file_split(filename):
 
     base_filename = os.path.splitext(os.path.basename(filename))[0]
     data_df = pd.read_excel(vs.combined + filename, sheet_name = 0)
-    data_df.to_csv(vs.data + base_filename + '_data.csv', sep =',', index=True)
+    data_df.to_csv(vs.data + base_filename + '_data.csv', sep =',', index=False)
     dataset_metadata_df = pd.read_excel(vs.combined + filename, sheet_name = 1)
-    dataset_metadata_df.to_csv(vs.metadata + base_filename + '_dataset_metadata.csv', sep =',', index=True)
+    dataset_metadata_df.to_csv(vs.metadata + base_filename + '_dataset_metadata.csv', sep =',', index=False)
     vars_metadata_df = pd.read_excel(vs.combined + filename, sheet_name = 2)
-    vars_metadata_df.to_csv(vs.metadata + base_filename + '_vars_metadata.csv', sep =',', index=True)
+    vars_metadata_df.to_csv(vs.metadata + base_filename + '_vars_metadata.csv', sep =',', index=False)
