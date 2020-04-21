@@ -2,5 +2,5 @@
 *.csv
 __pycache__/
 *.pyc
-conf/login/
 conf/login
+src/error

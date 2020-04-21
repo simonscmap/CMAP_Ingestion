@@ -9,6 +9,9 @@ def makedir(directory):
 	return
 
 def leafStruc(base):
+	makedir(base)
+	if base[-1] != '/':
+		base = base + '/'
 	nrt = base + 'nrt/'
 	makedir(nrt)
 	rep = base + 'rep/'
@@ -23,11 +26,33 @@ def leafStruc(base):
 	makedir(code)
 	return nrt, rep, metadata, stats, doc, code
 
-vault = str(Path.home()) + r'/CMAP_Dropbox/vault/'
+vault = str(Path.home()) + r'/CMAP Data Submission Dropbox/Simons CMAP/vault/'
+staging = str(Path.home()) + r'/AWS_staging/'
+
+################# AWS Staging Area Structure  ##################
+makedir(staging)
+
+#########  data  #########
+data = staging + 'data/'
+makedir(data)
+
+########  metadata  ########
+metadata = staging + 'metadata/'
+makedir(metadata)
+
+########  combined (temporary)  ########
+combined = staging + 'combined/'
+makedir(combined)
+
+
 
 
 ################## Simons CMAP vault structure ##################
 makedir(vault)
+
+#########  BCP  #########
+BCP = vault + 'BCP/'
+makedir(BCP)
 
 #########  assimilation  #########
 assimilation = vault + 'assimilation/'
@@ -61,8 +86,3 @@ makedir(float)
 ########  obs/remote/satellite  ########
 satellite = remote + 'satellite/'
 makedir(satellite)
-
-####  cruise_tree_test #####
-cruise_tree = cruise + 'tblCruiseName_CruiseNickName_Data/'
-makedir(cruise_tree)
-nrt_cruise_tree, rep_cruise_tree, metadata_cruise_tree, stats_cruise_tree, doc_cruise_tree, code_cruise_tree = leafStruc(cruise_tree)
