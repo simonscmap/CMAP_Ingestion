@@ -5,8 +5,14 @@ import credentials as cr
 import pyodbc
 import platform
 import pandas as pd
+import pycmap
+
 ######## DB Specific ############
 
+def DB_query(query):
+    api = pycmap.API()
+    query_result = api.query(query)
+    return query_result
 
 def server_select_credentials(server):
     if server == 'Rainier':
@@ -50,6 +56,7 @@ def lineInsert(server,tableName, columnList ,query):
     insertQuery = """INSERT INTO {} {} VALUES {} """.format(tableName, columnList, query)
     cursor.execute(insertQuery)
     conn.commit()
+
 
 
 
