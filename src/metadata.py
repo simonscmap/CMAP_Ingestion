@@ -12,15 +12,6 @@ tblDatasets:
 
 
 """
-#
-# convert temporal_res string to temporal_res ID :
-# input col of temporal res, could differ
-# Get temporal res ID and String - use as dict to map ID to temporal res input column from metadata
-#
-# list_temporal_res_cmap = list(api.query('''SELECT [Temporal_Resolution] FROM tblTemporal_Resolutions''').iloc[:,0])
-# list_temporal_res_lowercase = [i.lower() for i in list_temporal_res_cmap]
-# print(list_temporal_res_lowercase)
-# non_matching_vals = list(df[col][~df[col].str.lower().isin(list_temporal_res_lowercase)])
 
 def DB_query(query):
     api = pycmap.API()
@@ -32,10 +23,10 @@ def ID_Var_Map(series_to_map,res_col, tableName):
     api = pycmap.API()
     query = '''SELECT * FROM ''' + tableName
     call = DB.DB_query(query)
-    series = series_to_map.str.lower()
+    series = series_to_map.astype(str).str.lower()
     sdict = dict(zip(call[res_col].str.lower(), call.ID))
     mapped_series = series.map(sdict)
-    mapped_series = cmn.nanToNA(mapped_series)
+    mapped_series = list(cmn.nanToNA(mapped_series))
     return mapped_series
 
 def import_metadata(make_tableName):
@@ -85,43 +76,61 @@ def tblDataset_References_Insert(dataset_metadata_df,server='Rainier'):
         cI.lineInsert(server,'[opedia].[dbo].[tblDataset_References]', columnList, query)
     print('Inserting data into tblDataset_References.')
 
-def tblVariables_Insert(dataset_metadata_df,variable_metadata_df, Table_Name, CRS='',server='Rainier'):
-    IDvar = DB.findDatasetID(dataset_metadata_df['dataset_short_name'].iloc[0], server)
-    Short_Name = variable_metadata_df['var_short_name'].as_list()
-    Long_Name = variable_metadata_df['var_long_name'].as_list()
-    Unit = variable_metadata_df['var_unit'].as_list()
-    Temporal_Res_ID = ID_Var_Map(variable_metadata_df['var_temporal_res'],'Temporal_Resolution', 'tblTemporal_Resolutions')
-    Spatial_Res_ID = ID_Var_Map(variable_metadata_df['var_spatial_res'],'Spatial_Resolution', 'tblSpatial_Resolutions')
+def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table_Name, process_level = 'REP',CRS='',server='Rainier'):
+    Db_list = len(variable_metadata_df) * ['Opedia']
+    IDvar_list = len(variable_metadata_df) * [DB.findDatasetID(dataset_metadata_df['dataset_short_name'].iloc[0], server)]
+    Table_Name_list = len(variable_metadata_df) * [Table_Name]
+    Short_Name_list = variable_metadata_df['var_short_name'].tolist()
+    Long_Name_list = variable_metadata_df['var_long_name'].tolist()
+    Unit_list = variable_metadata_df['var_unit'].tolist()
+    Temporal_Res_ID_list = ID_Var_Map(variable_metadata_df['var_temporal_res'],'Temporal_Resolution', 'tblTemporal_Resolutions')
+    Spatial_Res_ID_list = ID_Var_Map(variable_metadata_df['var_spatial_res'],'Spatial_Resolution', 'tblSpatial_Resolutions')
+    Temporal_Coverage_Begin_list, Temporal_Coverage_End_list = cmn.getColBounds(data_df,'time',list_multiplier = len(variable_metadata_df))
+    Lat_Coverage_Begin_list, Lat_Coverage_End_list = cmn.getColBounds(data_df,'lat',list_multiplier = len(variable_metadata_df))
+    Lon_Coverage_Begin_list, Lon_Coverage_End_list = cmn.getColBounds(data_df,'lon',list_multiplier = len(variable_metadata_df))
+    Grid_Mapping_list = [CRS] * len(variable_metadata_df)
+    Sensor_ID_list = ID_Var_Map(variable_metadata_df['var_sensor'],'Sensor', 'tblSensors')
+    Make_ID_list = len(variable_metadata_df) * list(ID_Var_Map(dataset_metadata_df['dataset_make'],'Make', 'tblMakes'))
+    Process_ID_list = ID_Var_Map(pd.Series(len(variable_metadata_df) * [process_level]),'Process_Stage', 'tblProcess_Stages')
+    Study_Domain_ID_list = ID_Var_Map(variable_metadata_df['var_discipline'],'Study_Domain', 'tblStudy_Domains')
+    Comment_list = cmn.nanToNA(variable_metadata_df['var_comment']).to_list()
+    Visualize_list = cmn.nanToNA(variable_metadata_df['visualize']).tolist()
 
-    Temporal_Coverage_Begin = 'FILL'
-    Temporal_Coverage_End = 'FILL'
-    Lat_Coverage_Begin = 'FILL'
-    Lat_Coverage_End = 'FILL'
-    Lon_Coverage_Begin = 'FILL'
-    Lon_Coverage_End = 'FILL'
-    Grid_Mapping = [CRS] * len(variable_metadata_df)
-    Sensor_ID = ID_Var_Map(variable_metadata_df['var_sensor'],'Sensor', 'tblSensors')
-    Process_ID = 'Pull from vault structure lookup? REP/NRT/FOR'
-    Study_Domain_ID = ID_Var_Map(variable_metadata_df['var_discipline'],'Study_Domain', 'tblStudy_Domains')
-    Comment = variable_metadata_df['var_comment'].as_list()
-    Visualize = variable_metadata_df['visualize'].as_list()
+    columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize)'
 
 
-"""
-[DB],[Dataset_ID], [Table_Name],[Short_Name],[Long_Name],[Unit],[Make_ID],[Sensor_ID]
-"""
-"""
+    # return Db_list,IDvar_list,Table_Name_list,Short_Name_list,Long_Name_list,Unit_list,Temporal_Res_ID_list,Spatial_Res_ID_list,Temporal_Coverage_Begin_list,Temporal_Coverage_End_list,Lat_Coverage_Begin_list,Lat_Coverage_End_list,Lon_Coverage_Begin_list,Lon_Coverage_End_list,Grid_Mapping_list,Sensor_ID_list,Make_ID_list,Process_ID_list,Study_Domain_ID_list,Comment_list,Visualize_list
 
-[Process_ID],[Study_Domain_ID],[Comment],[Visualize],[Data_Type]
-"""
+    for Db, IDvar, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID,Spatial_Res_ID, Temporal_Coverage_Begin,Temporal_Coverage_End,Lat_Coverage_Begin,Lat_Coverage_End,Lon_Coverage_Begin,Lon_Coverage_End,Grid_Mapping,Make_ID,Sensor_ID,Process_ID,Study_Domain_ID,Comment, Visualize in zip(
+    Db_list,IDvar_list, Table_Name_list, Short_Name_list,Long_Name_list,Unit_list,Temporal_Res_ID_list,
+    Spatial_Res_ID_list,Temporal_Coverage_Begin_list,Temporal_Coverage_End_list,Lat_Coverage_Begin_list,Lat_Coverage_End_list,
+    Lon_Coverage_Begin_list, Lon_Coverage_End_list,Grid_Mapping_list,Sensor_ID_list,
+    Make_ID_list,Process_ID_list,Study_Domain_ID_list,Comment_list,Visualize_list):
+        query = (Db, IDvar, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID,Spatial_Res_ID,
+        Temporal_Coverage_Begin,Temporal_Coverage_End,Lat_Coverage_Begin,Lat_Coverage_End,
+        Lon_Coverage_Begin,Lon_Coverage_End,Grid_Mapping,Make_ID,Sensor_ID,Process_ID,
+        Study_Domain_ID,Comment, Visualize)
+        # return columnList, query
+        DB.lineInsert(server,'[opedia].[dbo].[tblVariables]', columnList, query)
+    print('Inserting data into tblVariables')
+
+
+
+    #
+    #
+    # for Db, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment in zip(DB_list, dataset_ID_list, Table_Name_list, short_name_list, long_name_list, unit_list, temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list, Sensor_ID_list, Process_ID_list, Study_Domain_ID_list,  comment_list):
+    #     query = (Db, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment)
+    #     cI.lineInsert(server,'[opedia].[dbo].[tblVariables]', columnList, query)
+    # print('Inserting data into tblVariables')
+
 
 
 def tblVariables(DB_list, Dataset_Name_list, Table_Name_list, short_name_list, long_name_list, unit_list,temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list,Sensor_ID_list, Process_ID_list, Study_Domain_ID_list, comment_list,server):
     Dataset_ID_raw = cI.findID(Dataset_Name_list[0], 'tblDatasets', server)
     dataset_ID_list = [Dataset_ID_raw] * len(DB_list)
-    columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment)'
-    for DB, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID,  comment in zip(DB_list, dataset_ID_list, Table_Name_list, short_name_list, long_name_list, unit_list, temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list, Sensor_ID_list, Process_ID_list, Study_Domain_ID_list,  comment_list):
-        query = (DB, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID,  comment)
+    columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID, Comment)'
+    for DB, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment in zip(DB_list, dataset_ID_list, Table_Name_list, short_name_list, long_name_list, unit_list, temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list, Sensor_ID_list, Process_ID_list, Study_Domain_ID_list,  comment_list):
+        query = (Db, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment)
         cI.lineInsert(server,'[opedia].[dbo].[tblVariables]', columnList, query)
     print('Inserting data into tblVariables')
 
