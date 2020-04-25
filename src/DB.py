@@ -14,6 +14,9 @@ def DB_query(query):
     query_result = api.query(query)
     return query_result
 
+
+
+
 def server_select_credentials(server):
     if server == 'Rainier':
         usr=cr.usr_rainier
@@ -43,13 +46,7 @@ def dbConnect(server,db='Opedia', TDS_Version='7.3'):
     cursor = conn.cursor()
     return conn, cursor
 
-def findDatasetID(datasetName, server):
-    """ this function pulls the ID value from the [tblDatasets] for the tblDataset_References to use """
-    conn,cursor = dbConnect(server)
-    cur_str = """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '""" + datasetName + """'"""
-    cursor.execute(cur_str)
-    IDvar = (cursor.fetchone()[0])
-    return IDvar
+
 
 def lineInsert(server,tableName, columnList ,query):
     conn,cursor = dbConnect(server)

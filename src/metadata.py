@@ -68,12 +68,12 @@ def tblDatasets_Insert(dataset_metadata_df,server='Rainier'):
 
 def tblDataset_References_Insert(dataset_metadata_df,server='Rainier'):
     Dataset_Name = dataset_metadata_df['dataset_short_name'].iloc[0]
-    IDvar = DB.findDatasetID(Dataset_Name, server)
+    IDvar = cmn.findDatasetID(Dataset_Name, server)
     columnList = '(Dataset_ID, Reference)'
     reference_list = dataset_metadata_df['dataset_references'].to_list()
     for ref in reference_list:
         query = (IDvar, ref)
-        cI.lineInsert(server,'[opedia].[dbo].[tblDataset_References]', columnList, query)
+        DB.lineInsert(server,'[opedia].[dbo].[tblDataset_References]', columnList, query)
     print('Inserting data into tblDataset_References.')
 
 def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table_Name, process_level = 'REP',CRS='',server='Rainier'):
@@ -99,8 +99,6 @@ def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table
     columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize)'
 
 
-    # return Db_list,IDvar_list,Table_Name_list,Short_Name_list,Long_Name_list,Unit_list,Temporal_Res_ID_list,Spatial_Res_ID_list,Temporal_Coverage_Begin_list,Temporal_Coverage_End_list,Lat_Coverage_Begin_list,Lat_Coverage_End_list,Lon_Coverage_Begin_list,Lon_Coverage_End_list,Grid_Mapping_list,Sensor_ID_list,Make_ID_list,Process_ID_list,Study_Domain_ID_list,Comment_list,Visualize_list
-
     for Db, IDvar, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID,Spatial_Res_ID, Temporal_Coverage_Begin,Temporal_Coverage_End,Lat_Coverage_Begin,Lat_Coverage_End,Lon_Coverage_Begin,Lon_Coverage_End,Grid_Mapping,Make_ID,Sensor_ID,Process_ID,Study_Domain_ID,Comment, Visualize in zip(
     Db_list,IDvar_list, Table_Name_list, Short_Name_list,Long_Name_list,Unit_list,Temporal_Res_ID_list,
     Spatial_Res_ID_list,Temporal_Coverage_Begin_list,Temporal_Coverage_End_list,Lat_Coverage_Begin_list,Lat_Coverage_End_list,
@@ -116,23 +114,30 @@ def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table
 
 
 
-    #
-    #
-    # for Db, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment in zip(DB_list, dataset_ID_list, Table_Name_list, short_name_list, long_name_list, unit_list, temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list, Sensor_ID_list, Process_ID_list, Study_Domain_ID_list,  comment_list):
-    #     query = (Db, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment)
-    #     cI.lineInsert(server,'[opedia].[dbo].[tblVariables]', columnList, query)
-    # print('Inserting data into tblVariables')
+def findID(datasetName, server, catalogTable):
+    """ this function pulls the ID value from the [tblDatasets] for the tblDataset_References to use """
+    conn = dc.dbConnect(server)
+    cursor = conn.cursor()
+    cur_str = """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '""" + datasetName + """'"""
+    cursor.execute(cur_str)
+    IDvar = (cursor.fetchone()[0])
+    return IDvar
+    
+def tblKeywords_Insert(variable_metadata_df,dataset_metadata_df,Table_Name,server='Rainier'):
+    IDvar = cmn.getDatasetID(dataset_metadata_df['dataset_short_name'].iloc[0])
+    for index,row in variable_metadata_df.iterrows():
+        VarID = cmn.findVarID(IDvar, variable_metadata_df.loc[index,'var_short_name'],  server)
+        keyword_list = (variable_metadata_df.loc[index,'var_keywords']).split(',')
+        for keyword in keyword_list:
+            keyword = keyword.lstrip()
+            query = (VarID, keyword)
+            print(query)
+            if len(keyword) > 0: # won't insert empty values
+                try: # Cannot insert duplicate entries, so skips if duplicate
+                    DB.lineInsert(server,'[opedia].[dbo].[tblKeywords]', '(var_ID, keywords)', query)
+                except Exception as e:
+                    print(e)
 
-
-
-def tblVariables(DB_list, Dataset_Name_list, Table_Name_list, short_name_list, long_name_list, unit_list,temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list,Sensor_ID_list, Process_ID_list, Study_Domain_ID_list, comment_list,server):
-    Dataset_ID_raw = cI.findID(Dataset_Name_list[0], 'tblDatasets', server)
-    dataset_ID_list = [Dataset_ID_raw] * len(DB_list)
-    columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID, Comment)'
-    for DB, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment in zip(DB_list, dataset_ID_list, Table_Name_list, short_name_list, long_name_list, unit_list, temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list, Sensor_ID_list, Process_ID_list, Study_Domain_ID_list,  comment_list):
-        query = (Db, dataset_ID, Table_Name, short_name, long_name, unit, temporal_res, spatial_res, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Sensor_ID, Make_ID, Process_ID, Study_Domain_ID,  comment)
-        cI.lineInsert(server,'[opedia].[dbo].[tblVariables]', columnList, query)
-    print('Inserting data into tblVariables')
 
 
 # cF.tblDatasets(DB, Dataset_Name, Dataset_Long_Name, Variables, Data_Source, Distributor, Description, Climatology,server)
