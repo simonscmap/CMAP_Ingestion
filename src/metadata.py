@@ -3,20 +3,7 @@ import DB
 import glob
 import pandas as pd
 import pycmap
-"""
-Tables to insert into:
-tblDatasets:
 
-
-
-
-
-"""
-
-def DB_query(query):
-    api = pycmap.API()
-    query_result = api.query(query)
-    return query_result
 
 
 def ID_Var_Map(series_to_map,res_col, tableName):
@@ -42,7 +29,6 @@ def import_metadata(make_tableName):
 
 def tblDatasets_Insert(dataset_metadata_df,server='Rainier'):
         dataset_metadata_df = cmn.nanToNA(dataset_metadata_df)
-
         Dataset_Name = dataset_metadata_df['dataset_short_name'].iloc[0]
         Dataset_Long_Name = dataset_metadata_df['dataset_long_name'].iloc[0]
         Dataset_Version = dataset_metadata_df['dataset_version'].iloc[0]
@@ -78,7 +64,7 @@ def tblDataset_References_Insert(dataset_metadata_df,server='Rainier'):
 
 def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table_Name, process_level = 'REP',CRS='',server='Rainier'):
     Db_list = len(variable_metadata_df) * ['Opedia']
-    IDvar_list = len(variable_metadata_df) * [DB.findDatasetID(dataset_metadata_df['dataset_short_name'].iloc[0], server)]
+    IDvar_list = len(variable_metadata_df) * [cmn.getDatasetID_DS_Name(dataset_metadata_df['dataset_short_name'].iloc[0])]
     Table_Name_list = len(variable_metadata_df) * [Table_Name]
     Short_Name_list = variable_metadata_df['var_short_name'].tolist()
     Long_Name_list = variable_metadata_df['var_long_name'].tolist()
@@ -95,34 +81,25 @@ def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table
     Study_Domain_ID_list = ID_Var_Map(variable_metadata_df['var_discipline'],'Study_Domain', 'tblStudy_Domains')
     Comment_list = cmn.nanToNA(variable_metadata_df['var_comment']).to_list()
     Visualize_list = cmn.nanToNA(variable_metadata_df['visualize']).tolist()
+    Data_Type_list = cmn.getTableName_Dtypes(Table_Name)['DATA_TYPE'].tolist()
+    columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize, Data_Type)'
 
-    columnList = '(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize)'
 
-
-    for Db, IDvar, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID,Spatial_Res_ID, Temporal_Coverage_Begin,Temporal_Coverage_End,Lat_Coverage_Begin,Lat_Coverage_End,Lon_Coverage_Begin,Lon_Coverage_End,Grid_Mapping,Make_ID,Sensor_ID,Process_ID,Study_Domain_ID,Comment, Visualize in zip(
+    for Db, IDvar, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID,Spatial_Res_ID, Temporal_Coverage_Begin,Temporal_Coverage_End,Lat_Coverage_Begin,Lat_Coverage_End,Lon_Coverage_Begin,Lon_Coverage_End,Grid_Mapping,Make_ID,Sensor_ID,Process_ID,Study_Domain_ID,Comment, Visualize, Data_Type in zip(
     Db_list,IDvar_list, Table_Name_list, Short_Name_list,Long_Name_list,Unit_list,Temporal_Res_ID_list,
     Spatial_Res_ID_list,Temporal_Coverage_Begin_list,Temporal_Coverage_End_list,Lat_Coverage_Begin_list,Lat_Coverage_End_list,
-    Lon_Coverage_Begin_list, Lon_Coverage_End_list,Grid_Mapping_list,Sensor_ID_list,
-    Make_ID_list,Process_ID_list,Study_Domain_ID_list,Comment_list,Visualize_list):
+    Lon_Coverage_Begin_list, Lon_Coverage_End_list,Grid_Mapping_list,
+    Make_ID_list, Sensor_ID_list, Process_ID_list,Study_Domain_ID_list,Comment_list,Visualize_list, Data_Type_list):
         query = (Db, IDvar, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID,Spatial_Res_ID,
         Temporal_Coverage_Begin,Temporal_Coverage_End,Lat_Coverage_Begin,Lat_Coverage_End,
         Lon_Coverage_Begin,Lon_Coverage_End,Grid_Mapping,Make_ID,Sensor_ID,Process_ID,
-        Study_Domain_ID,Comment, Visualize)
-        # return columnList, query
+        Study_Domain_ID,Comment, Visualize, Data_Type)
+
         DB.lineInsert(server,'[opedia].[dbo].[tblVariables]', columnList, query)
     print('Inserting data into tblVariables')
 
 
 
-def findID(datasetName, server, catalogTable):
-    """ this function pulls the ID value from the [tblDatasets] for the tblDataset_References to use """
-    conn = dc.dbConnect(server)
-    cursor = conn.cursor()
-    cur_str = """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '""" + datasetName + """'"""
-    cursor.execute(cur_str)
-    IDvar = (cursor.fetchone()[0])
-    return IDvar
-    
 def tblKeywords_Insert(variable_metadata_df,dataset_metadata_df,Table_Name,server='Rainier'):
     IDvar = cmn.getDatasetID(dataset_metadata_df['dataset_short_name'].iloc[0])
     for index,row in variable_metadata_df.iterrows():
@@ -138,15 +115,65 @@ def tblKeywords_Insert(variable_metadata_df,dataset_metadata_df,Table_Name,serve
                 except Exception as e:
                     print(e)
 
+def tblDataset_Cruises_Insert(dataset_metadata_df, cruiseName):
+    """use pycmap cruise ID to find metatadata..."""
+    cruise_details = cmn.getCruiseDetails(cruiseName)
+    if cruise_details.empty == True:
+        print('That cruise name or nickname does not appear to be in tblCruises. Here is a list of cruises that are present: ')
+        pd.set_option('display.max_rows', None)
+        print(getListCruises())
+    else:
+        cruise_ID = cruise_details['ID'].iloc[0]
+        dataset_ID = cmn.getDatasetID_DS_Name(dataset_metadata_df['dataset_short_name'].iloc[0])
+        query = (dataset_ID, cruise_ID)
+        DB.lineInsert(server,'[opedia].[dbo].[tblDataset_Cruises]', '(Dataset_ID, Cruise_ID)', query)
 
 
-# cF.tblDatasets(DB, Dataset_Name, Dataset_Long_Name, Variables, Data_Source, Distributor, Description, Climatology,server)
-# cF.tblDataset_References(Dataset_Name, reference_list,server)
-# cF.tblVariables(DB_list, Dataset_Name_list, Table_Name_list, short_name_list, long_name_list, unit_list,temporal_res_list, spatial_res_list, Temporal_Coverage_Begin_list, Temporal_Coverage_End_list, Lat_Coverage_Begin_list, Lat_Coverage_End_list, Lon_Coverage_Begin_list, Lon_Coverage_End_list, Grid_Mapping_list, Make_ID_list,Sensor_ID_list, Process_ID_list, Study_Domain_ID_list, comment_list,server)
-# cF.tblKeywords(vars_metadata, Dataset_Name,keyword_col,tableName,server)
 
-#
-""" new ssf function updates"""
-# ssf.buildVarDFSmallTables(tableName,server)
-""" add to Datasets_Cruises table """
-# cF.lineInsert('tblDataset_Cruises', '(Dataset_ID, Cruise_ID)', '(177,589)'
+
+def deleteFromtblKeywords(Dataset_ID,server):
+    Keyword_ID_list = cmn.getKeywordsDataset(Dataset_ID)
+    Keyword_ID_str = "','".join(str(key) for key in Keyword_ID_list)
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblKeywords] WHERE [var_ID] IN ('""" + Keyword_ID_str + """')"""
+    DB.DB_modify(cur_str,server)
+
+
+
+def deleteFromtblDataset_Stats(Dataset_ID,server):
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_Stats_ID] WHERE [Dataset_ID] = """ + str(Dataset_ID)
+    DB.DB_modify(cur_str,server)
+
+
+def deleteFromtblDataset_Cruises(Dataset_ID,server):
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_Cruises] WHERE [Dataset_ID] = """ + str(Dataset_ID)
+    DB.DB_modify(cur_str,server)
+
+
+def deleteFromtblDataset_References(Dataset_ID,server):
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_References] WHERE [Dataset_ID] = """ + str(Dataset_ID)
+    DB.DB_modify(cur_str,server)
+
+def deleteFromtblVariables(Dataset_ID,server):
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblVariables] WHERE [Dataset_ID] = """ + str(Dataset_ID)
+    DB.DB_modify(cur_str,server)
+
+def deleteFromtblDatasets(Dataset_ID,server):
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblDatasets] WHERE [ID] = """ + Dataset_ID
+    DB.DB_modify(cur_str,server)
+
+def dropTable(tableName,server):
+    cur_str = """DROP TABLE """ + tableName
+    DB.DB_modify(cur_str,server)
+
+def deleteCatalogTables(tableName,server):
+    contYN = input('Are you sure you want to delete all of the catalog tables for ' + tableName + ' ?  [yes/no]: ' )
+    Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName)
+    if contYN == 'yes':
+        deleteFromtblKeywords(tableName,server)
+        deleteFromtblDataset_Stats(tableName,server)
+        deleteFromtblDataset_Cruises(tableName,server)
+        deleteFromtblDataset_References(tableName,server)
+        deleteFromtblVariables(tableName,server)
+        deleteFromtblDatasets(tableName,server)
+    else:
+        print('Catalog tables for ' + datasetName + ' not deleted')

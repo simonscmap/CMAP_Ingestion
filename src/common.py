@@ -10,6 +10,10 @@ def nanToNA(df):
     df = df.replace(np.nan, '', regex=True)
     return df
 
+def lowercase_List(list):
+    lower_list = [x.lower() for x in list]
+    return lower_list
+
 def getColBounds(df,col,list_multiplier= None):
     min_col = df[col].min()
     max_col = df[col].max()
@@ -31,11 +35,25 @@ def getDatasetID_Tbl_Name(tableName):
     dsID = query_return.iloc[0][0]
     return dsID
 
-def DB_query(query):
-    api = pycmap.API()
-    query_result = api.query(query)
-    return query_result
+def getKeywordsDataset(dataset_ID):
+    cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(dataset_ID = dataset_ID)
+    query_return = DB.DB_query(cur_str)['ID'].to_list()
+    return query_return
 
+def getTableName_Dtypes(tableName):
+    query = """ select COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '""" + tableName + """'"""
+    query_return = DB.DB_query(query)
+    return query_return
+
+def getCruiseDetails(cruiseName):
+    query = """EXEC uspCruiseByName '""" + cruiseName + """'"""
+    query_return = DB.DB_query(query)
+    return query_return
+
+def getListCruises():
+    query = """EXEC uspCruises"""
+    query_return = DB.DB_query(query)
+    return query_return
 
 def findVarID(datasetID, Short_Name,  server):
     """ this function pulls the ID value from the [tblVariables] for the tblKeywords to use """
