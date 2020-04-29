@@ -19,6 +19,7 @@ def DB_modify(cmnd,server='Rainer'):
     cursor.execute(cmnd)
     conn.commit()
 
+
 def server_select_credentials(server):
     if server == 'Rainier':
         usr=cr.usr_rainier
@@ -50,11 +51,13 @@ def dbConnect(server,db='Opedia', TDS_Version='7.3'):
 
 def lineInsert(server,tableName, columnList ,query):
     insertQuery = """INSERT INTO {} {} VALUES {} """.format(tableName, columnList, query)
-    DB_modify(insertQuery)
+    conn,cursor = dbConnect(server)
+    cursor.execute(insertQuery)
+    conn.commit()
+
 
 def toSQLbcp(export_path, tableName,  server):
 
     usr,psw,ip,port = server_select_credentials(server)
     str = """bcp Opedia.dbo.""" + tableName + """ in """ +"""'""" + export_path + """'""" + """ -e error -c -t, -U  """ + usr + """ -P """ + psw + """ -S """ + ip + """,""" + port
-    print(str)
     os.system(str)

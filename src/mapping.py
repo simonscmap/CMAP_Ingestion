@@ -5,7 +5,7 @@ import cartopy
 import matplotlib.pyplot as plt
 
 
-static_outputdir = '/home/nrhagen/Documents/CMAP/mission_icons/'
+static_outputdir = '/home/nrhagen/Documents/CMAP/CMAP_Ingestion/static/mission_icons/'
 
 
 def pandas2geopandas(df):
@@ -31,5 +31,5 @@ def cartopy_sparse_map(data_df,tableName,outputdir = static_outputdir):
     ax.outline_patch.set_edgecolor('#424242')
     ax.set_facecolor('#424242')
     gdf.plot(ax=ax, color='#FF8C00', markersize= 3,alpha = 0.4,rasterized=True)
-    plt.savefig(static_outputdir + table + '.svg',dpi=200,transparent=True,bbox_inches='tight',rasterized=True)
+    plt.savefig(static_outputdir + tableName + '.svg',dpi=200,transparent=True,bbox_inches='tight',rasterized=True)
     plt.close()

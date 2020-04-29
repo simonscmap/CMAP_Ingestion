@@ -1,6 +1,10 @@
+import sys
+sys.path.append('../conf/')
+import vault_structure as vs
 import pandas as pd
 import numpy as np
 import DB
+import os
 
 def strip_whitespace_headers(df):
     df.rename(columns=lambda x: x.strip())
@@ -75,3 +79,33 @@ def deletefromStatsTable(tableName,server):
     insertQuery = """DELETE FROM tblDataset_Stats where Dataset_Name = '%s'""" % (tableName)
     cursor.execute(insertQuery)
     conn.commit()
+
+
+def find(name, path):
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            return os.path.join(root, name)
+
+def find_File_Path_guess_tree(name):
+    for root, dirs, files in os.walk(vs.vault):
+        if name in files:
+            fpath=  os.path.join(root, name)
+            if 'cruise' in fpath:
+                struct = vs.cruise
+            elif 'float' in fpath:
+                struct = vs.float
+            elif 'station' in fpath:
+                struct = vs.station
+            elif 'satellite' in fpath:
+                struct = vs.satellite
+            elif 'satellite' in fpath:
+                struct = vs.satellite
+            elif 'satellite' in fpath:
+                struct = vs.satellite
+            elif 'model' in fpath:
+                struct = vs.model
+            elif 'assimilation' in fpath:
+                struct = vs.assimilation
+            else:
+                struct = 'File path not found'
+            return struct

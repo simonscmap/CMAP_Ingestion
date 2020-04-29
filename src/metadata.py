@@ -36,7 +36,7 @@ def tblDatasets_Insert(dataset_metadata_df,server='Rainier'):
         Dataset_Make = dataset_metadata_df['dataset_make'].iloc[0]
         Data_Source = dataset_metadata_df['dataset_source'].iloc[0]
         Distributor = dataset_metadata_df['dataset_distributor'].iloc[0]
-        Dataset_Acknowledgement = dataset_metadata_df['dataset_acknowledgement'].iloc[0]
+        Acknowledgement = dataset_metadata_df['dataset_acknowledgement'].iloc[0]
         Contact_Email = dataset_metadata_df['contact_email'].iloc[0]
         Dataset_History = dataset_metadata_df['dataset_history'].iloc[0]
         Description = dataset_metadata_df['dataset_description'].iloc[0]
@@ -47,14 +47,14 @@ def tblDatasets_Insert(dataset_metadata_df,server='Rainier'):
         Doc_URL = ''
         Icon_URL = ''
 
-        query = (Db,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Dataset_Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)
+        query = (Db,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)
         columnList = '(DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)'
         DB.lineInsert(server,'[opedia].[dbo].[tblDatasets]', columnList, query)
         print('Metadata inserted into tblDatasets.')
 
 def tblDataset_References_Insert(dataset_metadata_df,server='Rainier'):
     Dataset_Name = dataset_metadata_df['dataset_short_name'].iloc[0]
-    IDvar = cmn.findDatasetID(Dataset_Name, server)
+    IDvar = cmn.getDatasetID_DS_Name(Dataset_Name)
     columnList = '(Dataset_ID, Reference)'
     reference_list = dataset_metadata_df['dataset_references'].to_list()
     for ref in reference_list:
@@ -101,7 +101,7 @@ def tblVariables_Insert(data_df, dataset_metadata_df,variable_metadata_df, Table
 
 
 def tblKeywords_Insert(variable_metadata_df,dataset_metadata_df,Table_Name,server='Rainier'):
-    IDvar = cmn.getDatasetID(dataset_metadata_df['dataset_short_name'].iloc[0])
+    IDvar = cmn.getDatasetID_DS_Name(dataset_metadata_df['dataset_short_name'].iloc[0])
     for index,row in variable_metadata_df.iterrows():
         VarID = cmn.findVarID(IDvar, variable_metadata_df.loc[index,'var_short_name'],  server)
         keyword_list = (variable_metadata_df.loc[index,'var_keywords']).split(',')
@@ -115,7 +115,7 @@ def tblKeywords_Insert(variable_metadata_df,dataset_metadata_df,Table_Name,serve
                 except Exception as e:
                     print(e)
 
-def tblDataset_Cruises_Insert(dataset_metadata_df, cruiseName):
+def tblDataset_Cruises_Insert(dataset_metadata_df, cruiseName,server='Rainier'):
     """use pycmap cruise ID to find metatadata..."""
     cruise_details = cmn.getCruiseDetails(cruiseName)
     if cruise_details.empty == True:
@@ -136,44 +136,51 @@ def deleteFromtblKeywords(Dataset_ID,server):
     Keyword_ID_str = "','".join(str(key) for key in Keyword_ID_list)
     cur_str = """DELETE FROM [Opedia].[dbo].[tblKeywords] WHERE [var_ID] IN ('""" + Keyword_ID_str + """')"""
     DB.DB_modify(cur_str,server)
-
+    print('tblKeyword entries deleted for Dataset_ID: ', Dataset_ID)
 
 
 def deleteFromtblDataset_Stats(Dataset_ID,server):
     cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_Stats_ID] WHERE [Dataset_ID] = """ + str(Dataset_ID)
     DB.DB_modify(cur_str,server)
+    print('tblDataset_Stats entries deleted for Dataset_ID: ', Dataset_ID)
 
 
 def deleteFromtblDataset_Cruises(Dataset_ID,server):
     cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_Cruises] WHERE [Dataset_ID] = """ + str(Dataset_ID)
     DB.DB_modify(cur_str,server)
+    print('tblDataset_Cruises entries deleted for Dataset_ID: ', Dataset_ID)
 
 
 def deleteFromtblDataset_References(Dataset_ID,server):
     cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_References] WHERE [Dataset_ID] = """ + str(Dataset_ID)
     DB.DB_modify(cur_str,server)
+    print('tblDataset_References entries deleted for Dataset_ID: ', Dataset_ID)
 
 def deleteFromtblVariables(Dataset_ID,server):
     cur_str = """DELETE FROM [Opedia].[dbo].[tblVariables] WHERE [Dataset_ID] = """ + str(Dataset_ID)
     DB.DB_modify(cur_str,server)
+    print('tblVariables entries deleted for Dataset_ID: ', Dataset_ID)
 
 def deleteFromtblDatasets(Dataset_ID,server):
-    cur_str = """DELETE FROM [Opedia].[dbo].[tblDatasets] WHERE [ID] = """ + Dataset_ID
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblDatasets] WHERE [ID] = """ + str(Dataset_ID)
     DB.DB_modify(cur_str,server)
+    print('tblDataset entries deleted for Dataset_ID: ', Dataset_ID)
 
 def dropTable(tableName,server):
     cur_str = """DROP TABLE """ + tableName
     DB.DB_modify(cur_str,server)
+    print( tableName, ' Removed from DB')
 
-def deleteCatalogTables(tableName,server):
+def deleteCatalogTables(tableName,server='Rainier'):
     contYN = input('Are you sure you want to delete all of the catalog tables for ' + tableName + ' ?  [yes/no]: ' )
     Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName)
     if contYN == 'yes':
-        deleteFromtblKeywords(tableName,server)
-        deleteFromtblDataset_Stats(tableName,server)
-        deleteFromtblDataset_Cruises(tableName,server)
-        deleteFromtblDataset_References(tableName,server)
-        deleteFromtblVariables(tableName,server)
-        deleteFromtblDatasets(tableName,server)
+        deleteFromtblKeywords(Dataset_ID,server)
+        deleteFromtblDataset_Stats(Dataset_ID,server)
+        deleteFromtblDataset_Cruises(Dataset_ID,server)
+        deleteFromtblDataset_References(Dataset_ID,server)
+        deleteFromtblVariables(Dataset_ID,server)
+        deleteFromtblDatasets(Dataset_ID,server)
+        dropTable(tableName,server)
     else:
         print('Catalog tables for ' + datasetName + ' not deleted')
