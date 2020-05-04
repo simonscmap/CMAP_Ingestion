@@ -140,7 +140,7 @@ def deleteFromtblKeywords(Dataset_ID,server):
 
 
 def deleteFromtblDataset_Stats(Dataset_ID,server):
-    cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_Stats_ID] WHERE [Dataset_ID] = """ + str(Dataset_ID)
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblDataset_Stats] WHERE [Dataset_ID] = """ + str(Dataset_ID)
     DB.DB_modify(cur_str,server)
     print('tblDataset_Stats entries deleted for Dataset_ID: ', Dataset_ID)
 

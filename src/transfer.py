@@ -4,6 +4,18 @@ sys.path.append("../conf/")
 import vault_structure as vs
 import shutil
 import pandas as pd
+import requests
+
+
+requests_Download(DOI,filename,table, process_level = 'REP'):
+    r = requests.get(DOI, stream=True)
+    with open(vs.staging + 'combined/' + filename,'wb') as f:
+        f.write(r.content)
+def Zenodo_DOI_to_vault(DOI, tableName, process_level = 'REP'):
+    if filename.astype(str).contains('.csv'):
+        filename = DOI.astype(str).split('.csv')[0].rsplit('/',1)[1] + '.csv'
+    elif filename.astype(str).contains('.xlsx'):
+        filename = DOI.astype(str).split('.xlsx')[0].rsplit('/',1)[1] + '.xlsx'
 
 def staging_to_vault(filename,make_tableName, process_level = 'REP', remove_file_flag=True):
     """
