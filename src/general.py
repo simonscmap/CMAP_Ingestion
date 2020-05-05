@@ -18,66 +18,28 @@ import argparse
 
 
 
-"""
 
-Start function -- help will display all args and optional args
-{functions and use:
-1. Split file in staging
-2. Transfer from staging to vault
-3. Import data, suggest SQL, pause. continue.
-3. tblDatasets -- flag for LARGE partial ingest
-4. tblDataset_References
-5. tblVariables
-6. tblKeywords
-7. tblDatasets_Stats
-8. tblDatasets_Cruises (optional and if data is cruise -- flag)
----Testing Suite ----
-9. If not pass, rollback
-10. If --flag LARGE partial, continue ingestion. Rebuild stats. Update tblVars ST bounds
-11. Create Index (auto suggest?)
-
-
-What inputs
-- filename - (in staging)
-    -filename in vault should reflect staging
-- tableName
-- vs branch
--------------
-optional_args:
--cruise name
-
-#todo:
--mapping zoom feature
--SQL index suggestion print, post testing OK?
--large dataset ingestion flag, ingestion etc.
--Command line args
-
-"""
-
-
-parser = argparse.ArgumentParser(description = 'Ingestion datasets into CMAP')
-parser.add_argument("staging filename",type=str,help = 'filename from staging area')
-parser.add_argument("tableName",type=str)
-parser.parse_args()
-
-#inputs for argparse
-staging_filename = sys.argv[1]
-tableName = sys.argv[2]
 
 # staging_filename = 'sg148m15d001-762_cmap.xlsx'
 # tableName = 'tblSeaglider_148_Mission_15'
 
-# struct = cmn.find_File_Path_guess_tree(filename)
 
 ###(opt) transfer ###
+
+def getBranch_Path(args):
+    branch_path = cmn.vault_struct_retrival(args.branch)
+    return branch_path
+
+
 def splitExcel(staging_filename):
     transfer.single_file_split(staging_filename)
 
-def staging_to_vault(staging_filename,path=vs.cruise + tableName, remove_file_flag=False):
+
+def staging_to_vault(staging_filename, branch, tableName, remove_file_flag=False):
     transfer.staging_to_vault(staging_filename,path, remove_file_flag)
 
 
-def importDataMemory(branch, tableName):
+def importDataMemory(tableName):
     data_df = data.import_single_data(vs.cruise + tableName)
     dataset_metadata_df,variable_metadata_df = metadata.import_metadata(vs.cruise + tableName)
     data_dict = {'data_df':data_df, 'dataset_metadata_df':dataset_metadata_df,'variable_metadata_df':variable_metadata_df}
@@ -96,7 +58,7 @@ def insertData(data_dict,tableName,server = 'Rainier'):
 
 
 def insertMetadata(data_dict,tableName,server = 'Rainier',cruiseName=''):
-    metadata.tblDatasets_Insert(data_dict['dataset_metadata_df']) # invalid col name Acknowledgement only in python?
+    metadata.tblDatasets_Insert(data_dict['dataset_metadata_df'])
     metadata.tblDataset_References_Insert(data_dict['dataset_metadata_df'])
     metadata.tblVariables_Insert(data_dict['data_df'], data_dict['dataset_metadata_df'],data_dict['variable_metadata_df'], tableName,process_level = 'REP',CRS='',server='Rainier')
     metadata.tblKeywords_Insert(data_dict['variable_metadata_df'],data_dict['dataset_metadata_df'],tableName)
@@ -104,14 +66,60 @@ def insertMetadata(data_dict,tableName,server = 'Rainier',cruiseName=''):
         metadata.tblDataset_Cruises_Insert(data_dict['dataset_metadata_df'], cruiseName)
 
 
-### TESTING SUITE  ###
-# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️
-# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️
-# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️
-######################
+###   TESTING SUITE   ###
+# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
+# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
+# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
+#########################
 
 def insertStats(data_dict,tableName):
     stats.updateStats_Small(tableName, data_dict['data_df'],data_dict['dataset_metadata_df'])
 
 def createIcon(data_dict,tableName):
-    mapping.cartopy_sparse_map(data_dict['data_df'],tableName)
+    mapping.cartopy_sparse_map(data_dict['data_df'],tableName,zoom_level='high')
+
+
+
+def full_ingestion(args,server):
+    print('Full Ingestion')
+
+    splitExcel(args.staging_filename)
+    staging_to_vault(args.staging_filename, getBranch_Path(args.Branch), args.tableName, remove_file_flag=True)
+    data_dict = importDataMemory(args.tableName)
+    SQL_suggestion(data_dict,args.tableName,make ='observation')
+    insertData(data_dict,args.tableName,server = server)
+    insertMetadata(data_dict,args.tableName,server =server,cruiseName=args.cruiseName)
+    insertStats(data_dict,args.tableName)
+    createIcon(data_dict,args.tableName)
+
+def partial_ingestion():
+    print('Partial Ingestion')
+    pass
+
+
+
+def main():
+    parser = argparse.ArgumentParser(description = "Ingestion datasets into CMAP")
+    parser.add_argument("staging_filename",type=str,help = "Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'")
+    parser.add_argument("tableName",type=str, help = "Desired SQL and Vault Table Name. Ex: tblSeaFlow")
+    parser.add_argument("branch",type=str, help = "Branch where dataset should be placed in Vault. Ex's: cruise, float, station, satellite, model, assimilation.")
+    parser.add_argument('-P','--Partial_Ingestion',nargs='?', const=True)
+    parser.add_argument('-C','--cruiseName',nargs='?')
+
+    args = parser.parse_args()
+
+    if args.Partial_Ingestion:
+        partial_ingestion()
+
+    else:
+        full_ingestion(args,server ='Rainier')
+
+
+if __name__=="__main__":
+    main()
+
+
+
+
+# staging_filename = 'sg148m15d001-762_cmap.xlsx'
+# tableName = 'tblSeaglider_148_Mission_15'
