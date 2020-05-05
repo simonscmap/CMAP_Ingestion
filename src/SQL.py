@@ -50,6 +50,8 @@ def SQL_index_suggestion_formatter(data_df, tableName, FG = 'Primary', DB = 'Ope
 
     """.format(DB=DB,UNIQUE_flag=UNIQUE_flag, tableName=tableName, depth_str = depth_str, depth_flag_comma=depth_flag_comma,depth_flag_lp = depth_flag_lp,depth_flag_rp =depth_flag_rp, FG = FG )
 
+    print(SQL_index_dir)
+    input("Please check and modify SQL index if needed, then press to continue validator...")
 
     SQL_index_dir = {'sql_index': SQL_index_str}
     return SQL_index_dir

@@ -7,17 +7,19 @@ import pandas as pd
 import requests
 
 
-requests_Download(DOI,filename,table, process_level = 'REP'):
+def requests_Download(doi_download_str,filename):
     r = requests.get(DOI, stream=True)
     with open(vs.staging + 'combined/' + filename,'wb') as f:
         f.write(r.content)
-def Zenodo_DOI_to_vault(DOI, tableName, process_level = 'REP'):
-    if filename.astype(str).contains('.csv'):
-        filename = DOI.astype(str).split('.csv')[0].rsplit('/',1)[1] + '.csv'
-    elif filename.astype(str).contains('.xlsx'):
-        filename = DOI.astype(str).split('.xlsx')[0].rsplit('/',1)[1] + '.xlsx'
 
-def staging_to_vault(filename,make_tableName, process_level = 'REP', remove_file_flag=True):
+
+def Zenodo_DOI_Formatter(DOI,filename):
+    doi_record = DOI.split('zenodo.')[1]
+    doi_download_str = 'https://zenodo.org/record/{doi_record}}/files/{filename}}?download=1'.format(doi_record = doi_record, filename=filename)
+    return doi_download_str
+
+
+def staging_to_vault(filename,branch, tableName, process_level = 'REP', remove_file_flag=True):
     """
     Transfers a file from staging to vault rep or nrt.
     removes file from staging on successful transfer
@@ -34,7 +36,7 @@ def staging_to_vault(filename,make_tableName, process_level = 'REP', remove_file
         Flag option for removing input file from staging
 
     """
-    nrt_tree, rep_tree, metadata_tree, stats_tree, doc_tree, code_tree  = vs.leafStruc(make_tableName)
+    nrt_tree, rep_tree, metadata_tree, stats_tree, doc_tree, code_tree  = vs.leafStruc(branch + tableName)
     base_filename = os.path.splitext(os.path.basename(filename))[0]
 
     data_fname = vs.staging + 'data/' + base_filename + '_data.csv'

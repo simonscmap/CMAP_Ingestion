@@ -27,6 +27,23 @@ def getColBounds(df,col,list_multiplier= None):
 
     return min_col, max_col
 
+def vault_struct_retrival(branch):
+    if branch.lower() == 'cruise':
+        vs_struct = vs.cruise
+    elif branch.lower() == 'float':
+        vs_struct = vs.float
+    elif branch.lower() == 'station':
+        vs_struct = vs.station
+    elif branch.lower() == 'satellite':
+        vs_struct = vs.satellite
+    elif branch.lower() == 'model':
+        vs_struct = vs.model
+    elif branch.lower() == 'assimilation':
+        vs_struct = vs.assimilation
+    else:
+        print('Vault branch structure not found in vault_structure.py. Please modify that script.')
+    return vs_struct
+    
 def getDatasetID_DS_Name(datasetName):
     cur_str = """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '""" + datasetName + """'"""
     query_return = DB.DB_query(cur_str)
