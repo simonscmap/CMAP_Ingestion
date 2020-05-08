@@ -64,4 +64,28 @@ def test_getDatasetID_Tbl_Name():
     ds_ID_expected = 83
     assert ds_ID_func == ds_ID_expected, "test get datasetID from table name failed."
 
-    
+def test_getKeywordsIDDataset():
+    input_DS_id = 83
+    keyword_id_list_func = cmn.getKeywordsIDDataset(input_DS_id)
+    keyword_id_list_expected = [1126,1127]
+    assert keyword_id_list_func == keyword_id_list_expected, "test get keywords from datasetID failed."
+
+def test_getTableName_Dtypes():
+    input_tblName = 'tblFlombaum'
+    expected_df = pd.DataFrame({'COLUMN_NAME': ['time','lat','lon','depth','prochlorococcus_abundance_flombaum','synechococcus_abundance_flombaum'],'DATA_TYPE': ['date','float','float','float','float','float']})
+    func_df = cmn.getTableName_Dtypes(input_tblName)
+    assert_frame_equal(func_df, expected_df,obj = "get tablename datatypes test failed.")
+
+def test_getCruiseDetails():
+    input_cruisename = 'KOK1606'
+    expected_df = pd.DataFrame(columns = ['ID','Nickname','Name','Ship_Name','Start_Time','End_Time','Lat_Min','Lat_Max','Lon_Min','Lon_Max','Chief_Name'] )
+    expected_df.loc[len(expected_df),:] = [589, 'Gradients_1', 'KOK1606', 'R/V Kaimikai O Kanaloa', '2016-04-20T00:04:37.000Z', '2016-05-04T02:33:45.000Z', 21.4542, 37.8864, -158.3355, -157.858, 'Virginia Armbrust']
+    func_df = cmn.getCruiseDetails(input_cruisename)
+    assert_frame_equal(func_df, expected_df,check_dtype=False, obj = "get cruise details test failed.")
+
+def test_findVarID():
+    input_datasetID = 83
+    input_Short_Name = 'prochlorococcus_abundance_flombaum'
+    VarID_expected = 1126
+    varID_func = cmn.findVarID(input_datasetID,input_Short_Name)
+    assert varID_func == VarID_expected, "find variable ID test failed."
