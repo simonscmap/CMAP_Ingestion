@@ -36,3 +36,32 @@ def test_getColBounds():
     assert expected_max_single == func_max_single, """getColBounds max single failed"""
     assert expected_min_mult == func_min_mult, """getColBounds min mult failed"""
     assert expected_max_mult == func_max_mult, """getColBounds max mult failed"""
+
+def test_vault_struct_retrival():
+    cruise_path_func = cmn.vault_struct_retrival('cruise')
+    float_path_func = cmn.vault_struct_retrival('float')
+    station_path_func = cmn.vault_struct_retrival('station')
+    satellite_path_func = cmn.vault_struct_retrival('satellite')
+    model_path_func = cmn.vault_struct_retrival('model')
+    assimilation_path_func = cmn.vault_struct_retrival('assimilation')
+
+    assert cruise_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/cruise/', "cruise vault path test failed"
+    assert float_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/float/', "float vault path test failed"
+    assert station_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/station/', "station vault path test failed"
+    assert satellite_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/remote/satellite/', "satellite vault path test failed"
+    assert model_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/model/', "model vault path test failed"
+    assert assimilation_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/assimilation/', "assimilation vault path test failed"
+
+def test_getDatasetID_DS_Name():
+    input_ds_name = "Flombaum"
+    ds_ID_func = cmn.getDatasetID_DS_Name(input_ds_name)
+    ds_ID_expected = 83
+    assert ds_ID_func == ds_ID_expected, "test get datasetID from dataset name failed."
+
+def test_getDatasetID_Tbl_Name():
+    input_tblName = "tblFlombaum"
+    ds_ID_func = cmn.getDatasetID_Tbl_Name(input_tblName)
+    ds_ID_expected = 83
+    assert ds_ID_func == ds_ID_expected, "test get datasetID from table name failed."
+
+    
