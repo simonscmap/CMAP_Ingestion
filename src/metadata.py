@@ -3,6 +3,7 @@ import DB
 import glob
 import pandas as pd
 import pycmap
+api = pycmap.API(token='41061240-e9ff-11e9-bf30-edd064890625')
 
 
 
@@ -27,7 +28,7 @@ def import_metadata(make_tableName):
     vars_metadata_df = cmn.strip_whitespace_headers(vars_metadata_df)
     return dataset_metadata_df, vars_metadata_df
 
-def tblDatasets_Insert(dataset_metadata_df,server='Rainier'):
+def tblDatasets_Insert(dataset_metadata_df,tableName, server='Rainier'):
         dataset_metadata_df = cmn.nanToNA(dataset_metadata_df)
         Dataset_Name = dataset_metadata_df['dataset_short_name'].iloc[0]
         Dataset_Long_Name = dataset_metadata_df['dataset_long_name'].iloc[0]
@@ -45,7 +46,7 @@ def tblDatasets_Insert(dataset_metadata_df,server='Rainier'):
         #Temps
         Variables = ''
         Doc_URL = ''
-        Icon_URL = ''
+        Icon_URL = "https://raw.githubusercontent.com/simonscmap/CMAP_Ingestion/master/static/mission_icons/{tableName}.svg?sanitize=true".format(tableName = tableName)
 
         query = (Db,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)
         columnList = '(DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)'

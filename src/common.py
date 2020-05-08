@@ -6,11 +6,14 @@ import numpy as np
 import DB
 import os
 
+
 def strip_whitespace_headers(df):
-    df.rename(columns=lambda x: x.strip())
+    """Strips any whitespace from dataframe headers"""
+    df.columns = df.columns.str.strip()
     return df
 
 def nanToNA(df):
+    """Replaces and numpy nans with '' """
     df = df.replace(np.nan, '', regex=True)
     return df
 
@@ -43,7 +46,7 @@ def vault_struct_retrival(branch):
     else:
         print('Vault branch structure not found in vault_structure.py. Please modify that script.')
     return vs_struct
-    
+
 def getDatasetID_DS_Name(datasetName):
     cur_str = """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '""" + datasetName + """'"""
     query_return = DB.DB_query(cur_str)

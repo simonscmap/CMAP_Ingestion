@@ -55,8 +55,8 @@ def staging_to_vault(filename,branch, tableName, process_level = 'REP', remove_f
         os.remove(data_fname)
         os.remove(dataset_metadata_fname)
         os.remove(vars_metadata_fname)
-
-def single_file_split(filename):
+# 'EddyExperimentA__L1_v1_0.xlsx'
+def single_file_split(filename, metadata_only_split = False):
     """
     Splits an excel file containing data, dataset_metadata and vars_metadata sheets
     into three seperate files in the staging file strucutre.
@@ -69,9 +69,31 @@ def single_file_split(filename):
     """
 
     base_filename = os.path.splitext(os.path.basename(filename))[0]
-    data_df = pd.read_excel(vs.combined + filename, sheet_name = 0)
-    data_df.to_csv(vs.data + base_filename + '_data.csv', sep =',', index=False)
-    dataset_metadata_df = pd.read_excel(vs.combined + filename, sheet_name = 1)
+
+    if metadata_only_split == False:
+
+        data_df = pd.read_excel(vs.combined + filename, sheet_name = 0)
+        data_df.to_csv(vs.data + base_filename + '_data.csv', sep =',', index=False)
+        dataset_metadata_df = pd.read_excel(vs.combined + filename, sheet_name = 1)
+        vars_metadata_df = pd.read_excel(vs.combined + filename, sheet_name = 2)
+        os.remove(vs.combined + filename)
+    else:
+        dataset_metadata_df = pd.read_excel(vs.metadata + filename, sheet_name = 0)
+        vars_metadata_df = pd.read_excel(vs.metadata + filename, sheet_name = 1)
+        os.remove(vs.metadata + filename)
+
     dataset_metadata_df.to_csv(vs.metadata + base_filename + '_dataset_metadata.csv', sep =',', index=False)
-    vars_metadata_df = pd.read_excel(vs.combined + filename, sheet_name = 2)
     vars_metadata_df.to_csv(vs.metadata + base_filename + '_vars_metadata.csv', sep =',', index=False)
+
+
+def remove_data_metadata_fnames_staging(staging_sep_flag = 'combined'):
+    if staging_sep_flag == 'combined':
+        for base_filename in os.listdir(vs.combined):
+            os.rename(vs.combined + base_filename, vs.combined + base_filename.replace('data', ''))
+            os.rename(vs.combined + base_filename, vs.combined + base_filename.replace('metadata', ''))
+            os.rename(vs.combined + base_filename, vs.combined + base_filename.replace('meta_data', ''))
+    else:
+        for base_filename in os.listdir(vs.data):
+            os.rename(vs.data +base_filename, vs.data + base_filename.replace('data', ''))
+        for base_filename in os.listdir(vs.metadata):
+            os.rename(vs.metadata +base_filename, vs.metadata + base_filename.replace('metadata', ''))

@@ -58,7 +58,7 @@ def insertData(data_dict,tableName,server = 'Rainier'):
 
 
 def insertMetadata(data_dict,tableName,server = 'Rainier',cruiseName=''):
-    metadata.tblDatasets_Insert(data_dict['dataset_metadata_df'])
+    metadata.tblDatasets_Insert(data_dict['dataset_metadata_df'],tableName)
     metadata.tblDataset_References_Insert(data_dict['dataset_metadata_df'])
     metadata.tblVariables_Insert(data_dict['data_df'], data_dict['dataset_metadata_df'],data_dict['variable_metadata_df'], tableName,process_level = 'REP',CRS='',server='Rainier')
     metadata.tblKeywords_Insert(data_dict['variable_metadata_df'],data_dict['dataset_metadata_df'],tableName)
@@ -83,19 +83,19 @@ def createIcon(data_dict,tableName):
 def full_ingestion(args,server):
     print('Full Ingestion')
 
-    splitExcel(args.staging_filename)
+    # splitExcel(args.staging_filename)
+    single_file_split(filename,metadata_only_split=True)
     staging_to_vault(args.staging_filename, getBranch_Path(args.Branch), args.tableName, remove_file_flag=True)
-    data_dict = importDataMemory(args.tableName)
-    SQL_suggestion(data_dict,args.tableName,make ='observation')
-    insertData(data_dict,args.tableName,server = server)
-    insertMetadata(data_dict,args.tableName,server =server,cruiseName=args.cruiseName)
-    insertStats(data_dict,args.tableName)
-    createIcon(data_dict,args.tableName)
+    # data_dict = importDataMemory(args.tableName)
+    # SQL_suggestion(data_dict,args.tableName,make ='observation')
+    # insertData(data_dict,args.tableName,server = server)
+    # insertMetadata(data_dict,args.tableName,server =server,cruiseName=args.cruiseName)
+    # insertStats(data_dict,args.tableName)
+    # createIcon(data_dict,args.tableName)
 
 def partial_ingestion():
     print('Partial Ingestion')
     pass
-
 
 
 def main():
