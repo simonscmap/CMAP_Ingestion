@@ -37,13 +37,13 @@ def test_getColBounds():
     assert expected_min_mult == func_min_mult, """getColBounds min mult failed"""
     assert expected_max_mult == func_max_mult, """getColBounds max mult failed"""
 
-def test_vault_struct_retrival():
-    cruise_path_func = cmn.vault_struct_retrival('cruise')
-    float_path_func = cmn.vault_struct_retrival('float')
-    station_path_func = cmn.vault_struct_retrival('station')
-    satellite_path_func = cmn.vault_struct_retrival('satellite')
-    model_path_func = cmn.vault_struct_retrival('model')
-    assimilation_path_func = cmn.vault_struct_retrival('assimilation')
+def test_vault_struct_retrieval():
+    cruise_path_func = cmn.vault_struct_retrieval('cruise')
+    float_path_func = cmn.vault_struct_retrieval('float')
+    station_path_func = cmn.vault_struct_retrieval('station')
+    satellite_path_func = cmn.vault_struct_retrieval('satellite')
+    model_path_func = cmn.vault_struct_retrieval('model')
+    assimilation_path_func = cmn.vault_struct_retrieval('assimilation')
 
     assert cruise_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/cruise/', "cruise vault path test failed"
     assert float_path_func == '/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/float/', "float vault path test failed"
