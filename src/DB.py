@@ -20,14 +20,6 @@ def DB_modify(cmnd,server='Rainer'):
     cursor.execute(cmnd)
     conn.commit()
 
-
-
-# def dbRead(query,server):
-# 	conn = olddbConnect(server)
-# 	dframe = sql.read_sql(query, conn)
-# 	conn.close()
-# 	return dframe
-
 def dbRead(query,server='Rainer'):
 	conn,cursor = dbConnect(server)
 	df = sql.read_sql(query, conn)

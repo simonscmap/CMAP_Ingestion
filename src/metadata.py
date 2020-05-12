@@ -133,7 +133,7 @@ def tblDataset_Cruises_Insert(dataset_metadata_df, cruiseName,server='Rainier'):
 
 
 def deleteFromtblKeywords(Dataset_ID,server):
-    Keyword_ID_list = cmn.getKeywordsDataset(Dataset_ID)
+    Keyword_ID_list = cmn.getKeywordsIDDataset(Dataset_ID)
     Keyword_ID_str = "','".join(str(key) for key in Keyword_ID_list)
     cur_str = """DELETE FROM [Opedia].[dbo].[tblKeywords] WHERE [var_ID] IN ('""" + Keyword_ID_str + """')"""
     DB.DB_modify(cur_str,server)

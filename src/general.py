@@ -27,7 +27,7 @@ import argparse
 ###(opt) transfer ###
 
 def getBranch_Path(args):
-    branch_path = cmn.vault_struct_retrival(args.branch)
+    branch_path = cmn.vault_struct_retrieval(args.branch)
     return branch_path
 
 
