@@ -6,7 +6,6 @@ import pycmap
 api = pycmap.API(token='41061240-e9ff-11e9-bf30-edd064890625')
 
 
-
 def ID_Var_Map(series_to_map,res_col, tableName):
     api = pycmap.API()
     query = '''SELECT * FROM ''' + tableName
@@ -116,19 +115,18 @@ def tblKeywords_Insert(variable_metadata_df,dataset_metadata_df,Table_Name,serve
                 except Exception as e:
                     print(e)
 
-def tblDataset_Cruises_Insert(dataset_metadata_df, cruiseName,server='Rainier'):
+
+def tblDataset_Cruises_Insert(dataset_metadata_df,server='Rainier'):
     """use pycmap cruise ID to find metatadata..."""
-    cruise_details = cmn.getCruiseDetails(cruiseName)
-    if cruise_details.empty == True:
-        print('That cruise name or nickname does not appear to be in tblCruises. Here is a list of cruises that are present: ')
-        pd.set_option('display.max_rows', None)
-        print(getListCruises())
-    else:
-        cruise_ID = cruise_details['ID'].iloc[0]
-        dataset_ID = cmn.getDatasetID_DS_Name(dataset_metadata_df['dataset_short_name'].iloc[0])
+    matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
+    if unmatched_cruises != []:
+        print("The following cruises are not in CMAP: ", unmatched_cruises, " Please contact the CMAP team to add these cruises.")
+
+    cruise_ID_list = cmn.get_cruise_IDS(cruise_name_list)
+    dataset_ID = cmn.getDatasetID_DS_Name(dataset_metadata_df['dataset_short_name'].iloc[0])
+    for cruise_ID in cruise_ID_list():
         query = (dataset_ID, cruise_ID)
         DB.lineInsert(server,'[opedia].[dbo].[tblDataset_Cruises]', '(Dataset_ID, Cruise_ID)', query)
-
 
 
 

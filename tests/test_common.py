@@ -98,3 +98,9 @@ def test_verify_cruise_lists():
     func_match_list, func_unmatched_list = cmn.verify_cruise_lists(test_df)
     assert func_match_list == expected_list_matched, 'verify_cruise_lists match failed.'
     assert func_unmatched_list == expected_list_unmatched, 'verify_cruise_lists unmatched failed.'
+
+def test_get_cruise_IDS():
+    test_cruise_name_list = ['kok1606','mgl1704']
+    expected_ID_list = [589, 593]
+    func_ID_list = cmn.get_cruise_IDS(test_cruise_name_list)
+    assert func_ID_list == expected_ID_list, "Get cruise IDs test failed."

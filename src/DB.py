@@ -7,7 +7,6 @@ import pandas.io.sql as sql
 import platform
 import pandas as pd
 import pycmap
-import common as cmn
 ######## DB Specific ############
 
 def DB_query(query):

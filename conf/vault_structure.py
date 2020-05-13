@@ -63,6 +63,10 @@ makedir(assimilation)
 model = vault + 'model/'
 makedir(model)
 
+#########  r2r2 cruise #########
+r2r_cruise = vault + 'r2r_cruise/'
+makedir(r2r_cruise)
+
 #########  observations  #########
 obs = vault + 'observation/'
 makedir(obs)

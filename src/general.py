@@ -84,8 +84,8 @@ def full_ingestion(args,server):
     print('Full Ingestion')
 
     # splitExcel(args.staging_filename)
-    single_file_split(filename,metadata_only_split=True)
-    staging_to_vault(args.staging_filename, getBranch_Path(args.Branch), args.tableName, remove_file_flag=True)
+    # single_file_split(filename,metadata_only_split=False)
+    # staging_to_vault(args.staging_filename, getBranch_Path(args.Branch), args.tableName, remove_file_flag=True)
     # data_dict = importDataMemory(args.tableName)
     # SQL_suggestion(data_dict,args.tableName,make ='observation')
     # insertData(data_dict,args.tableName,server = server)
@@ -104,7 +104,7 @@ def main():
     parser.add_argument("tableName",type=str, help = "Desired SQL and Vault Table Name. Ex: tblSeaFlow")
     parser.add_argument("branch",type=str, help = "Branch where dataset should be placed in Vault. Ex's: cruise, float, station, satellite, model, assimilation.")
     parser.add_argument('-P','--Partial_Ingestion',nargs='?', const=True)
-    parser.add_argument('-C','--cruiseName',nargs='?')
+    # parser.add_argument('-C','--cruiseName',nargs='?')
 
     args = parser.parse_args()
 

@@ -137,3 +137,20 @@ def find_File_Path_guess_tree(name):
             else:
                 struct = 'File path not found'
             return struct
+
+def verify_cruise_lists(dataset_metadata_df):
+    """Returns matching and non matching cruises"""
+    cruise_series = dataset_metadata_df['official_cruise_name(s)']
+    """ check that every cruise_name in column exists in the database. map those that don't exist into return"""
+    cruise_set = set(lowercase_List(cruise_series.to_list()))
+    db_cruise_set = set(lowercase_List(getListCruises()['Name'].to_list()))
+    matched = list(cruise_set.intersection(db_cruise_set))
+    unmatched = list(cruise_set.difference(db_cruise_set))
+    return matched, unmatched
+
+def get_cruise_IDS(cruise_name_list):
+    """Returns IDs of input cruise names"""
+    cruise_db_df = getListCruises()
+    cruise_name_list = lowercase_List(cruise_name_list)
+    cruise_ID_list = cruise_db_df['ID'][cruise_db_df['Name'].str.lower().isin(cruise_name_list)].to_list()
+    return cruise_ID_list

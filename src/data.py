@@ -67,7 +67,7 @@ def sort_values(df,cols):
     return df
 
 def ST_columns(df):
-    """Returns SpaceTime related columns in a dataset"""
+    """Returns SpaceTime related columns in a dataset as a list"""
     df_cols = cmn.lowercase_List(list(df))
     ST_vars = [st for st in df_cols if "time" in st or "lat" in st or "lon" in st or "depth" in st]
     return ST_vars
