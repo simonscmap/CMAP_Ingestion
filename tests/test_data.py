@@ -24,40 +24,8 @@ def test_sort_values():
     func_df = data.sort_values(test_df, ['time','lon','lat'])
     assert func_df.reset_index(drop=True, inplace=True) == expected_df.reset_index(drop=True, inplace=True), "test_sort_values test failed"
 
-def sort_values(df,cols):
-    """Sorts dataframe cols
-
-    Parameters
-    ----------
-    df : Pandas DataFrame
-        The dataframe to be modified
-    cols : list
-        List of column name strings
-
-    Returns
-    -------
-    df
-        Pandas DataFrame with input cols sorts in ASC order.
-    """
-    df = df.sort_values(cols, ascending=[True] * len(cols))
-    return df
-
-def ST_columns(df):
-    """Returns SpaceTime related columns in a dataset"""
-    df_cols = cmn.lowercase_List(list(df))
-    ST_vars = [st for st in df_cols if "time" in st or "lat" in st or "lon" in st or "depth" in st]
-    return ST_vars
-
-##############   Data Import    ############
-
-def read_csv(path_and_filename,delim = ','):
-    """Imports csv into pandas DataFrame"""
-    df = pd.read_csv(path_and_filename,sep=delim,parse_dates=['time'])
-    return df
-
-
-def fetch_single_datafile(branch,tableName, file_ext = '.csv',process_level = 'REP'):
-    """Finds first file in glob with input path to vault structure. Returns path_filename """
-    vault_path = cmn.vault_struct_retrieval(branch)
-    flist = glob.glob(vault_path + tableName+'/' + process_level.lower() + '/' +'*' + file_ext)
-    return flist
+def test_ST_columns():
+    test_df = pd.DataFrame({'time': ['2010-01-01','2020-01-11'],'lat': [-90,-80], 'lon': [-180,-170]})
+    expected_list = ['time','lat','lon']
+    func_list = data.ST_columns(test_df)
+    assert func_list == expected_list, "test ST_columns test failed."

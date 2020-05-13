@@ -89,3 +89,12 @@ def test_findVarID():
     VarID_expected = 1126
     varID_func = cmn.findVarID(input_datasetID,input_Short_Name)
     assert varID_func == VarID_expected, "find variable ID test failed."
+
+
+def test_verify_cruise_lists():
+    test_df = pd.DataFrame({'official_cruise_name(s)': ['KOK1606','cruise_not_in_database']})
+    expected_list_matched = ['kok1606']
+    expected_list_unmatched =  ['cruise_not_in_database']
+    func_match_list, func_unmatched_list = cmn.verify_cruise_lists(test_df)
+    assert func_match_list == expected_list_matched, 'verify_cruise_lists match failed.'
+    assert func_unmatched_list == expected_list_unmatched, 'verify_cruise_lists unmatched failed.'
