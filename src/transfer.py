@@ -7,11 +7,10 @@ import pandas as pd
 import requests
 
 
-def requests_Download(doi_download_str,filename):
-    r = requests.get(DOI, stream=True)
-    with open(vs.staging + 'combined/' + filename,'wb') as f:
+def requests_Download(download_str,filename, path):
+    r = requests.get(download_str, stream=True)
+    with open(path + filename,'w+') as f:
         f.write(r.content)
-
 
 def Zenodo_DOI_Formatter(DOI,filename):
     doi_record = DOI.split('zenodo.')[1]

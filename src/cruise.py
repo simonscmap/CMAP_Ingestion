@@ -1,3 +1,7 @@
+import sys
+import transfer
+sys.path.append("../conf/")
+import vault_structure as vs
 import requests
 import pandas as pd
 import numpy as np
@@ -18,6 +22,7 @@ import time
 """func:  download cruise_gps data  """
 """func:  parse gps, sample? min/max time/lat/lon  """
 
+
 def gather_cruise_links():
     all_cruise_url = "http://data.rvdata.us/directory/Cruise"
     page = requests.get(all_cruise_url)
@@ -30,18 +35,24 @@ def gather_cruise_links():
             cruise_name = cruise_link.split("cruise/")[1]
             all_cruise_df.loc[len(all_cruise_df)] = [cruise_name,cruise_link]
     return all_cruise_df
-"""master urls"""
+
+
+def download_cruise_data_from_url(cruise_name,download_url_str,dataset_category):
+    cruise_base_path = vs.r2r_cruise
+    transfer.requests_Download(download_url_str,cruise_name[0] + '_' + dataset_category + '.csv', cruise_base_path + cruise_name[0] + '/')
 
 def retrieve_id_search(cmdf,id_col_str):
     id_return = cmdf[cmdf['id_col'].str.contains(id_col_str)]['info_col'].to_list()
     return id_return
 
 def trim_returned_link(link_str):
+    if isinstance(link_str, str):
+        link_str = [link_str]
     trimmed_link = [link.replace('<','').replace('>','') for link in link_str]
     return trimmed_link
 
-def get_cruise_traj(cmdf):
-    cruise_traj_links = retrieve_id_search(cmdf,"r2r:hasProduct")# [0].replace('<','').replace('>','')
+def get_cruise_traj(cmdf,cruise_name):
+    cruise_traj_links = retrieve_id_search(cmdf,"r2r:hasProduct")
     trim_traj_link = trim_returned_link(cruise_traj_links)
     if len(trim_traj_link) > 1:
         trim_link = trim_traj_link[1] # second cruise product should be 1 min temporal res
@@ -49,10 +60,9 @@ def get_cruise_traj(cmdf):
         trim_link = trim_traj_link[0]
     cruise_traj_df = parse_r2r_page(trim_link)
     label = retrieve_id_search(cruise_traj_df,"rdfs:label")
-    if label[0].contains("1Min"):
-        return
-
-    return label
+    link = trim_returned_link(cruise_traj_df['info_col'][cruise_traj_df['id_col']=='dcterms:source'].iloc[0])
+    if "1Min" in label[0]:
+        download_cruise_data_from_url(cruise_name,link[0],'trajectory')
 
 def get_chief_sci(cmdf):
     chief_sci_link = retrieve_id_search(cmdf,"r2r:hasParticipant")[0].replace('<','').replace('>','')
@@ -94,7 +104,7 @@ cruise_nickname = retrieve_id_search(cmdf, "dcterms:title")
 cruise_shipname = retrieve_id_search(cmdf, "r2r:VesselName")
 chief_sci = get_chief_sci(cmdf)
 
-ctl = get_cruise_traj(cmdf)
+get_cruise_traj(cmdf,cruise_name)
 def print_cruise_info(cruise_name, cruise_nickname,cruise_shipname,chief_sci):
     print("Cruise Name: ", cruise_name, "\n")
     print("Cruise Nickname: ", cruise_nickname, "\n")
