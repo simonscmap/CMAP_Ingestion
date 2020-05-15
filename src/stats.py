@@ -7,21 +7,21 @@ api = pycmap.API()
 
 def updateStatsTable(ID, json_str, server):
     conn, cursor  = DB.dbConnect(server)
+    print(conn,cursor)
     deleteQuery = """DELETE FROM tblDataset_Stats WHERE Dataset_ID = '{}'""".format(ID)
     insertQuery = """INSERT INTO tblDataset_Stats (Dataset_ID, JSON_stats) VALUES('{}','{}')""".format(ID, json_str)
     try:
-        cursor.execute(deleteQuery)
-        cursor.execute(insertQuery)
-        conn.commit()
+        DB.DB_modify(deleteQuery)
+        DB.DB_modify(insertQuery)
+
     except Exception as e: print(e)
 
-def updateStats_Small(tableName, data_df='',server='Rainier'):
-            if data_df == '':
-                query = 'SELECT * FROM {tableName}'.format(tableName=tableName)
-
-                data_df = DB.dbRead(query,server)
-            else:
+def updateStats_Small(tableName, data_df=None,server='Rainier'):
+            if data_df is not None:
                 data_df = data_df
+            else:
+                query = 'SELECT * FROM {tableName}'.format(tableName=tableName)
+                data_df = DB.dbRead(query,server)
             Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName)
             stats_df = data_df.describe()
             min_max_df = pd.DataFrame({'time':[data_df['time'].min(),data_df['time'].max()]},index=['min','max'])

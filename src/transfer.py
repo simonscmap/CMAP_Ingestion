@@ -9,7 +9,7 @@ import requests
 
 def requests_Download(download_str,filename, path):
     r = requests.get(download_str, stream=True)
-    with open(path + filename,'w+') as f:
+    with open(path + filename,'wb') as f:
         f.write(r.content)
 
 def Zenodo_DOI_Formatter(DOI,filename):
@@ -18,7 +18,8 @@ def Zenodo_DOI_Formatter(DOI,filename):
     return doi_download_str
 
 
-def staging_to_vault(filename,branch, tableName, process_level = 'REP', remove_file_flag=True):
+def staging_to_vault(filename,branch, tableName, remove_file_flag=True, process_level = 'REP' ):
+
     """
     Transfers a file from staging to vault rep or nrt.
     removes file from staging on successful transfer
@@ -27,12 +28,15 @@ def staging_to_vault(filename,branch, tableName, process_level = 'REP', remove_f
     ----------
     filename : string
         Filename and extension to be transfered.
-    make_tableName : string
-        Vault organization and tableName: ex: vs.cruise + 'tblCruise_CruiseNN_ctd'
-    process_level : str, default REP, optional
-        Place the data in the REP or the NRT
+    branch : string
+        Vault organization path: ex: vs.cruise
+    tableName : string
+        SQL tableName
     remove_file_flag : bool, default True, optional
         Flag option for removing input file from staging
+    process_level : str, default REP, optional
+        Place the data in the REP or the NRT
+
 
     """
     nrt_tree, rep_tree, metadata_tree, stats_tree, doc_tree, code_tree  = vs.leafStruc(branch + tableName)

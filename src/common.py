@@ -82,17 +82,21 @@ def getDatasetID_Tbl_Name(tableName):
     dsID = query_return.iloc[0][0]
     return dsID
 
+def getKeywordIDsTableNameVarName(tableName,var_short_name_list):
+    """Get list of keyword ID's from input dataset ID"""
+    cur_str = """select [ID] from tblVariables where Table_Name = '{tableName}' AND [Short_Name] in {vsnp}""".format(tableName = tableName,vsnp = tuple(var_short_name_list))
+    query_return = str(tuple(DB.DB_query(cur_str)['ID'].to_list()))
+    return query_return
+
 def getKeywordsIDDataset(dataset_ID):
     """Get list of keyword ID's from input dataset ID"""
-    dataset_ID = str(dataset_ID)
-    cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(dataset_ID = dataset_ID)
+    cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(dataset_ID = str(dataset_ID))
     query_return = DB.DB_query(cur_str)['ID'].to_list()
     return query_return
 
 def getTableName_Dtypes(tableName):
     """Get data types from input table name """
     query = """ select COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '""" + tableName + """'"""
-    print(query)
     query_return = DB.DB_query(query)
     return query_return
 

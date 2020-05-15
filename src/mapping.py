@@ -43,6 +43,7 @@ def get_extent(df,bound_multiplier = 1):
     max_lat = max(df['lat'])
     lon_range = np.abs(min_lon - max_lon)
     lat_range = np.abs(min_lat - max_lat)
+
     min_lon_bound = min_lon - (lon_range * bound_multiplier)
     max_lon_bound = max_lon + (lon_range * bound_multiplier)
     min_lat_bound = min_lat - (lat_range * bound_multiplier)
@@ -69,9 +70,12 @@ def cartopy_sparse_map(data_df,tableName,outputdir = static_outputdir,zoom_level
     if zoom_level != None:
         ax = plt.axes(projection=cartopy.crs.PlateCarree())
         extent_dict = get_extent(data_df)
-        ax.autoscale_view()
+    
         # ax.set_extent([extent_dict['min_lon'], extent_dict['max_lon'],extent_dict['min_lat'], extent_dict['max_lat']], crs=ccrs.PlateCarree())
         ax.add_image(tiles,7,interpolation='spline36')
+        ax.autoscale_view()
+        # ax.set_aspect('auto')
+        ax.set_aspect(1./ax.get_data_ratio())
     else:
         ax = plt.axes(projection=ccrs.Mollweide(central_longitude=-140))
         ax.set_global()

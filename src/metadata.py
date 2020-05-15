@@ -1,9 +1,12 @@
+import sys
+sys.path.append('../conf/login/')
+import credentials as cr
 import common as cmn
 import DB
 import glob
 import pandas as pd
 import pycmap
-api = pycmap.API(token='41061240-e9ff-11e9-bf30-edd064890625')
+api = pycmap.API(token=cr.api_key)
 
 
 def ID_Var_Map(series_to_map,res_col, tableName):
@@ -16,10 +19,10 @@ def ID_Var_Map(series_to_map,res_col, tableName):
     mapped_series = list(cmn.nanToNA(mapped_series))
     return mapped_series
 
-def import_metadata(make_tableName):
-    ds_meta_list = glob.glob(make_tableName +'/metadata/'+'*dataset_metadata*')
-    vars_meta_list = glob.glob(make_tableName +'/metadata/'+'*vars_metadata*')
-
+def import_metadata(branch, tableName):
+    branch_path = cmn.vault_struct_retrieval(branch)
+    ds_meta_list = glob.glob(branch_path + tableName +'/metadata/'+'*dataset_metadata*')
+    vars_meta_list = glob.glob(branch_path + tableName +'/metadata/'+'*vars_metadata*')
     dataset_metadata_df = pd.read_csv(ds_meta_list[0],sep=',')
     vars_metadata_df = pd.read_csv(vars_meta_list[0],sep=',')
 
@@ -122,9 +125,9 @@ def tblDataset_Cruises_Insert(dataset_metadata_df,server='Rainier'):
     if unmatched_cruises != []:
         print("The following cruises are not in CMAP: ", unmatched_cruises, " Please contact the CMAP team to add these cruises.")
 
-    cruise_ID_list = cmn.get_cruise_IDS(cruise_name_list)
+    cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
     dataset_ID = cmn.getDatasetID_DS_Name(dataset_metadata_df['dataset_short_name'].iloc[0])
-    for cruise_ID in cruise_ID_list():
+    for cruise_ID in cruise_ID_list:
         query = (dataset_ID, cruise_ID)
         DB.lineInsert(server,'[opedia].[dbo].[tblDataset_Cruises]', '(Dataset_ID, Cruise_ID)', query)
 
@@ -183,3 +186,35 @@ def deleteCatalogTables(tableName,server='Rainier'):
         dropTable(tableName,server)
     else:
         print('Catalog tables for ' + datasetName + ' not deleted')
+# tblAMT13_Chisholm, csal_ppt_AMT13
+def removeKeywords(keywords_list,var_short_name_list,tableName,server='Rainier'):
+    keywords_list = cmn.lowercase_List(keywords_list)
+    """Removes keyword from specific variable in table"""
+    keyword_IDs = cmn.getKeywordIDsTableNameVarName(tableName,var_short_name_list)
+    cur_str = """DELETE FROM [Opedia].[dbo].[tblKeywords] WHERE [var_ID] IN """ + keyword_IDs + """ AND LOWER([keywords]) IN """ + str(tuple(keywords_list))
+    DB.DB_modify(cur_str,server)
+    print('tblKeyword entries deleted for: ', keywords_list, var_short_name_list, tableName)
+
+#
+# keywords_list =  ['abundance',
+# 'bacteria',
+# 'cyanobacteria',
+# 'ecotype',
+# 'microbe',
+# 'microorganism',
+# 'photosynthesis',
+# 'picoplankton',
+# 'plankton',
+# 'Pro',
+# 'Pro strain',
+# 'Prochlorococcus',
+# 'Syn',
+# 'Synechococcus',
+# 'time series']
+# var_short_name_list = ['csal_cmore',
+# 'sigma_cmore',
+# 'site_Chisholm',
+# 'temp_C_cmore',
+# 'time_quality_Chisholm']
+# tableName = 'tblHOT_BATS_Prochlorococcus_Abundance'
+# removeKeywords(keywords_list,var_short_name_list,tableName)

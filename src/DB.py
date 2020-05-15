@@ -26,6 +26,7 @@ def dbRead(query,server='Rainer'):
 	return df
 
 def server_select_credentials(server):
+    
     if server == 'Rainier':
         usr=cr.usr_rainier
         psw=cr.psw_rainier

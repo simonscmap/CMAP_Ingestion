@@ -45,7 +45,8 @@ def format_time_col(df,time_col, format= '%Y-%m-%d %H:%M:%S'):
     df
         Pandas DataFrame with time col formatted
     """
-    df['time'] = pd.to_datetime(df[time_col].astype(str), format=format,errors='coerce')
+    df['time'] = pd.to_datetime(df[time_col].astype(str), errors='coerce')
+    df['time'].dt.strftime(format)
     return df
 
 def sort_values(df,cols):
@@ -83,22 +84,21 @@ def read_csv(path_and_filename,delim = ','):
 def fetch_single_datafile(branch,tableName, file_ext = '.csv',process_level = 'REP'):
     """Finds first file in glob with input path to vault structure. Returns path_filename """
     vault_path = cmn.vault_struct_retrieval(branch)
-    flist = glob.glob(vault_path + tableName + '/' + process_level.lower() + '/' +'*' + file_ext)
+    flist = glob.glob(vault_path + tableName + '/' + process_level.lower() + '/' +'*' + file_ext)[0]
     return flist
 
 
 ##############   Data Insert    ############
-
 
 def data_df_to_db(df, tableName,server = 'Rainier'):
     """Inserts dataframe into SQL tbl"""
 
     df = cmn.strip_whitespace_headers(df)
     df = cmn.nanToNA(df)
-    df = format_time_col(df,time_col, format)
+    df = format_time_col(df,'time')
     ST_cols = ['time','lat', 'lon','depth']
     df = removeMissings(df, ST_columns(df))
-    df = sort_values(ST_columns(df))
+    df = sort_values(df,ST_columns(df))
     temp_file_path = vs.BCP + tableName + '.csv'
     df.to_csv(temp_file_path, index=False)
     DB.toSQLbcp(temp_file_path, tableName,server)
