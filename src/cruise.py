@@ -196,28 +196,28 @@ def parse_cruise_metadata(cruise_name='', cruise_url=''):
 
 
 
-# cruise_links = gather_cruise_links()
+cruise_links = gather_cruise_links()
 #
-# for cruise_name,cruise_link in zip(cruise_links['cruise_name'],cruise_links['cruise_link']):
-#
-#     try:
-#         cmdf = parse_cruise_metadata(cruise_name)
-#         if not cmdf.empty:
-#             try:
-#                 get_cruise_metadata(cmdf,cruise_name)
-#             except:
-#                 print(cruise_name, " cruise metadata not downloaded")
-#             try:
-#                 get_cruise_traj(cmdf,cruise_name)
-#                 fill_ST_bounds_metadata(cruise_name)
-#             except:
-#                 print(cruise_name, " cruise trajectory not downloaded")
-#
-#         print(cruise_name, " Downloaded")
-#     except:
-#         print("##########################")
-#         print(cruise_name, " Not Fully Downloaded")
-#         print("##########################")
+for cruise_name,cruise_link in zip(cruise_links['cruise_name'],cruise_links['cruise_link']):
+
+    try:
+        cmdf = parse_cruise_metadata(cruise_name)
+        if not cmdf.empty:
+            try:
+                get_cruise_metadata(cmdf,cruise_name)
+            except:
+                print(cruise_name, " cruise metadata not downloaded")
+            try:
+                get_cruise_traj(cmdf,cruise_name)
+                fill_ST_bounds_metadata(cruise_name)
+            except:
+                print(cruise_name, " cruise trajectory not downloaded")
+
+        print(cruise_name, " Downloaded")
+    except:
+        print("##########################")
+        print(cruise_name, " Not Fully Downloaded")
+        print("##########################")
 
 # cruise_name = 'AE0818'
 # cruise_name = 'AR1-03'

@@ -79,7 +79,7 @@ def insertStats(data_dict,tableName):
     stats.updateStats_Small(tableName, data_dict['data_df'])
 
 def createIcon(data_dict,tableName):
-    mapping.cartopy_sparse_map(data_dict['data_df'],tableName,zoom_level='high')
+    mapping.folium_map(data_dict['data_df'],tableName)
 
 
 
@@ -89,7 +89,7 @@ def full_ingestion(args,server):
     # splitExcel(args.staging_filename)
     # single_file_split(filename,metadata_only_split=False)
     # staging_to_vault(args.staging_filename, getBranch_Path(args), args.tableName, remove_file_flag=True)
-    data_dict = importDataMemory(args.branch, args.tableName)
+    data_dict = data.importDataMemory(args.branch, args.tableName)
     # SQL_suggestion(data_dict,args.tableName,args.branch)
     # insertData(data_dict,args.tableName,server = server)
     # insertMetadata(data_dict,args.tableName,server =server)

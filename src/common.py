@@ -7,6 +7,15 @@ import DB
 import os
 
 
+def normalize(vals, min_max=False):
+    """Takes an array and either normalize to min/max, standardize it (remove the mean and divide by standard deviation)."""
+    if min_max:
+        normalized_vals=(vals-np.nanmin(vals))/(np.nanmax(vals)-np.nanmin(vals))
+    else:
+        normalized_vals=(vals-np.nanmean(vals))/np.nanstd(vals)
+    return normalized_vals
+
+
 def strip_whitespace_headers(df):
     """Strips any whitespace from dataframe headers"""
     df.columns = df.columns.str.strip()

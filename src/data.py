@@ -7,7 +7,7 @@ sys.path.append('../conf/')
 import vault_structure as vs
 import DB
 import common as cmn
-
+import metadata
 
 def removeMissings(df, cols):
     """Removes missing rows for all columns provided
@@ -88,11 +88,17 @@ def fetch_single_datafile(branch,tableName, file_ext = '.csv',process_level = 'R
     return flist
 
 
+def importDataMemory(branch, tableName):
+    data_file_name = fetch_single_datafile(branch,tableName)
+    data_df = read_csv(data_file_name)
+    dataset_metadata_df,variable_metadata_df = metadata.import_metadata(branch, tableName)
+    data_dict = {'data_df':data_df, 'dataset_metadata_df':dataset_metadata_df,'variable_metadata_df':variable_metadata_df}
+    return data_dict
+
 ##############   Data Insert    ############
 
 def data_df_to_db(df, tableName,server = 'Rainier'):
     """Inserts dataframe into SQL tbl"""
-
     df = cmn.strip_whitespace_headers(df)
     df = cmn.nanToNA(df)
     df = format_time_col(df,'time')
