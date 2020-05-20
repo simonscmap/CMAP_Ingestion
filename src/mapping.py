@@ -52,8 +52,6 @@ def html_to_static(m, tableName):
     driver.execute_script("document.getElementsByClassName('leaflet-control-attribution')[0].style.display = 'none';")
     driver.execute_script("document.getElementsByClassName('leaflet-control-container')[0].style.display = 'none';")
     driver.execute_script("document.getElementsByClassName('leaflet-bottom leaflet-left')[0].style.display = 'none';")
-
-    # driver.set_window_size(4000, 3000)
     time.sleep(4)
     driver.save_screenshot(static_outputdir + tableName + ".png")
     driver.close()
@@ -68,11 +66,9 @@ def folium_map(df, tableName):
     m = folium.Map(
         [df.lat.mean(), df.lon.mean()],
         tiles=None,
-        min_zoom=3,
+        min_zoom=4,
         max_zoom=10,
         zoom_start=7,
-        # control_scale=False,
-        # zoom_control=False,
         prefer_canvas=True,
     )
     sw = df[["lat", "lon"]].min().values.tolist()
@@ -83,46 +79,7 @@ def folium_map(df, tableName):
     if lat_abs > 1 or lon_abs > 1:
         m.fit_bounds([sw, ne])
 
-
-
-    # sw[0] = sw[0] - lat_abs
-    # sw[1] = sw[1] - lon_abs
-    # ne[0] = ne[0]  + lat_abs
-    # ne[1] = ne[1] + lon_abs
     m = addLayers(m)
     HeatMap(data, gradient={0.65: "#0A8A9F", 1: "#5F9EA0"}).add_to(m)
     m = addMarkers(m, df)
     html_to_static(m, tableName)
-
-
-def getsmalltablenames():
-  qry = """SELECT distinct [Table_Name] FROM [Opedia].[dbo].[tblVariables] WHERE
-  Make_ID = 1
-  AND
-  Sensor_ID = 2
-  AND Table_Name NOT IN
-  ('tblWOA_Climatology','tblGLODAP')"""
-  tablename_df = DB.DB_query(qry)
-  tlist = tablename_df['Table_Name'].to_list()
-  return tlist
-
-tdf = getsmalltablenames()
-
-for tname in tdf:
-    try:
-        print(tname)
-        qry = """SELECT  * FROM {tableName}""".format(tableName=tname)
-        df = DB.dbRead(qry)
-        if len(df) > 10000:
-            df = df.sample(10000)
-
-        m = folium_map(df, tname)
-    except:
-        print(tname, ' not mapped')
-# tableName = 'tblCruise_Temperature'
-# # tableName = "tblSeaFlow"
-# qry = """SELECT  * FROM {tableName}""".format(tableName=tableName)
-# df = DB.dbRead(qry)
-# df = df.sample(2000)
-#
-# m = folium_map(df, tableName)
