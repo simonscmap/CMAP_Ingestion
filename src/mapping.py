@@ -4,7 +4,13 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium import webdriver
 import common as cmn
 import folium
-from folium.plugins import HeatMap, MarkerCluster,FastMarkerCluster, Fullscreen, MousePosition
+from folium.plugins import (
+    HeatMap,
+    MarkerCluster,
+    FastMarkerCluster,
+    Fullscreen,
+    MousePosition,
+)
 import time
 import os
 from PIL import Image
@@ -49,9 +55,15 @@ def html_to_static(m, tableName):
     fpath = os.getcwd()
     driver.get("file://" + static_outputdir + tableName + ".html")
     container = driver.find_element_by_class_name("leaflet-control-attribution")
-    driver.execute_script("document.getElementsByClassName('leaflet-control-attribution')[0].style.display = 'none';")
-    driver.execute_script("document.getElementsByClassName('leaflet-control-container')[0].style.display = 'none';")
-    driver.execute_script("document.getElementsByClassName('leaflet-bottom leaflet-left')[0].style.display = 'none';")
+    driver.execute_script(
+        "document.getElementsByClassName('leaflet-control-attribution')[0].style.display = 'none';"
+    )
+    driver.execute_script(
+        "document.getElementsByClassName('leaflet-control-container')[0].style.display = 'none';"
+    )
+    driver.execute_script(
+        "document.getElementsByClassName('leaflet-bottom leaflet-left')[0].style.display = 'none';"
+    )
     time.sleep(4)
     driver.save_screenshot(static_outputdir + tableName + ".png")
     driver.close()
