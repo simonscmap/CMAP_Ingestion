@@ -66,7 +66,7 @@ def insertData(data_dict, tableName, server="Rainier"):
     data.data_df_to_db(data_dict["data_df"], tableName, server)
 
 
-def insertMetadata(data_dict, tableName, server="Rainier"):
+def insertMetadata(data_dict, tableName, cruise_missing_flag, server="Rainier"):
     metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName)
     metadata.tblDataset_References_Insert(data_dict["dataset_metadata_df"])
     metadata.tblVariables_Insert(
@@ -81,7 +81,8 @@ def insertMetadata(data_dict, tableName, server="Rainier"):
     metadata.tblKeywords_Insert(
         data_dict["variable_metadata_df"], data_dict["dataset_metadata_df"], tableName
     )
-    metadata.tblDataset_Cruises_Insert(data_dict["dataset_metadata_df"])
+    if cruise_missing_flag != True:
+        metadata.tblDataset_Cruises_Insert(data_dict["dataset_metadata_df"])
 
 
 ###   TESTING SUITE   ###
@@ -101,13 +102,12 @@ def createIcon(data_dict, tableName):
 
 def full_ingestion(args, server):
     print("Full Ingestion")
-    #
-    # splitExcel(args.staging_filename)
-    # staging_to_vault(args.staging_filename, getBranch_Path(args), args.tableName, remove_file_flag=True)
+    splitExcel(args.staging_filename)
+    staging_to_vault(args.staging_filename, getBranch_Path(args), args.tableName, remove_file_flag=True)
     data_dict = data.importDataMemory(args.branch, args.tableName)
     SQL_suggestion(data_dict,args.tableName,args.branch)
     insertData(data_dict,args.tableName,server = server)
-    insertMetadata(data_dict,args.tableName,server =server)
+    insertMetadata(data_dict,args.tableName,args.cruiseMissing, server =server)
     insertStats(data_dict,args.tableName)
     createIcon(data_dict, args.tableName)
 
@@ -133,7 +133,7 @@ def main():
         help="Branch where dataset should be placed in Vault. Ex's: cruise, float, station, satellite, model, assimilation.",
     )
     parser.add_argument("-P", "--Partial_Ingestion", nargs="?", const=True)
-    # parser.add_argument('-C','--cruiseName',nargs='?')
+    parser.add_argument('-C','--cruiseMissing',action='store_true')
 
     args = parser.parse_args()
 
