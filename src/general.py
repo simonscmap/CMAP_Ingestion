@@ -105,9 +105,9 @@ def full_ingestion(args, server):
     # splitExcel(args.staging_filename)
     # staging_to_vault(args.staging_filename, getBranch_Path(args), args.tableName, remove_file_flag=True)
     data_dict = data.importDataMemory(args.branch, args.tableName)
-    # SQL_suggestion(data_dict,args.tableName,args.branch)
-    # insertData(data_dict,args.tableName,server = server)
-    # insertMetadata(data_dict,args.tableName,server =server)
+    SQL_suggestion(data_dict,args.tableName,args.branch)
+    insertData(data_dict,args.tableName,server = server)
+    insertMetadata(data_dict,args.tableName,server =server)
     insertStats(data_dict,args.tableName)
     createIcon(data_dict, args.tableName)
 
