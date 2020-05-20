@@ -33,8 +33,8 @@ def import_metadata(branch, tableName):
     dataset_metadata_df = pd.read_csv(ds_meta_list[0], sep=",")
     vars_metadata_df = pd.read_csv(vars_meta_list[0], sep=",")
 
-    dataset_metadata_df = cmn.strip_whitespace_headers(dataset_metadata_df)
-    vars_metadata_df = cmn.strip_whitespace_headers(vars_metadata_df)
+    dataset_metadata_df = cmn.nanToNA(cmn.strip_whitespace_headers(dataset_metadata_df))
+    vars_metadata_df = cmn.nanToNA(cmn.strip_whitespace_headers(vars_metadata_df))
     return dataset_metadata_df, vars_metadata_df
 
 

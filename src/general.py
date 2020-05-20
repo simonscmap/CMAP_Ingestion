@@ -103,13 +103,12 @@ def full_ingestion(args, server):
     print("Full Ingestion")
     #
     # splitExcel(args.staging_filename)
-    # single_file_split(filename,metadata_only_split=False)
     # staging_to_vault(args.staging_filename, getBranch_Path(args), args.tableName, remove_file_flag=True)
     data_dict = data.importDataMemory(args.branch, args.tableName)
     # SQL_suggestion(data_dict,args.tableName,args.branch)
     # insertData(data_dict,args.tableName,server = server)
     # insertMetadata(data_dict,args.tableName,server =server)
-    # insertStats(data_dict,args.tableName)
+    insertStats(data_dict,args.tableName)
     createIcon(data_dict, args.tableName)
 
 
@@ -142,12 +141,10 @@ def main():
         partial_ingestion()
 
     else:
-        full_ingestion(args, server="Rainier")
+        data_dict =full_ingestion(args, server="Rainier")
+    return data_dict
 
+data_dict = main()
 
-if __name__ == "__main__":
-    main()
-
-
-# staging_filename = 'sg148m15d001-762_cmap.xlsx'
-# tableName = 'tblSeaglider_148_Mission_15'
+# if __name__ == "__main__":
+#     main()

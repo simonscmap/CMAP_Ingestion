@@ -9,7 +9,6 @@ api = pycmap.API()
 
 def updateStatsTable(ID, json_str, server):
     conn, cursor = DB.dbConnect(server)
-    print(conn, cursor)
     deleteQuery = """DELETE FROM tblDataset_Stats WHERE Dataset_ID = '{}'""".format(ID)
     insertQuery = """INSERT INTO tblDataset_Stats (Dataset_ID, JSON_stats) VALUES('{}','{}')""".format(
         ID, json_str
