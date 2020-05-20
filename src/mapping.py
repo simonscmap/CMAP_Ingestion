@@ -4,13 +4,14 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium import webdriver
 import common as cmn
 import folium
-from folium.plugins import HeatMap, MarkerCluster, Fullscreen, MousePosition
+from folium.plugins import HeatMap, MarkerCluster,FastMarkerCluster, Fullscreen, MousePosition
 import time
 import os
 from PIL import Image
 from PIL import ImageOps
 import DB
 import numpy as np
+
 static_outputdir = "/home/nrhagen/Documents/CMAP/CMAP_Ingestion/static/mission_icons/"
 
 
@@ -23,6 +24,7 @@ def addLayers(m):
 
 def addMarkers(m, df):
     """Adds CircleMarker points to folium map"""
+
     mc = MarkerCluster(
         options={"spiderfyOnMaxZoom": "False", "disableClusteringAtZoom": "1"}
     )
@@ -46,49 +48,81 @@ def html_to_static(m, tableName):
     driver = webdriver.Firefox(options=options)
     fpath = os.getcwd()
     driver.get("file://" + static_outputdir + tableName + ".html")
+    container = driver.find_element_by_class_name("leaflet-control-attribution")
+    driver.execute_script("document.getElementsByClassName('leaflet-control-attribution')[0].style.display = 'none';")
+    driver.execute_script("document.getElementsByClassName('leaflet-control-container')[0].style.display = 'none';")
+    driver.execute_script("document.getElementsByClassName('leaflet-bottom leaflet-left')[0].style.display = 'none';")
+
     # driver.set_window_size(4000, 3000)
     time.sleep(4)
-    driver.save_screenshot("map.png")
+    driver.save_screenshot(static_outputdir + tableName + ".png")
     driver.close()
-    time.sleep(1)
-    img = Image.open("map.png")
-    border = (50, 25, 25, 40)  # left, up, right, bottom
-
-    ImageOps.crop(img, border).save(static_outputdir + tableName + ".png")
-
 
 
 def folium_map(df, tableName):
     """Creates folium map object from input DataFrame"""
-    df = df.sample(2000)
+
     df.reset_index(drop=True, inplace=True)
     data = list(zip(df.lat, df.lon))
 
     m = folium.Map(
         [df.lat.mean(), df.lon.mean()],
         tiles=None,
-        zoom_start=9,
-        control_scale=True,
+        min_zoom=3,
+        max_zoom=10,
+        zoom_start=7,
+        # control_scale=False,
+        # zoom_control=False,
         prefer_canvas=True,
     )
-    lat_abs = np.abs(np.max(df['lat']) - np.min(df['lat'])) * 0.03
-    lon_abs = np.abs(np.max(df['lon']) - np.min(df['lon'])) * 0.03
+    sw = df[["lat", "lon"]].min().values.tolist()
+    ne = df[["lat", "lon"]].max().values.tolist()
 
-    sw = df[['lat', 'lon']].min().values.tolist()
-    ne = df[['lat', 'lon']].max().values.tolist()
+    lat_abs = np.abs(np.max(df["lat"]) - np.min(df["lat"]))
+    lon_abs = np.abs(np.max(df["lon"]) - np.min(df["lon"]))
+    if lat_abs > 1 or lon_abs > 1:
+        m.fit_bounds([sw, ne])
+
+
 
     # sw[0] = sw[0] - lat_abs
     # sw[1] = sw[1] - lon_abs
     # ne[0] = ne[0]  + lat_abs
     # ne[1] = ne[1] + lon_abs
-    m.fit_bounds([sw, ne])
     m = addLayers(m)
     HeatMap(data, gradient={0.65: "#0A8A9F", 1: "#5F9EA0"}).add_to(m)
     m = addMarkers(m, df)
     html_to_static(m, tableName)
 
-tableName = "tblKM1513_HOE_legacy_2A_Dyhrman_Omics"
-qry  = """SELECT  * FROM {tableName}""".format(tableName = tableName)
-df = DB.dbRead(qry)
 
-m = folium_map(df,tableName)
+def getsmalltablenames():
+  qry = """SELECT distinct [Table_Name] FROM [Opedia].[dbo].[tblVariables] WHERE
+  Make_ID = 1
+  AND
+  Sensor_ID = 2
+  AND Table_Name NOT IN
+  ('tblWOA_Climatology','tblGLODAP')"""
+  tablename_df = DB.DB_query(qry)
+  tlist = tablename_df['Table_Name'].to_list()
+  return tlist
+
+tdf = getsmalltablenames()
+
+for tname in tdf:
+    try:
+        print(tname)
+        qry = """SELECT  * FROM {tableName}""".format(tableName=tname)
+        df = DB.dbRead(qry)
+        if len(df) > 10000:
+            df = df.sample(10000)
+
+        m = folium_map(df, tname)
+    except:
+        print(tname, ' not mapped')
+# tableName = 'tblCruise_Temperature'
+# # tableName = "tblSeaFlow"
+# qry = """SELECT  * FROM {tableName}""".format(tableName=tableName)
+# df = DB.dbRead(qry)
+# df = df.sample(2000)
+#
+# m = folium_map(df, tableName)

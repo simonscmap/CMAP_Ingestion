@@ -18,13 +18,13 @@ def DB_query(query):
     return query_result
 
 
-def DB_modify(cmnd, server="Rainer"):
+def DB_modify(cmnd, server="Rainier"):
     conn, cursor = dbConnect(server)
     cursor.execute(cmnd)
     conn.commit()
 
 
-def dbRead(query, server="Rainer"):
+def dbRead(query, server="Rainier"):
     conn, cursor = dbConnect(server)
     df = sql.read_sql(query, conn)
     conn.close()

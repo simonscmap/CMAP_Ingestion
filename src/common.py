@@ -114,7 +114,7 @@ def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
     cur_str = """select [ID] from tblVariables where Table_Name = '{tableName}' AND [Short_Name] in {vsnp}""".format(
         tableName=tableName, vsnp=tuple(var_short_name_list)
     )
-    query_return = str(tuple(DB.DB_query(cur_str)["ID"].to_list()))
+    query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return
 
 

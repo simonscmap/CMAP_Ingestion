@@ -357,11 +357,14 @@ def deleteCatalogTables(tableName, server="Rainier"):
         print("Catalog tables for " + datasetName + " not deleted")
 
 
-# tblAMT13_Chisholm, csal_ppt_AMT13
 def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainier"):
+    """Removes a list of keywords for list of variables in a table"""
+
     keywords_list = cmn.lowercase_List(keywords_list)
     """Removes keyword from specific variable in table"""
-    keyword_IDs = cmn.getKeywordIDsTableNameVarName(tableName, var_short_name_list)
+    keyword_IDs = str(
+        tuple(cmn.getKeywordIDsTableNameVarName(tableName, var_short_name_list))
+    )
     cur_str = (
         """DELETE FROM [Opedia].[dbo].[tblKeywords] WHERE [var_ID] IN """
         + keyword_IDs
@@ -375,6 +378,26 @@ def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainie
         var_short_name_list,
         tableName,
     )
+
+
+def addKeywords(keywords_list, var_short_name_list, tableName, server="Rainier"):
+    """Inserts list of keywords for list of variables in a table"""
+    keywords_list = cmn.lowercase_List(keywords_list)
+    """Removes keyword from specific variable in table"""
+    keyword_IDs = cmn.getKeywordIDsTableNameVarName(tableName, var_short_name_list)
+    columnList = "(var_ID, Keywords)"
+    for var_ID in keyword_IDs:
+        for keyword in keywords_list:
+            query = """('{var_ID}', '{keyword}')""".format(
+                var_ID=var_ID, keyword=keyword
+            )
+            cur_str = """INSERT INTO [Opedia].[dbo].[tblKeywords] {columnList} VALUES {query}""".format(
+                columnList=columnList, query=query
+            )
+            try:
+                DB.lineInsert(server, "[opedia].[dbo].[tblDatasets]", columnList, query)
+            except Exception as e:
+                print(e)
 
 
 #
