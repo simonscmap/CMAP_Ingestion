@@ -56,7 +56,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     # Temps
     Variables = ""
     Doc_URL = ""
-    Icon_URL = "https://raw.githubusercontent.com/simonscmap/CMAP_Ingestion/master/static/mission_icons/{tableName}.svg?sanitize=true".format(
+    Icon_URL = "https://raw.githubusercontent.com/simonscmap/CMAP_Ingestion/master/static/mission_icons/{tableName}.png".format(
         tableName=tableName
     )
 
