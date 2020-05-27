@@ -82,11 +82,17 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     print("Metadata inserted into tblDatasets.")
 
 
-def tblDataset_References_Insert(dataset_metadata_df, server="Rainier"):
+def tblDataset_References_Insert(
+    dataset_metadata_df, DOI_link_append=None, server="Rainier"
+):
+
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
     IDvar = cmn.getDatasetID_DS_Name(Dataset_Name)
     columnList = "(Dataset_ID, Reference)"
     reference_list = dataset_metadata_df["dataset_references"].to_list()
+    if DOI_link_append != None:
+        reference_list.append(DOI_link_append)
+
     for ref in reference_list:
         query = (IDvar, ref)
         DB.lineInsert(
@@ -385,7 +391,7 @@ def addKeywords(keywords_list, var_short_name_list, tableName, server="Rainier")
     keywords_list = cmn.lowercase_List(keywords_list)
     """Removes keyword from specific variable in table"""
     keyword_IDs = cmn.getKeywordIDsTableNameVarName(tableName, var_short_name_list)
-    columnList = "(var_ID, Keywords)"
+    columnList = "(var_ID, keywords)"
     for var_ID in keyword_IDs:
         for keyword in keywords_list:
             query = """('{var_ID}', '{keyword}')""".format(
@@ -395,31 +401,6 @@ def addKeywords(keywords_list, var_short_name_list, tableName, server="Rainier")
                 columnList=columnList, query=query
             )
             try:
-                DB.lineInsert(server, "[opedia].[dbo].[tblDatasets]", columnList, query)
+                DB.lineInsert(server, "[opedia].[dbo].[tblKeywords]", columnList, query)
             except Exception as e:
                 print(e)
-
-
-#
-# keywords_list =  ['abundance',
-# 'bacteria',
-# 'cyanobacteria',
-# 'ecotype',
-# 'microbe',
-# 'microorganism',
-# 'photosynthesis',
-# 'picoplankton',
-# 'plankton',
-# 'Pro',
-# 'Pro strain',
-# 'Prochlorococcus',
-# 'Syn',
-# 'Synechococcus',
-# 'time series']
-# var_short_name_list = ['csal_cmore',
-# 'sigma_cmore',
-# 'site_Chisholm',
-# 'temp_C_cmore',
-# 'time_quality_Chisholm']
-# tableName = 'tblHOT_BATS_Prochlorococcus_Abundance'
-# removeKeywords(keywords_list,var_short_name_list,tableName)

@@ -16,13 +16,6 @@ import pycmap
 import argparse
 
 
-# staging_filename = 'g1_fluoro_test.xlsx'
-# tableName = 'tblFluoro_Test'
-
-
-###(opt) transfer ###
-
-
 def getBranch_Path(args):
     branch_path = cmn.vault_struct_retrieval(args.branch)
     return branch_path
@@ -68,7 +61,9 @@ def insertData(data_dict, tableName, server="Rainier"):
 
 def insertMetadata(data_dict, tableName, cruise_missing_flag, server="Rainier"):
     metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName)
-    metadata.tblDataset_References_Insert(data_dict["dataset_metadata_df"])
+    metadata.tblDataset_References_Insert(
+        data_dict["dataset_metadata_df"], args.DOI_link_append
+    )
     metadata.tblVariables_Insert(
         data_dict["data_df"],
         data_dict["dataset_metadata_df"],
@@ -103,12 +98,17 @@ def createIcon(data_dict, tableName):
 def full_ingestion(args, server):
     print("Full Ingestion")
     splitExcel(args.staging_filename)
-    staging_to_vault(args.staging_filename, getBranch_Path(args), args.tableName, remove_file_flag=True)
+    staging_to_vault(
+        args.staging_filename,
+        getBranch_Path(args),
+        args.tableName,
+        remove_file_flag=True,
+    )
     data_dict = data.importDataMemory(args.branch, args.tableName)
-    SQL_suggestion(data_dict,args.tableName,args.branch)
-    insertData(data_dict,args.tableName,server = server)
-    insertMetadata(data_dict,args.tableName,args.cruiseMissing, server =server)
-    insertStats(data_dict,args.tableName)
+    SQL_suggestion(data_dict, args.tableName, args.branch)
+    insertData(data_dict, args.tableName, server=server)
+    insertMetadata(data_dict, args.tableName, args.cruiseMissing, server=server)
+    insertStats(data_dict, args.tableName)
     createIcon(data_dict, args.tableName)
 
 
@@ -119,11 +119,7 @@ def partial_ingestion():
 
 def main():
     parser = argparse.ArgumentParser(description="Ingestion datasets into CMAP")
-    parser.add_argument(
-        "staging_filename",
-        type=str,
-        help="Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'",
-    )
+
     parser.add_argument(
         "tableName", type=str, help="Desired SQL and Vault Table Name. Ex: tblSeaFlow"
     )
@@ -132,8 +128,19 @@ def main():
         type=str,
         help="Branch where dataset should be placed in Vault. Ex's: cruise, float, station, satellite, model, assimilation.",
     )
+    parser.add_argument(
+        "staging_filename",
+        type=str,
+        help="Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'",
+    )
+    parser.add_argument(
+        "DOI_link_append",
+        type=str,
+        help="DOI string to append to reference_list",
+        nargs="?",
+    )
     parser.add_argument("-P", "--Partial_Ingestion", nargs="?", const=True)
-    parser.add_argument('-C','--cruiseMissing',action='store_true')
+    parser.add_argument("-C", "--cruiseMissing", action="store_true")
 
     args = parser.parse_args()
 
@@ -141,10 +148,8 @@ def main():
         partial_ingestion()
 
     else:
-        data_dict =full_ingestion(args, server="Rainier")
-    return data_dict
+        data_dict = full_ingestion(args, server="Rainier")
 
-data_dict = main()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

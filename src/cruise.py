@@ -1,5 +1,3 @@
-########## Dev Notes: Some metadata downloads are failing if a val (ex chief sci) is missing. Should download without...
-
 import sys
 import transfer
 
@@ -8,24 +6,10 @@ import vault_structure as vs
 import common as cmn
 import requests
 import data
-import pandas as pd  # time_min, time_max = cmn.getColBounds(traj_df,'time')
+import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
 import time
-
-
-########## Vault Structure Transfer ###################
-""" func to put raw cruise data in cruise_folder on vault """
-
-########## Web Functions ###################
-"""https request func"""
-"""BS finder funcs"""
-"""func: gather name ie.  gl:hasCruiseIDe"""
-"""func: gather nickname guess ie. Title: gradients"""
-"""func: gather shipname ie. shipname : r2r:VesselName"""
-"""func: gather chief scientist: first of crew members """
-"""func:  download cruise_gps data  """
-"""func:  parse gps, sample? min/max time/lat/lon  """
 
 
 ##############################################
