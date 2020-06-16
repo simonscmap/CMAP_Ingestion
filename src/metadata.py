@@ -107,7 +107,7 @@ def tblVariables_Insert(
     variable_metadata_df,
     Table_Name,
     process_level="REP",
-    CRS="",
+    CRS="CRS",
     server="Rainier",
 ):
     Db_list = len(variable_metadata_df) * ["Opedia"]

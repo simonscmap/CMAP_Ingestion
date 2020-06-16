@@ -55,8 +55,12 @@ def getColBounds(df, col, list_multiplier="0"):
         returns two lists of column mins and maxes
 
     """
-    min_col = [int(pd.to_numeric(df[col]).min())]
-    max_col = [int(pd.to_numeric(df[col]).max())]
+    if col == "time":
+        min_col = [pd.to_datetime(df["time"]).min().strftime("%Y-%m-%d %H:%M:%S")]
+        max_col = [pd.to_datetime(df["time"]).min().strftime("%Y-%m-%d %H:%M:%S")]
+    else:
+        min_col = [int(pd.to_numeric(df[col]).min())]
+        max_col = [int(pd.to_numeric(df[col]).max())]
     if list_multiplier != "0":
         min_col = min_col * int(list_multiplier)
         max_col = max_col * int(list_multiplier)
@@ -114,6 +118,8 @@ def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
     cur_str = """select [ID] from tblVariables where Table_Name = '{tableName}' AND [Short_Name] in {vsnp}""".format(
         tableName=tableName, vsnp=tuple(var_short_name_list)
     )
+    if len(var_short_name_list) == 1:
+        cur_str = cur_str.replace(",)", ")")
     query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return
 

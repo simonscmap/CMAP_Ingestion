@@ -20,8 +20,10 @@ def DB_query(query):
 
 def DB_modify(cmnd, server="Rainier"):
     conn, cursor = dbConnect(server)
+    conn.autocommit = True
+
     cursor.execute(cmnd)
-    conn.commit()
+    # conn.commit()
 
 
 def dbRead(query, server="Rainier"):

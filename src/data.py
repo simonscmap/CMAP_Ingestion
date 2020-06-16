@@ -75,11 +75,7 @@ def sort_values(df, cols):
 def ST_columns(df):
     """Returns SpaceTime related columns in a dataset as a list"""
     df_cols = cmn.lowercase_List(list(df))
-    ST_vars = [
-        st
-        for st in df_cols
-        if "time" in st or "lat" in st or "lon" in st or "depth" in st
-    ]
+    ST_vars = [i for i in df_cols if i in ["time", "lat", "lon", "depth"]]
     return ST_vars
 
 
@@ -123,10 +119,10 @@ def data_df_to_db(df, tableName, server="Rainier"):
     df = cmn.strip_whitespace_headers(df)
     df = cmn.nanToNA(df)
     df = format_time_col(df, "time")
-    ST_cols = ["time", "lat", "lon", "depth"]
     df = removeMissings(df, ST_columns(df))
     df = sort_values(df, ST_columns(df))
+    # df = df[['time','lat','lon','depth','cruise','station','cast','C14_assimilation_prochlorococcus','C14_assimilation_synechococcus','C14_assimilation_pico','bottle']]
     temp_file_path = vs.BCP + tableName + ".csv"
-    df.to_csv(temp_file_path, index=False)
+    df.to_csv(temp_file_path, index=False, header=False)
     DB.toSQLbcp(temp_file_path, tableName, server)
     os.remove(temp_file_path)

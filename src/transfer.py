@@ -76,32 +76,40 @@ def staging_to_vault(
         os.remove(vars_metadata_fname)
 
 
-# 'EddyExperimentA__L1_v1_0.xlsx'
-def single_file_split(filename, metadata_only_split=False):
+def single_file_split(filename, metadata_filename):
     """
+    #If metadata_filename is provided, ds,vars split, data file just transfered.
+    else:
+        filename is split into all three files.
+
     Splits an excel file containing data, dataset_metadata and vars_metadata sheets
     into three seperate files in the staging file strucutre.
+    If additional metadata filename is provided, data is split.
 
     Parameters
     ----------
     filename : string
         Filename and extension to be split.
-
+    metadata_filename : string (optional)
+        Filename of metadata specific file.
     """
 
     base_filename = os.path.splitext(os.path.basename(filename))[0]
 
-    if metadata_only_split == False:
-
+    if metadata_filename == None:
+        metadata_filename = filename
         data_df = pd.read_excel(vs.combined + filename, sheet_name=0)
-        data_df.to_csv(vs.data + base_filename + "_data.csv", sep=",", index=False)
-        dataset_metadata_df = pd.read_excel(vs.combined + filename, sheet_name=1)
-        vars_metadata_df = pd.read_excel(vs.combined + filename, sheet_name=2)
-        os.remove(vs.combined + filename)
+
+
     else:
-        dataset_metadata_df = pd.read_excel(vs.metadata + filename, sheet_name=0)
-        vars_metadata_df = pd.read_excel(vs.metadata + filename, sheet_name=1)
-        os.remove(vs.metadata + filename)
+        data_df = pd.read_csv(vs.combined + filename)
+    #
+    dataset_metadata_df = pd.read_excel(
+        vs.combined + metadata_filename, sheet_name="dataset_meta_data"
+    )
+    vars_metadata_df = pd.read_excel(
+        vs.combined + metadata_filename, sheet_name="vars_meta_data"
+    )
 
     dataset_metadata_df.to_csv(
         vs.metadata + base_filename + "_dataset_metadata.csv", sep=",", index=False
@@ -109,6 +117,9 @@ def single_file_split(filename, metadata_only_split=False):
     vars_metadata_df.to_csv(
         vs.metadata + base_filename + "_vars_metadata.csv", sep=",", index=False
     )
+    data_df.to_csv(vs.data + base_filename + "_data.csv", sep=",", index=False)
+
+    # os.remove(vs.combined + filename)
 
 
 def remove_data_metadata_fnames_staging(staging_sep_flag="combined"):

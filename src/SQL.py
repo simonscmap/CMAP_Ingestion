@@ -48,7 +48,7 @@ def SQL_index_suggestion_formatter(
     # if any are True, there are duplicates in subset
     SQL_index_str = """
     USE [{DB}]
-    GO
+
 
     CREATE {UNIQUE_flag} NONCLUSTERED INDEX [IX_{tableName}_time_lat_lon_{depth_str}] ON [dbo].[{tableName}]
     (
@@ -57,7 +57,7 @@ def SQL_index_suggestion_formatter(
     	[lon] ASC{depth_flag_comma}
     	{depth_flag_lp}{depth_str}{depth_flag_rp}
     )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [{FG}]
-    GO
+
 
     """.format(
         DB=DB,
@@ -70,10 +70,7 @@ def SQL_index_suggestion_formatter(
         FG=FG,
     )
 
-    print(SQL_index_str)
-    input(
-        "Please check and modify SQL index if needed, then press to continue validator..."
-    )
+
 
     SQL_index_dir = {"sql_index": SQL_index_str}
     return SQL_index_dir
@@ -92,7 +89,7 @@ def SQL_tbl_suggestion_formatter(
         sdf.loc[sdf["column_name"] == "depth", "null_status"] = "NOT NULL,"
     sdf["null_status"].iloc[-1] = sdf["null_status"].iloc[-1].replace(",", "")
     sdf["column_name"] = "[" + sdf["column_name"].astype(str) + "]"
-    sdf["dtype"] = sdf["dtype"].replace("object", "[float]")
+    sdf["dtype"] = sdf["dtype"].replace("object", "[nvarchar](200)")
     sdf["dtype"] = sdf["dtype"].replace("float64", "[float]")
     sdf["dtype"] = sdf["dtype"].replace("int64", "[int]")
 
@@ -103,10 +100,10 @@ def SQL_tbl_suggestion_formatter(
     USE [{}]
 
     SET ANSI_NULLS ON
-    GO
+
 
     SET QUOTED_IDENTIFIER ON
-    GO
+
 
     CREATE TABLE [dbo].[{}](
 
@@ -115,15 +112,12 @@ def SQL_tbl_suggestion_formatter(
 
     ) ON [{}]
 
-    GO
+
 
     """.format(
         DB, tableName, var_string, FG
     )
-    print(SQL_tbl)
-    input(
-        "Please check and modify SQL table if needed, then press to continue validator..."
-    )
+
 
     sql_dict = {"sql_tbl": SQL_tbl}
     return sql_dict

@@ -1,3 +1,10 @@
+# dev note: flag and provide two links to general function if data and metadata are split....
+
+# DOI link - > download files to staging
+# file names are given to general func
+# datafilename -m metdatafilename
+
+
 import sys
 import os
 
@@ -21,8 +28,8 @@ def getBranch_Path(args):
     return branch_path
 
 
-def splitExcel(staging_filename):
-    transfer.single_file_split(staging_filename)
+def splitExcel(staging_filename, metadata_filename):
+    transfer.single_file_split(staging_filename, metadata_filename)
 
 
 def staging_to_vault(staging_filename, branch, tableName, remove_file_flag=False):
@@ -52,6 +59,13 @@ def SQL_suggestion(data_dict, tableName, branch):
     sql_tbl = SQL.SQL_tbl_suggestion_formatter(cdt, tableName)
     sql_index = SQL.SQL_index_suggestion_formatter(data_dict["data_df"], tableName)
     sql_combined_str = sql_tbl["sql_tbl"] + sql_index["sql_index"]
+    contYN = input("Do you want to build this table in SQL? " + " ?  [yes/no]: ")
+    if contYN.lower() == "yes":
+        DB.DB_modify(sql_tbl["sql_tbl"])
+        DB.DB_modify(sql_index["sql_index"])
+
+    else:
+        sys.exit()
     SQL.write_SQL_file(sql_combined_str, tableName, make)
 
 
@@ -59,10 +73,10 @@ def insertData(data_dict, tableName, server="Rainier"):
     data.data_df_to_db(data_dict["data_df"], tableName, server)
 
 
-def insertMetadata(data_dict, tableName, cruise_missing_flag, server="Rainier"):
+def insertMetadata(data_dict, tableName, DOI_link_append, server="Rainier"):
     metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName)
     metadata.tblDataset_References_Insert(
-        data_dict["dataset_metadata_df"], args.DOI_link_append
+        data_dict["dataset_metadata_df"], DOI_link_append
     )
     metadata.tblVariables_Insert(
         data_dict["data_df"],
@@ -70,13 +84,16 @@ def insertMetadata(data_dict, tableName, cruise_missing_flag, server="Rainier"):
         data_dict["variable_metadata_df"],
         tableName,
         process_level="REP",
-        CRS="",
+        CRS="CRS",
         server="Rainier",
     )
     metadata.tblKeywords_Insert(
         data_dict["variable_metadata_df"], data_dict["dataset_metadata_df"], tableName
     )
-    if cruise_missing_flag != True:
+    if (
+        data_dict["dataset_metadata_df"]["official_cruise_name(s)"].dropna().empty
+        == False
+    ):
         metadata.tblDataset_Cruises_Insert(data_dict["dataset_metadata_df"])
 
 
@@ -97,7 +114,8 @@ def createIcon(data_dict, tableName):
 
 def full_ingestion(args, server):
     print("Full Ingestion")
-    splitExcel(args.staging_filename)
+
+    splitExcel(args.staging_filename, args.metadata_filename)
     staging_to_vault(
         args.staging_filename,
         getBranch_Path(args),
@@ -107,7 +125,7 @@ def full_ingestion(args, server):
     data_dict = data.importDataMemory(args.branch, args.tableName)
     SQL_suggestion(data_dict, args.tableName, args.branch)
     insertData(data_dict, args.tableName, server=server)
-    insertMetadata(data_dict, args.tableName, args.cruiseMissing, server=server)
+    insertMetadata(data_dict, args.tableName, args.DOI_link_append, server=server)
     insertStats(data_dict, args.tableName)
     createIcon(data_dict, args.tableName)
 
@@ -134,13 +152,15 @@ def main():
         help="Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'",
     )
     parser.add_argument(
-        "DOI_link_append",
-        type=str,
+        "-m", "--metadata_filename", nargs="?",
+    )
+    parser.add_argument(
+        "-d",
+        "--DOI_link_append",
         help="DOI string to append to reference_list",
         nargs="?",
     )
     parser.add_argument("-P", "--Partial_Ingestion", nargs="?", const=True)
-    parser.add_argument("-C", "--cruiseMissing", action="store_true")
 
     args = parser.parse_args()
 
@@ -150,6 +170,5 @@ def main():
     else:
         data_dict = full_ingestion(args, server="Rainier")
 
-
-if __name__ == "__main__":
+if __name__ == main():
     main()

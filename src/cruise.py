@@ -67,6 +67,33 @@ def fill_ST_bounds_metadata(cruise_name):
 
 
 ##############################################
+############## Cruise Data ###################
+##############################################
+
+
+def get_cruise_data(cmdf, cruise_name):
+    try:
+        cruise_data_links = retrieve_id_search(cmdf, "isr2r:hasCruiseof")
+        trim_data_links = trim_returned_link(asdf)
+
+        for data_link in trim_data_links:
+
+            data = parse_r2r_page(trim_link)
+            label = retrieve_id_search(cruise_traj_df, "rdfs:label")
+            link = trim_returned_link(
+                cruise_traj_df["info_col"][
+                    cruise_traj_df["id_col"] == "dcterms:source"
+                ].iloc[0]
+            )
+            if "1Min" in label[0]:
+                download_cruise_data_from_url(cruise_name, link[0], "trajectory")
+                clean_cruise_traj(cruise_name)
+
+    except:
+        pass
+
+
+##############################################
 ########### Cruise Trajectory ################
 ##############################################
 
@@ -93,22 +120,23 @@ def get_cruise_traj(cmdf, cruise_name):
             clean_cruise_traj(cruise_name)
 
     except:
-        cruise_track_link = (
-            retrieve_id_search(cmdf, "r2r:Track")[0].replace("<", "").replace(">", "")
-        )
-        cruise_track_df = parse_r2r_page(cruise_track_link)
-        track_string = retrieve_id_search(cruise_track_df, "geosparql:asWKT")[0]
-        track_string = track_string.split("(")[1].split(")")[0]
-        coord_list = track_string.split(",")
-        coord_df = pd.DataFrame(coord_list)
-        coord_df[["lon", "lat"]] = pd.Series(coord_list).str.split(" ", expand=True)
-        coord_df["time"] = ""
-        coord_df = coord_df[["time", "lat", "lon"]]
-        coord_df.to_csv(
-            vs.r2r_cruise + cruise_name + "/" + cruise_name + "_trajectory.csv",
-            sep=",",
-            index=False,
-        )
+        pass
+        # cruise_track_link = (
+        #     retrieve_id_search(cmdf, "r2r:Track")[0].replace("<", "").replace(">", "")
+        # )
+        # cruise_track_df = parse_r2r_page(cruise_track_link)
+        # track_string = retrieve_id_search(cruise_track_df, "geosparql:asWKT")[0]
+        # track_string = track_string.split("(")[1].split(")")[0]
+        # coord_list = track_string.split(",")
+        # coord_df = pd.DataFrame(coord_list)
+        # coord_df[["lon", "lat"]] = pd.Series(coord_list).str.split(" ", expand=True)
+        # coord_df["time"] = ""
+        # coord_df = coord_df[["time", "lat", "lon"]]
+        # coord_df.to_csv(
+        #     vs.r2r_cruise + cruise_name + "/" + cruise_name + "_trajectory.csv",
+        #     sep=",",
+        #     index=False,
+        # )
 
 
 def clean_cruise_traj(cruise_name):
@@ -230,30 +258,32 @@ def parse_cruise_metadata(cruise_name="", cruise_url=""):
         print(e)
 
 
-cruise_links = gather_cruise_links()
-#
-for cruise_name, cruise_link in zip(
-    cruise_links["cruise_name"], cruise_links["cruise_link"]
-):
+def main():
+    cruise_links = gather_cruise_links()
 
-    try:
-        cmdf = parse_cruise_metadata(cruise_name)
-        if not cmdf.empty:
-            try:
-                get_cruise_metadata(cmdf, cruise_name)
-            except:
-                print(cruise_name, " cruise metadata not downloaded")
-            try:
-                get_cruise_traj(cmdf, cruise_name)
-                fill_ST_bounds_metadata(cruise_name)
-            except:
-                print(cruise_name, " cruise trajectory not downloaded")
+    for cruise_name, cruise_link in zip(
+        cruise_links["cruise_name"], cruise_links["cruise_link"]
+    ):
 
-        print(cruise_name, " Downloaded")
-    except:
-        print("##########################")
-        print(cruise_name, " Not Fully Downloaded")
-        print("##########################")
+        try:
+            cmdf = parse_cruise_metadata(cruise_name)
+            if not cmdf.empty:
+                try:
+                    get_cruise_metadata(cmdf, cruise_name)
+                except:
+                    print(cruise_name, " cruise metadata not downloaded")
+                try:
+                    get_cruise_traj(cmdf, cruise_name)
+                    fill_ST_bounds_metadata(cruise_name)
+                except:
+                    print(cruise_name, " cruise trajectory not downloaded")
+
+            print(cruise_name, " Downloaded")
+        except:
+            print("##########################")
+            print(cruise_name, " Not Fully Downloaded")
+            print("##########################")
+
 
 # cruise_name = 'AE0818'
 # cruise_name = 'AR1-03'
