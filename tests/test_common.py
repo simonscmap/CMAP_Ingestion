@@ -178,3 +178,13 @@ def test_get_cruise_IDS():
     expected_ID_list = [589, 593]
     func_ID_list = cmn.get_cruise_IDS(test_cruise_name_list)
     assert func_ID_list == expected_ID_list, "Get cruise IDs test failed."
+
+
+def test_exclude_val_from_col():
+    test_series = pd.Series([1, "", " ", np.nan, "nan", "NaN", "NAN"])
+    exclude_list = ["", " ", np.nan, "nan", "NaN", "NAN"]
+    expected_series = pd.Series([1])
+    func_series = cmn.exclude_val_from_col(test_series, exclude_list)
+    assert list(func_series) == list(
+        expected_series
+    ), "exclude val from col test failed."

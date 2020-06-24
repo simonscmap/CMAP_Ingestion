@@ -70,8 +70,10 @@ def html_to_static(m, tableName):
 
 
 def folium_map(df, tableName):
+    print("Creating Icon and Map..")
     """Creates folium map object from input DataFrame"""
-
+    if len(df) > 5000:
+        df = df.sample(5000)
     df.reset_index(drop=True, inplace=True)
     data = list(zip(df.lat, df.lon))
 

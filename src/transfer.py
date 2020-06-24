@@ -100,7 +100,6 @@ def single_file_split(filename, metadata_filename):
         metadata_filename = filename
         data_df = pd.read_excel(vs.combined + filename, sheet_name=0)
 
-
     else:
         data_df = pd.read_csv(vs.combined + filename)
     #

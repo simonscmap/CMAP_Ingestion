@@ -56,8 +56,16 @@ def getColBounds(df, col, list_multiplier="0"):
 
     """
     if col == "time":
-        min_col = [pd.to_datetime(df["time"]).min().strftime("%Y-%m-%d %H:%M:%S")]
-        max_col = [pd.to_datetime(df["time"]).min().strftime("%Y-%m-%d %H:%M:%S")]
+        min_col = [
+            pd.to_datetime(df["time"], errors="coerce")
+            .min()
+            .strftime("%Y-%m-%d %H:%M:%S")
+        ]
+        max_col = [
+            pd.to_datetime(df["time"], errors="coerce")
+            .max()
+            .strftime("%Y-%m-%d %H:%M:%S")
+        ]
     else:
         min_col = [int(pd.to_numeric(df[col]).min())]
         max_col = [int(pd.to_numeric(df[col]).max())]
@@ -213,3 +221,50 @@ def get_cruise_IDS(cruise_name_list):
         cruise_db_df["Name"].str.lower().isin(cruise_name_list)
     ].to_list()
     return cruise_ID_list
+
+
+def exclude_val_from_col(series, exclude_list):
+    """
+
+    Parameters
+    ----------
+    series : Pandas Series
+        Input Series
+    exclude_list : list
+        List of values to exclude from string.
+
+    Returns
+    -------
+
+    Pandas Series
+        Returns the dataframe with exclude list values removed.
+
+    """
+    mod_series = pd.Series(list(series[~series.isin(exclude_list)]))
+    return mod_series
+
+
+def empty_list_2_empty_str(inlist):
+    """If a input list is empty returns an empty string, if not, list is returned"""
+    if not inlist:
+        inlist = ""
+    return inlist
+
+
+def cruise_has_trajectory(cruiseName):
+    cruise_id = get_cruise_IDS([cruiseName.upper()])
+    if len(cruise_id) == 0:
+        print(cruiseName, " is not a valid cruise in the CMAP database.")
+        cruise_has_traj = False
+    else:
+        cruise_traj_test_df = DB.DB_query(
+            """SELECT TOP (1) * FROM tblCruise_Trajectory WHERE Cruise_ID = '{cruise_id}'""".format(
+                cruise_id=cruise_id[0]
+            )
+        )
+        if cruise_traj_test_df.empty:
+            cruise_has_traj = False
+        else:
+            cruise_has_traj = True
+
+    return cruise_has_traj

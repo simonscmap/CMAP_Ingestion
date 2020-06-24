@@ -82,6 +82,15 @@ def ST_columns(df):
 ##############   Data Import    ############
 
 
+def clean_data_df(df):
+    df = cmn.strip_whitespace_headers(df)
+    df = cmn.nanToNA(df)
+    df = format_time_col(df, "time")
+    df = removeMissings(df, ST_columns(df))
+    df = sort_values(df, ST_columns(df))
+    return df
+
+
 def read_csv(path_and_filename, delim=","):
     """Imports csv into pandas DataFrame"""
     df = pd.read_csv(path_and_filename, sep=delim, parse_dates=["time"])
@@ -100,6 +109,7 @@ def fetch_single_datafile(branch, tableName, file_ext=".csv", process_level="REP
 def importDataMemory(branch, tableName):
     data_file_name = fetch_single_datafile(branch, tableName)
     data_df = read_csv(data_file_name)
+    data_df.rename(columns={"latitude": "lat", "longitude": "lon"}, inplace=True)
     dataset_metadata_df, variable_metadata_df = metadata.import_metadata(
         branch, tableName
     )
@@ -114,15 +124,12 @@ def importDataMemory(branch, tableName):
 ##############   Data Insert    ############
 
 
-def data_df_to_db(df, tableName, server="Rainier"):
+def data_df_to_db(df, tableName, clean_data_df=True, server="Rainier"):
     """Inserts dataframe into SQL tbl"""
-    df = cmn.strip_whitespace_headers(df)
-    df = cmn.nanToNA(df)
-    df = format_time_col(df, "time")
-    df = removeMissings(df, ST_columns(df))
-    df = sort_values(df, ST_columns(df))
-    # df = df[['time','lat','lon','depth','cruise','station','cast','C14_assimilation_prochlorococcus','C14_assimilation_synechococcus','C14_assimilation_pico','bottle']]
+    if clean_data_df == True:
+        clean_data_df(df)
     temp_file_path = vs.BCP + tableName + ".csv"
     df.to_csv(temp_file_path, index=False, header=False)
     DB.toSQLbcp(temp_file_path, tableName, server)
-    os.remove(temp_file_path)
+    print(temp_file_path)
+    # os.remove(temp_file_path)

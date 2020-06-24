@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import pycmap
 import common as cmn
 
@@ -17,9 +18,21 @@ def write_SQL_file(sql_str, tableName, make="observation"):
 
 
 def build_SQL_suggestion_df(df):
+    """Builds a dataframe of colulmn name and datatype for an input data specific dataframe"""
     sug_df = pd.DataFrame(columns=["column_name", "dtype"])
+    df = cmn.nanToNA(df)
+    df = cmn.strip_whitespace_headers(df)
+    exclude_list = [1, "", " ", np.nan, "nan", "NaN", "NAN"]
     for cn in list(df):
-        col_dtype = str(df[cn][df[cn] != " "].dtype)
+        if cn == "time":
+            col_dtype = "datetime"
+        else:
+            col_clean = cmn.exclude_val_from_col(df[cn], exclude_list)
+            try:
+                col_convert = pd.to_numeric(col_clean)
+            except:
+                col_convert = col_clean
+            col_dtype = col_convert.dtype
         sug_list = [cn, col_dtype]
         sug_df.loc[len(sug_df)] = sug_list
     return sug_df
@@ -70,8 +83,6 @@ def SQL_index_suggestion_formatter(
         FG=FG,
     )
 
-
-
     SQL_index_dir = {"sql_index": SQL_index_str}
     return SQL_index_dir
 
@@ -117,7 +128,6 @@ def SQL_tbl_suggestion_formatter(
     """.format(
         DB, tableName, var_string, FG
     )
-
 
     sql_dict = {"sql_tbl": SQL_tbl}
     return sql_dict

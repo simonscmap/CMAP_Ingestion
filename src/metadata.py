@@ -280,6 +280,7 @@ def tblDataset_Cruises_Insert(dataset_metadata_df, server="Rainier"):
             "(Dataset_ID, Cruise_ID)",
             query,
         )
+    print("Dataset matched to cruises: ", matched_cruises)
 
 
 def deleteFromtblKeywords(Dataset_ID, server):

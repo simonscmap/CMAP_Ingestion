@@ -1,8 +1,4 @@
-# dev note: flag and provide two links to general function if data and metadata are split....
-
-# DOI link - > download files to staging
-# file names are given to general func
-# datafilename -m metdatafilename
+# dev note: make sure keywords are set(). keyword with bcp insert? slow section
 
 
 import sys
@@ -59,6 +55,7 @@ def SQL_suggestion(data_dict, tableName, branch):
     sql_tbl = SQL.SQL_tbl_suggestion_formatter(cdt, tableName)
     sql_index = SQL.SQL_index_suggestion_formatter(data_dict["data_df"], tableName)
     sql_combined_str = sql_tbl["sql_tbl"] + sql_index["sql_index"]
+    print(sql_combined_str)
     contYN = input("Do you want to build this table in SQL? " + " ?  [yes/no]: ")
     if contYN.lower() == "yes":
         DB.DB_modify(sql_tbl["sql_tbl"])
@@ -169,6 +166,9 @@ def main():
 
     else:
         data_dict = full_ingestion(args, server="Rainier")
+        return data_dict
 
-if __name__ == main():
-    main()
+
+data_dict = main()
+# if __name__ == main():
+#     main()
