@@ -5,7 +5,8 @@ import numpy as np
 
 sys.path.append("../src")
 import common as cmn
-
+sys.path.append("../conf/")
+import paths
 
 def test_strip_whitespace_headers():
     test_df = pd.DataFrame({" prefix_space": [""], "suffix_space     ": [""]})
@@ -50,27 +51,27 @@ def test_vault_struct_retrieval():
 
     assert (
         cruise_path_func
-        == "/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/cruise/"
+        == paths.vault_path+"observation/in-situ/cruise/"
     ), "cruise vault path test failed"
     assert (
         float_path_func
-        == "/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/float/"
+        == paths.vault_path+"observation/in-situ/float/"
     ), "float vault path test failed"
     assert (
         station_path_func
-        == "/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/in-situ/station/"
+        == paths.vault_path+"observation/in-situ/station/"
     ), "station vault path test failed"
     assert (
         satellite_path_func
-        == "/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/observation/remote/satellite/"
+        == paths.vault_path+"observation/remote/satellite/"
     ), "satellite vault path test failed"
     assert (
         model_path_func
-        == "/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/model/"
+        == paths.vault_path+"model/"
     ), "model vault path test failed"
     assert (
         assimilation_path_func
-        == "/home/nrhagen/CMAP Data Submission Dropbox/Simons CMAP/vault/assimilation/"
+        == paths.vault_path+"assimilation/"
     ), "assimilation vault path test failed"
 
 

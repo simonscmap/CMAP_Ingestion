@@ -3,5 +3,7 @@
 __pycache__/
 *.pyc
 conf/login
+conf/paths.py
+
 src/error
 src/*.log

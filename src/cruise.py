@@ -1,4 +1,5 @@
-##dev note: Some cruises appear to be failing to retrieve metadata when it exists: ex https://www.rvdata.us/search/cruise/SAV-18-15
+##dev note: Download metadata for cruises without trajectories. If dataset has listed cruise that has metadata in vault, but no r2r traj. Can create cruise traj based on dataset ST.
+
 import sys
 import os
 import transfer
