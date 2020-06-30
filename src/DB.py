@@ -19,12 +19,15 @@ def DB_query(query):
 
 
 def DB_modify(cmnd, server="Rainier"):
-    conn, cursor = dbConnect(server)
-    conn.autocommit = True
 
-    cursor.execute(cmnd)
-    # conn.commit()
+    try:
+        conn, cursor = dbConnect(server)
+        conn.autocommit = True
 
+        cursor.execute(cmnd)
+        conn.close()
+    except Exception as e:
+        conn.close()
 
 def dbRead(query, server="Rainier"):
     conn, cursor = dbConnect(server)
