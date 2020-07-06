@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import DB
 import pycmap
+pycmap.API(cr.api_key)
 
 api = pycmap.API()
 

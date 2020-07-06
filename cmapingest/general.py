@@ -16,6 +16,7 @@ import stats
 import common as cmn
 import pandas as pd
 import pycmap
+pycmap.API(cr.api_key)
 import argparse
 
 

@@ -3,7 +3,7 @@ from pandas._testing import assert_frame_equal
 import sys
 import numpy as np
 
-sys.path.append("../src")
+sys.path.append("../cmapingest")
 import common as cmn
 sys.path.append("../conf/")
 import paths

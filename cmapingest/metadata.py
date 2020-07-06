@@ -7,6 +7,7 @@ import DB
 import glob
 import pandas as pd
 import pycmap
+pycmap.API(cr.api_key)
 
 api = pycmap.API(token=cr.api_key)
 

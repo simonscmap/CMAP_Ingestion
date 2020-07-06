@@ -8,7 +8,8 @@ import pandas.io.sql as sql
 import platform
 import pandas as pd
 import pycmap
-
+pycmap.API(cr.api_key)
+pycmap.API(cr.api_key)
 ######## DB Specific ############
 
 
