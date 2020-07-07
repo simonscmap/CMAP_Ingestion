@@ -1,4 +1,5 @@
 README.rst
+pyproject.toml
 setup.py
 cmapingest/DB.py
 cmapingest/SQL.py
@@ -12,6 +13,7 @@ cmapingest/mapping_folium.py
 cmapingest/metadata.py
 cmapingest/stats.py
 cmapingest/transfer.py
+cmapingest/vault_structure.py
 cmapingest.egg-info/PKG-INFO
 cmapingest.egg-info/SOURCES.txt
 cmapingest.egg-info/dependency_links.txt
