@@ -3,8 +3,6 @@ import os
 import pandas as pd
 import numpy as np
 import glob
-
-sys.path.append("../conf/")
 import vault_structure as vs
 import DB
 import common as cmn

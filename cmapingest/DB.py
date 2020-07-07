@@ -1,14 +1,13 @@
 import sys
 import os
 
-sys.path.append("../conf/login/")
+sys.path.append("../login/")
 import credentials as cr
 import pyodbc
 import pandas.io.sql as sql
 import platform
 import pandas as pd
 import pycmap
-pycmap.API(cr.api_key)
 pycmap.API(cr.api_key)
 ######## DB Specific ############
 

@@ -1,7 +1,6 @@
 import os
 import sys
 
-sys.path.append("../conf/")
 import vault_structure as vs
 import shutil
 import pandas as pd

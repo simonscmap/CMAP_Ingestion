@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("../conf/")
 import vault_structure as vs
 import pandas as pd
 import numpy as np

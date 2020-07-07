@@ -2,8 +2,8 @@
 *.csv
 __pycache__/
 *.pyc
-conf/login
-conf/paths.py
+login/
+conf/
 
 src/error
 src/*.log

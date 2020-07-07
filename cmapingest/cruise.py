@@ -5,7 +5,6 @@ import os
 import transfer
 import shutil
 
-sys.path.append("../conf/")
 import vault_structure as vs
 import common as cmn
 import DB
