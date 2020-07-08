@@ -1,12 +1,13 @@
 import sys
 
-sys.path.append("../conf/login/")
+sys.path.append("../login/")
 import credentials as cr
 import common as cmn
 import DB
 import glob
 import pandas as pd
 import pycmap
+
 pycmap.API(cr.api_key)
 
 api = pycmap.API(token=cr.api_key)
@@ -19,7 +20,7 @@ def ID_Var_Map(series_to_map, res_col, tableName):
     series = series_to_map.astype(str).str.lower()
     sdict = dict(zip(call[res_col].str.lower(), call.ID))
     mapped_series = series.map(sdict)
-    mapped_series = list(cmn.nanToNA(mapped_series).replace('',0))
+    mapped_series = list(cmn.nanToNA(mapped_series).replace("", 0))
     return mapped_series
 
 

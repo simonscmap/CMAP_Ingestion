@@ -1,8 +1,13 @@
+import sys
+
+sys.path.append("../login/")
+import credentials as cr
 import common as cmn
 import pandas as pd
 import numpy as np
 import DB
 import pycmap
+
 pycmap.API(cr.api_key)
 
 api = pycmap.API()

@@ -31,7 +31,9 @@ def leafStruc(base):
 
 vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
 staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
-collected_data = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
+collected_data = (
+    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
+)
 
 ################# AWS Staging Area Structure  ##################
 makedir(staging)

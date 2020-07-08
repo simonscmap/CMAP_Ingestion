@@ -203,7 +203,7 @@ def find_File_Path_guess_tree(name):
 
 def verify_cruise_lists(dataset_metadata_df):
     """Returns matching and non matching cruises"""
-    cruise_series = dataset_metadata_df["official_cruise_name(s)"]
+    cruise_series = dataset_metadata_df["cruise_names"]
     """ check that every cruise_name in column exists in the database. map those that don't exist into return"""
     cruise_set = set(lowercase_List(cruise_series.to_list()))
     db_cruise_set = set(lowercase_List(getListCruises()["Name"].to_list()))

@@ -5,8 +5,10 @@ import numpy as np
 
 sys.path.append("../cmapingest")
 import common as cmn
+
 sys.path.append("../conf/")
 import paths
+
 
 def test_strip_whitespace_headers():
     test_df = pd.DataFrame({" prefix_space": [""], "suffix_space     ": [""]})
@@ -50,28 +52,22 @@ def test_vault_struct_retrieval():
     assimilation_path_func = cmn.vault_struct_retrieval("assimilation")
 
     assert (
-        cruise_path_func
-        == paths.vault_path+"observation/in-situ/cruise/"
+        cruise_path_func == paths.vault_path + "observation/in-situ/cruise/"
     ), "cruise vault path test failed"
     assert (
-        float_path_func
-        == paths.vault_path+"observation/in-situ/float/"
+        float_path_func == paths.vault_path + "observation/in-situ/float/"
     ), "float vault path test failed"
     assert (
-        station_path_func
-        == paths.vault_path+"observation/in-situ/station/"
+        station_path_func == paths.vault_path + "observation/in-situ/station/"
     ), "station vault path test failed"
     assert (
-        satellite_path_func
-        == paths.vault_path+"observation/remote/satellite/"
+        satellite_path_func == paths.vault_path + "observation/remote/satellite/"
     ), "satellite vault path test failed"
     assert (
-        model_path_func
-        == paths.vault_path+"model/"
+        model_path_func == paths.vault_path + "model/"
     ), "model vault path test failed"
     assert (
-        assimilation_path_func
-        == paths.vault_path+"assimilation/"
+        assimilation_path_func == paths.vault_path + "assimilation/"
     ), "assimilation vault path test failed"
 
 
@@ -162,9 +158,7 @@ def test_findVarID():
 
 
 def test_verify_cruise_lists():
-    test_df = pd.DataFrame(
-        {"cruise_names": ["KOK1606", "cruise_not_in_database"]}
-    )
+    test_df = pd.DataFrame({"cruise_names": ["KOK1606", "cruise_not_in_database"]})
     expected_list_matched = ["kok1606"]
     expected_list_unmatched = ["cruise_not_in_database"]
     func_match_list, func_unmatched_list = cmn.verify_cruise_lists(test_df)

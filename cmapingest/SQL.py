@@ -2,9 +2,11 @@ import os
 import sys
 import pandas as pd
 import numpy as np
+
 sys.path.append("../conf/login/")
 import credentials as cr
 import pycmap
+
 pycmap.API(cr.api_key)
 import common as cmn
 

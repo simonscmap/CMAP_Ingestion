@@ -18,7 +18,7 @@ from PIL import ImageOps
 import DB
 import numpy as np
 
-static_outputdir = "/home/nrhagen/Documents/CMAP/CMAP_Ingestion/static/mission_icons/"
+static_outputdir = "/home/nrhagen/Documents/CMAP/cmapingest/static/mission_icons/"
 
 
 def addLayers(m):

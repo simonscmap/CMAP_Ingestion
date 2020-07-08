@@ -8,6 +8,7 @@ import pandas.io.sql as sql
 import platform
 import pandas as pd
 import pycmap
+
 pycmap.API(cr.api_key)
 ######## DB Specific ############
 
@@ -28,6 +29,7 @@ def DB_modify(cmnd, server="Rainier"):
         conn.close()
     except Exception as e:
         conn.close()
+
 
 def dbRead(query, server="Rainier"):
     conn, cursor = dbConnect(server)

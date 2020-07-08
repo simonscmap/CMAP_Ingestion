@@ -1,7 +1,9 @@
 # dev note: make sure keywords are set(). keyword with bcp insert? slow section
-
-
 import sys
+
+sys.path.append("../login/")
+import credentials as cr
+
 import os
 
 import vault_structure as vs
@@ -15,6 +17,7 @@ import stats
 import common as cmn
 import pandas as pd
 import pycmap
+
 pycmap.API(cr.api_key)
 import argparse
 
@@ -87,10 +90,7 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server="Rainier"):
     metadata.tblKeywords_Insert(
         data_dict["variable_metadata_df"], data_dict["dataset_metadata_df"], tableName
     )
-    if (
-        data_dict["dataset_metadata_df"]["official_cruise_name(s)"].dropna().empty
-        == False
-    ):
+    if data_dict["dataset_metadata_df"]["cruise_names"].dropna().empty == False:
         metadata.tblDataset_Cruises_Insert(data_dict["dataset_metadata_df"])
 
 
@@ -169,6 +169,5 @@ def main():
         return data_dict
 
 
-data_dict = main()
-# if __name__ == main():
-#     main()
+if __name__ == main():
+    main()
