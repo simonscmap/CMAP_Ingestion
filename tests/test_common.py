@@ -163,7 +163,7 @@ def test_findVarID():
 
 def test_verify_cruise_lists():
     test_df = pd.DataFrame(
-        {"official_cruise_name(s)": ["KOK1606", "cruise_not_in_database"]}
+        {"cruise_names": ["KOK1606", "cruise_not_in_database"]}
     )
     expected_list_matched = ["kok1606"]
     expected_list_unmatched = ["cruise_not_in_database"]
