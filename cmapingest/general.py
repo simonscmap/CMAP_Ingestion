@@ -1,25 +1,27 @@
 # dev note: make sure keywords are set(). keyword with bcp insert? slow section
 import sys
+import os
+import pandas as pd
+import pycmap
+pycmap.API(cr.api_key)
+import argparse
 
 sys.path.append("../login/")
 import credentials as cr
 
-import os
 
-import vault_structure as vs
-import transfer
-import data
-import DB
-import metadata
-import SQL
-import mapping
-import stats
-import common as cmn
-import pandas as pd
-import pycmap
+from cmapingest import vault_structure as vs
+from cmapingest import transfer
+from cmapingest import data
+from cmapingest import DB
+from cmapingest import metadata
+from cmapingest import SQL
+from cmapingest import mapping
+from cmapingest import stats
+from cmapingest import common as cmn
 
-pycmap.API(cr.api_key)
-import argparse
+
+
 
 
 def getBranch_Path(args):

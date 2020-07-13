@@ -1,4 +1,4 @@
-README.rst
+README.md
 pyproject.toml
 setup.py
 cmapingest/DB.py
@@ -9,7 +9,6 @@ cmapingest/cruise.py
 cmapingest/data.py
 cmapingest/general.py
 cmapingest/mapping.py
-cmapingest/mapping_folium.py
 cmapingest/metadata.py
 cmapingest/stats.py
 cmapingest/transfer.py

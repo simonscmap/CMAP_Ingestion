@@ -1,10 +1,10 @@
 import sys
-
-import vault_structure as vs
+import os
 import pandas as pd
 import numpy as np
-import DB
-import os
+from cmapingest import DB
+from cmapingest import vault_structure as vs
+
 
 
 def normalize(vals, min_max=False):

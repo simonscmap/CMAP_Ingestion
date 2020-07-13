@@ -3,10 +3,11 @@ import os
 import pandas as pd
 import numpy as np
 import glob
-import vault_structure as vs
-import DB
-import common as cmn
-import metadata
+
+from cmapingest import vault_structure as vs
+from cmapingest import DB
+from cmapingest import common as cmn
+from cmapingest import metadata
 
 
 def removeMissings(df, cols):

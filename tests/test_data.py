@@ -3,8 +3,7 @@ from pandas._testing import assert_frame_equal
 import sys
 import numpy as np
 
-sys.path.append("../cmapingest")
-import data
+from cmapingest import data
 
 
 def test_removeMissings():

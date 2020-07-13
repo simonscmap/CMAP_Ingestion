@@ -3,9 +3,8 @@ from pandas._testing import assert_frame_equal
 import sys
 import numpy as np
 
-sys.path.append("../cmapingest")
-import common as cmn
-import metadata
+from cmapingest import common as cmn
+from cmapingest import metadata
 
 
 def test_ID_Var_Map():

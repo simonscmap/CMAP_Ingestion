@@ -1,10 +1,11 @@
 import os
 import sys
 
-import vault_structure as vs
 import shutil
 import pandas as pd
 import requests
+
+from cmapingest import vault_structure as vs
 
 
 def requests_Download(download_str, filename, path):

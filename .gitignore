@@ -2,8 +2,7 @@
 *.csv
 __pycache__/
 *.pyc
-login/
 conf/
-
-src/error
-src/*.log
+cmapingest/credentials.py
+cmapingest/error
+cmapingest/*.log

@@ -1,7 +1,6 @@
 import sys
 import os
 
-sys.path.append("../login/")
 import credentials as cr
 import pyodbc
 import pandas.io.sql as sql

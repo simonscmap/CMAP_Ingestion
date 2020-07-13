@@ -1,20 +1,17 @@
 ##dev note: Download metadata for cruises without trajectories. If dataset has listed cruise that has metadata in vault, but no r2r traj. Can create cruise traj based on dataset ST.
-
 import sys
 import os
-import transfer
 import shutil
-
-import vault_structure as vs
-import common as cmn
-import DB
 import requests
-import data
 import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
 import time
 
+from cmapingest import data
+from cmapingest import vault_structure as vs
+from cmapingest import common as cmn
+from cmapingest import DB
 
 ##############################################
 ########## Cruise Helper Funcs ###############

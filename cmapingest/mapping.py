@@ -2,7 +2,8 @@
 
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium import webdriver
-import common as cmn
+import numpy as np
+
 import folium
 from folium.plugins import (
     HeatMap,
@@ -15,8 +16,10 @@ import time
 import os
 from PIL import Image
 from PIL import ImageOps
-import DB
-import numpy as np
+
+from cmapingest import DB
+from cmapingest import common as cmn
+
 
 static_outputdir = "/home/nrhagen/Documents/CMAP/cmapingest/static/mission_icons/"
 

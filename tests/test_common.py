@@ -3,11 +3,9 @@ from pandas._testing import assert_frame_equal
 import sys
 import numpy as np
 
-sys.path.append("../cmapingest")
-import common as cmn
+from cmapingest import common as cmn
 
-sys.path.append("../conf/")
-import paths
+
 
 
 def test_strip_whitespace_headers():
@@ -42,33 +40,6 @@ def test_getColBounds():
     assert expected_min_mult == func_min_mult, """getColBounds min mult failed"""
     assert expected_max_mult == func_max_mult, """getColBounds max mult failed"""
 
-
-def test_vault_struct_retrieval():
-    cruise_path_func = cmn.vault_struct_retrieval("cruise")
-    float_path_func = cmn.vault_struct_retrieval("float")
-    station_path_func = cmn.vault_struct_retrieval("station")
-    satellite_path_func = cmn.vault_struct_retrieval("satellite")
-    model_path_func = cmn.vault_struct_retrieval("model")
-    assimilation_path_func = cmn.vault_struct_retrieval("assimilation")
-
-    assert (
-        cruise_path_func == paths.vault_path + "observation/in-situ/cruise/"
-    ), "cruise vault path test failed"
-    assert (
-        float_path_func == paths.vault_path + "observation/in-situ/float/"
-    ), "float vault path test failed"
-    assert (
-        station_path_func == paths.vault_path + "observation/in-situ/station/"
-    ), "station vault path test failed"
-    assert (
-        satellite_path_func == paths.vault_path + "observation/remote/satellite/"
-    ), "satellite vault path test failed"
-    assert (
-        model_path_func == paths.vault_path + "model/"
-    ), "model vault path test failed"
-    assert (
-        assimilation_path_func == paths.vault_path + "assimilation/"
-    ), "assimilation vault path test failed"
 
 
 def test_getDatasetID_DS_Name():

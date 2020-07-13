@@ -8,7 +8,8 @@ import credentials as cr
 import pycmap
 
 pycmap.API(cr.api_key)
-import common as cmn
+
+from cmapingest import common as cmn
 
 ######## Python Specific ############
 
