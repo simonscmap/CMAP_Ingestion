@@ -5,6 +5,7 @@ cmapingest/DB.py
 cmapingest/SQL.py
 cmapingest/__init__.py
 cmapingest/common.py
+cmapingest/credentials.py
 cmapingest/cruise.py
 cmapingest/data.py
 cmapingest/general.py

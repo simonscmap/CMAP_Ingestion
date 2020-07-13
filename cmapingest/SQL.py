@@ -3,8 +3,8 @@ import sys
 import pandas as pd
 import numpy as np
 
-sys.path.append("../conf/login/")
-import credentials as cr
+from cmapingest import  credentials as cr
+
 import pycmap
 
 pycmap.API(cr.api_key)

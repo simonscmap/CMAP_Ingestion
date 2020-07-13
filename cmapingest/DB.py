@@ -1,7 +1,7 @@
 import sys
 import os
 
-import credentials as cr
+from cmapingest import  credentials as cr
 import pyodbc
 import pandas.io.sql as sql
 import platform

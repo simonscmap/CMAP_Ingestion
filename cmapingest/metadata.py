@@ -1,7 +1,7 @@
 import sys
 
-sys.path.append("../login/")
-import credentials as cr
+from cmapingest import  credentials as cr
+
 
 import glob
 import pandas as pd
