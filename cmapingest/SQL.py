@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 
-from cmapingest import  credentials as cr
+from cmapingest import credentials as cr
 
 import pycmap
 

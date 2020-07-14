@@ -154,3 +154,11 @@ def test_exclude_val_from_col():
     assert list(func_series) == list(
         expected_series
     ), "exclude val from col test failed."
+
+def test_datasetINtblDatasets():
+    test_dataset_name_exists = 'ADD VALID TABLE NAME'
+    test_dataset_name_nonexist = 'KITTEN_GROWTH_RATE_MODEL'
+    exists_bool = cmn.datasetINtblDatasets(test_dataset_name_exists)
+    nonexist_bool = cmn.datasetINtblDatasets(test_dataset_name_nonexist)
+    assert exists_bool == True, "datasetINtblDatasets exist test failed."
+    assert nonexist_bool == False, , "datasetINtblDatasets nonexists test failed."

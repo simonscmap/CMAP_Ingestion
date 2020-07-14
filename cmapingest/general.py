@@ -3,6 +3,7 @@ import sys
 import os
 import pandas as pd
 import pycmap
+
 pycmap.API(cr.api_key)
 import argparse
 
@@ -19,9 +20,6 @@ from cmapingest import SQL
 from cmapingest import mapping
 from cmapingest import stats
 from cmapingest import common as cmn
-
-
-
 
 
 def getBranch_Path(args):

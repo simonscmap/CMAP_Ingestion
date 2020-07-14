@@ -6,7 +6,6 @@ from cmapingest import DB
 from cmapingest import vault_structure as vs
 
 
-
 def normalize(vals, min_max=False):
     """Takes an array and either normalize to min/max, standardize it (remove the mean and divide by standard deviation)."""
     if min_max:
@@ -267,3 +266,17 @@ def cruise_has_trajectory(cruiseName):
             cruise_has_traj = True
 
     return cruise_has_traj
+
+
+def datasetINtblDatasets(dataset_name):
+    """Returns a boolean if dataset name exists in tblDatasets"""
+    dataset_qry = DB.DB_query(
+        """SELECT * FROM tblDatasets WHERE Dataset_Name = '{dataset_name}'""".format(
+            dataset_name=dataset_name
+        )
+    )
+    if len(dataset_qry) >= 1:
+        ds_bool = True
+    else:
+        ds_bool = False
+    return ds_bool
