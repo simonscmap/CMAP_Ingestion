@@ -1,7 +1,7 @@
 import sys
 
-sys.path.append("../login/")
-import credentials as cr
+from cmapingest import  credentials as cr
+
 import pandas as pd
 import numpy as np
 import pycmap

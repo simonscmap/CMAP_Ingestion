@@ -5,9 +5,21 @@ import pandas as pd
 from cmapingest import DB
 
 
+def len_comparison_data_SQL(tableName,data_df)
 def data_tests():
-    dataset_name_valid_bool = datasetINtblDatasets(dataset_name)
+    tableInDB_bool = tableInDB(tableName)
     pass
+def metadata_tests():
+    dataset_name_valid_bool = cmn.datasetINtblDatasets(dataset_name)
+
+    pass
+
+def stored_proc_tests():
+    pass
+
+def pycmap_tests():
+    pass
+
 
 
 def main(tableName):
@@ -20,7 +32,7 @@ retrieval funcs will live in common...
 
 dataset either full or partially ingested into DB:
 -Data tests:
-  -does the tableName exist?
+  -does the tableName exist? - func/test
   -does the len(tableName) == len(data_df)?
   -does the table contain (time,lat,lon(depth?))
   -can you select top(1) from tableName.
@@ -31,7 +43,7 @@ dataset either full or partially ingested into DB:
 
 -Metadata Table tests:
   -tblDatasets:
-    -Does the table exist in tblDatasets?
+    -Does the table exist in tblDatasets?- func and test done
     -Are there any null cols in tblDatasets?
   -tblDatasetStats:
     -Do that stats match the min/max of stats from pandas (df.describe())
