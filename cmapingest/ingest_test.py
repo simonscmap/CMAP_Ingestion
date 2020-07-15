@@ -5,21 +5,27 @@ import pandas as pd
 from cmapingest import DB
 
 
-def len_comparison_data_SQL(tableName,data_df)
+def len_comparison_data_SQL(tableName, data_df):
+    pass
+
+
 def data_tests():
     tableInDB_bool = tableInDB(tableName)
     pass
+
+
 def metadata_tests():
     dataset_name_valid_bool = cmn.datasetINtblDatasets(dataset_name)
 
     pass
 
+
 def stored_proc_tests():
     pass
 
+
 def pycmap_tests():
     pass
-
 
 
 def main(tableName):

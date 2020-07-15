@@ -154,7 +154,7 @@ def test_exclude_val_from_col():
 
 
 def test_tableInDB():
-    test_tableName_exists = "tblFlombaum"
+    test_tableName_exists = "tblMakes"
     test_dataset_name_nonexist = "tblKITTEN_GROWTH_RATE_MODEL"
     exists_bool = cmn.tableInDB(test_tableName_exists)
     nonexist_bool = cmn.tableInDB(test_dataset_name_nonexist)
@@ -162,8 +162,9 @@ def test_tableInDB():
     assert nonexist_bool == False, "tableInDBs nonexists test failed."
 
 
+#
 def test_datasetINtblDatasets():
-    test_dataset_name_exists = "ADD VALID DATASETS NAME"
+    test_dataset_name_exists = "Flombaum"
     test_dataset_name_nonexist = "KITTEN_GROWTH_RATE_MODEL"
     exists_bool = cmn.datasetINtblDatasets(test_dataset_name_exists)
     nonexist_bool = cmn.datasetINtblDatasets(test_dataset_name_nonexist)
@@ -174,4 +175,4 @@ def test_datasetINtblDatasets():
 def test_length_of_tbl():
     tableName = "tblMakes"
     len_table_func = cmn.length_of_tbl(tableName)
-    assert len_table_func == "4"
+    assert len_table_func == "3"

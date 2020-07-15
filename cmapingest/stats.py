@@ -1,6 +1,6 @@
 import sys
 
-from cmapingest import  credentials as cr
+from cmapingest import credentials as cr
 
 import pandas as pd
 import numpy as np

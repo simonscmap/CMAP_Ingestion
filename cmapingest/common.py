@@ -267,14 +267,17 @@ def cruise_has_trajectory(cruiseName):
 
     return cruise_has_traj
 
+
 def tableInDB(tableName):
     """Returns a boolean if tableName exists in DB."""
     qry = """SELECT TOP(1) * FROM {tableName}""".format(tableName=tableName)
-    if len(qry) >= 1:
+    qry_result = DB.DB_query(qry)
+    if len(qry_result) > 0:
         tableBool = True
     else:
         tableBool = False
     return tableBool
+
 
 def datasetINtblDatasets(dataset_name):
     """Returns a boolean if dataset name exists in tblDatasets"""
@@ -288,8 +291,10 @@ def datasetINtblDatasets(dataset_name):
     else:
         ds_bool = False
     return ds_bool
+
+
 def length_of_tbl(tableName):
-    #devnote: find table length with sp_....
-    qry = """SELECT COUNT(*) FROM {tableName}""".format({tableName})
-    tableCount = str(DB.DB_query(qry).iloc[0])
+    """Returns a string representation of the length of a SQL table. Warning: only use only small tables"""
+    qry = """SELECT COUNT(*) FROM {tableName}""".format(tableName=tableName)
+    tableCount = list(DB.DB_query(qry))[0]
     return tableCount
