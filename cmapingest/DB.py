@@ -44,6 +44,11 @@ def server_select_credentials(server):
         psw = cr.psw_rainier
         ip = cr.ip_rainier
         port = cr.port_rainier
+    elif server == "Mariana":
+        usr = cr.usr_mariana
+        psw = cr.psw_mariana
+        ip = cr.ip_mariana
+        port = cr.port_mariana
     else:
         usr = cr.usr_beast
         psw = cr.psw_beast

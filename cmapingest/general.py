@@ -2,13 +2,15 @@
 import sys
 import os
 import pandas as pd
+
+sys.path.append("../login/")
+import credentials as cr
+
 import pycmap
 
 pycmap.API(cr.api_key)
 import argparse
 
-sys.path.append("../login/")
-import credentials as cr
 
 
 from cmapingest import vault_structure as vs
@@ -35,8 +37,8 @@ def staging_to_vault(staging_filename, branch, tableName, remove_file_flag=False
     transfer.staging_to_vault(staging_filename, branch, tableName, remove_file_flag)
 
 
-def importDataMemory(branch, tableName):
-    data_file_name = data.fetch_single_datafile(branch, tableName)
+def importDataMemory(branch, tableName,process_level):
+    data_file_name = data.fetch_single_datafile(branch, tableName,process_level)
     data_df = data.read_csv(data_file_name)
     dataset_metadata_df, variable_metadata_df = metadata.import_metadata(
         branch, tableName
@@ -69,11 +71,11 @@ def SQL_suggestion(data_dict, tableName, branch):
     SQL.write_SQL_file(sql_combined_str, tableName, make)
 
 
-def insertData(data_dict, tableName, server="Rainier"):
+def insertData(data_dict, tableName, server):
     data.data_df_to_db(data_dict["data_df"], tableName, server)
 
 
-def insertMetadata(data_dict, tableName, DOI_link_append, server="Rainier"):
+def insertMetadata(data_dict, tableName, DOI_link_append, server):
     metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName)
     metadata.tblDataset_References_Insert(
         data_dict["dataset_metadata_df"], DOI_link_append
@@ -85,7 +87,7 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server="Rainier"):
         tableName,
         process_level="REP",
         CRS="CRS",
-        server="Rainier",
+        server=server,
     )
     metadata.tblKeywords_Insert(
         data_dict["variable_metadata_df"], data_dict["dataset_metadata_df"], tableName
@@ -109,22 +111,23 @@ def createIcon(data_dict, tableName):
     mapping.folium_map(data_dict["data_df"], tableName)
 
 
-def full_ingestion(args, server):
+def full_ingestion(args):
     print("Full Ingestion")
+    print(args.Server)
+    # splitExcel(args.staging_filename, args.metadata_filename)
+    # staging_to_vault(
+    #     args.staging_filename,
+    #     getBranch_Path(args),
+    #     args.tableName,
+    #     remove_file_flag=True,
+    # )
+    # data_dict = data.importDataMemory(args.branch, args.tableName,args.process_level)
+    # SQL_suggestion(data_dict, args.tableName, args.branch)
+    # insertData(data_dict, args.tableName, server=args.Server)
+    # insertMetadata(data_dict, args.tableName, args.DOI_link_append, server=args.Server)
+    # insertStats(data_dict, args.tableName)
+    # createIcon(data_dict, args.tableName)
 
-    splitExcel(args.staging_filename, args.metadata_filename)
-    staging_to_vault(
-        args.staging_filename,
-        getBranch_Path(args),
-        args.tableName,
-        remove_file_flag=True,
-    )
-    data_dict = data.importDataMemory(args.branch, args.tableName)
-    SQL_suggestion(data_dict, args.tableName, args.branch)
-    insertData(data_dict, args.tableName, server=server)
-    insertMetadata(data_dict, args.tableName, args.DOI_link_append, server=server)
-    insertStats(data_dict, args.tableName)
-    createIcon(data_dict, args.tableName)
 
 
 def partial_ingestion():
@@ -149,6 +152,9 @@ def main():
         help="Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'",
     )
     parser.add_argument(
+        "-p", "--process_level", nargs="?",
+    )
+    parser.add_argument(
         "-m", "--metadata_filename", nargs="?",
     )
     parser.add_argument(
@@ -159,14 +165,17 @@ def main():
     )
     parser.add_argument("-P", "--Partial_Ingestion", nargs="?", const=True)
 
+    parser.add_argument("-S", "--Server",help="Server choice: Rainier, Mariana, Beast", nargs="?", default="Rainier")
+
+
     args = parser.parse_args()
 
     if args.Partial_Ingestion:
         partial_ingestion()
 
     else:
-        data_dict = full_ingestion(args, server="Rainier")
-        return data_dict
+        full_ingestion(args)
+        
 
 
 if __name__ == main():

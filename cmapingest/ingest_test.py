@@ -2,15 +2,27 @@
 # PI = post ingestion test
 ###
 import pandas as pd
+import numpy as np
 from cmapingest import DB
 
 
 def len_comparison_data_SQL(tableName, data_df):
-    pass
+    length_SQL = cmn.length_of_tbl(tableName)
+    length_data_df = len(data_df)
+    length_diff_int = np.abs(length_SQL - length_data_df)
+    if length_diff_int != 0:
+        len_comparison_data_SQL = False
+        err_msg = """The lengths of the SQL table and the pandas dataframe do not match. Length of SQL Table: {sql_len}. Length of DataFrame: {data_df}""".format(sql_len=length_SQL,data_df=length_data_df)
+    else:
+        len_comparison_data_SQL = True
+        err_msg = ""
+    error_dict = {'bool':len_comparison_data_SQL, 'msg'=err_msg}
+    return error_dict
 
 
-def data_tests():
+def data_tests(data_df, tableName):
     tableInDB_bool = tableInDB(tableName)
+    error_dict =len_comparison_data_SQL(tableName, data_df)
     pass
 
 
@@ -37,9 +49,14 @@ def main(tableName):
 retrieval funcs will live in common...
 
 dataset either full or partially ingested into DB:
+
 -Data tests:
   -does the tableName exist? - func/test
   -does the len(tableName) == len(data_df)?
+  -are there any empty columns?
+  -do the column names match the variable names?
+
+
   -does the table contain (time,lat,lon(depth?))
   -can you select top(1) from tableName.
   -

@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import numpy as np
 import glob
+import xarray as xr
+import vaex
 
 from cmapingest import vault_structure as vs
 from cmapingest import DB
@@ -52,6 +54,11 @@ def format_time_col(df, time_col, format="%Y-%m-%d %H:%M:%S"):
     return df
 
 
+def mapTo180180(df):
+    df.loc[df['lon'] > 180, 'lon'] = df.loc[df['lon'] > 180, 'lon'] - 360
+    return df
+
+
 def sort_values(df, cols):
     """Sorts dataframe cols
 
@@ -96,17 +103,18 @@ def read_csv(path_and_filename, delim=","):
     return df
 
 
-def fetch_single_datafile(branch, tableName, file_ext=".csv", process_level="REP"):
+def fetch_single_datafile(branch, tableName, process_level="REP",file_ext=".csv"):
     """Finds first file in glob with input path to vault structure. Returns path_filename """
     vault_path = cmn.vault_struct_retrieval(branch)
+    print(vault_path)
     flist = glob.glob(
         vault_path + tableName + "/" + process_level.lower() + "/" + "*" + file_ext
     )[0]
     return flist
 
 
-def importDataMemory(branch, tableName):
-    data_file_name = fetch_single_datafile(branch, tableName)
+def importDataMemory(branch, tableName,process_level):
+    data_file_name = fetch_single_datafile(branch, tableName,process_level)
     data_df = read_csv(data_file_name)
     data_df.rename(columns={"latitude": "lat", "longitude": "lon"}, inplace=True)
     dataset_metadata_df, variable_metadata_df = metadata.import_metadata(
@@ -132,3 +140,12 @@ def data_df_to_db(df, tableName, clean_data_df=True, server="Rainier"):
     DB.toSQLbcp(temp_file_path, tableName, server)
     print(temp_file_path)
     # os.remove(temp_file_path)
+
+##############   Data Transform    ############
+def netcdf4_to_vaexdf(netcdf_file):
+    """Imports a netcdf file into a vaex dataframe using pandas"""
+    xdf = xr.open_dataset(netcdf_file)
+    df = xdf.to_dataframe()
+    vdf = vaex.from_pandas(df=df, copy_index=True)
+    return vdf
+

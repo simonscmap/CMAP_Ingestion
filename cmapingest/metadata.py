@@ -52,7 +52,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     Data_Source = dataset_metadata_df["dataset_source"].iloc[0]
     Distributor = dataset_metadata_df["dataset_distributor"].iloc[0]
     Acknowledgement = dataset_metadata_df["dataset_acknowledgement"].iloc[0]
-    Contact_Email = dataset_metadata_df["contact_email"].iloc[0]
+    Contact_Email = ''#dataset_metadata_df["contact_email"].iloc[0]
     Dataset_History = dataset_metadata_df["dataset_history"].iloc[0]
     Description = dataset_metadata_df["dataset_description"].iloc[0]
     Climatology = dataset_metadata_df["climatology"].iloc[0]
@@ -146,7 +146,7 @@ def tblVariables_Insert(
         variable_metadata_df["var_sensor"], "Sensor", "tblSensors"
     )
     Make_ID_list = len(variable_metadata_df) * list(
-        ID_Var_Map(dataset_metadata_df["dataset_make"], "Make", "tblMakes")
+        ID_Var_Map(dataset_metadata_df["dataset_make"].head(1), "Make", "tblMakes")
     )
     Process_ID_list = ID_Var_Map(
         pd.Series(len(variable_metadata_df) * [process_level]),

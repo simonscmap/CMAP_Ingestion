@@ -1,6 +1,6 @@
 import os
 import sys
-
+import glob
 import shutil
 import pandas as pd
 import requests
@@ -12,6 +12,13 @@ def requests_Download(download_str, filename, path):
     r = requests.get(download_str, stream=True)
     with open(path + filename, "wb") as f:
         f.write(r.content)
+
+def clear_directory(directory):
+    try:
+        flist = glob.glob(directory + '*')
+        [os.remove(fil) for fil in flist]
+    except:
+        pass
 
 
 def Zenodo_DOI_Formatter(DOI, filename):
@@ -49,6 +56,10 @@ def staging_to_vault(
         branch + tableName
     )
     base_filename = os.path.splitext(os.path.basename(filename))[0]
+
+    clear_directory(rep_tree)
+    clear_directory(nrt_tree)
+    clear_directory(metadata_tree)
 
     data_fname = vs.staging + "data/" + base_filename + "_data.csv"
     dataset_metadata_fname = (
@@ -101,13 +112,13 @@ def single_file_split(filename, metadata_filename):
         data_df = pd.read_excel(vs.combined + filename, sheet_name=0)
 
     else:
-        data_df = pd.read_csv(vs.combined + filename)
+        data_df = pd.read_csv(vs.data + filename)
     #
     dataset_metadata_df = pd.read_excel(
-        vs.combined + metadata_filename, sheet_name="dataset_meta_data"
+        vs.metadata + metadata_filename, sheet_name="dataset_meta_data"
     )
     vars_metadata_df = pd.read_excel(
-        vs.combined + metadata_filename, sheet_name="vars_meta_data"
+        vs.metadata + metadata_filename, sheet_name="vars_meta_data"
     )
 
     dataset_metadata_df.to_csv(

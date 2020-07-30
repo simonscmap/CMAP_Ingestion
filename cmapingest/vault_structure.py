@@ -29,6 +29,7 @@ def leafStruc(base):
 
 vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
 staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
+# staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/Apps/Simons CMAP Web Data Submission/"
 collected_data = (
     str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
 )

@@ -294,7 +294,10 @@ def datasetINtblDatasets(dataset_name):
 
 
 def length_of_tbl(tableName):
-    """Returns a string representation of the length of a SQL table. Warning: only use only small tables"""
-    qry = """SELECT COUNT(*) FROM {tableName}""".format(tableName=tableName)
+    """Returns a string representation of the length of a SQL table. Alternate speedup?"""
+    qry = """  select sum (spart.rows)
+    from sys.partitions spart
+    where spart.object_id = object_id('{tableName}')
+    and spart.index_id < 2""".format(tableName=tableName)
     tableCount = list(DB.DB_query(qry))[0]
     return tableCount
