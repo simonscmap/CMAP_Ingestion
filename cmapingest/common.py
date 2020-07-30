@@ -298,6 +298,8 @@ def length_of_tbl(tableName):
     qry = """  select sum (spart.rows)
     from sys.partitions spart
     where spart.object_id = object_id('{tableName}')
-    and spart.index_id < 2""".format(tableName=tableName)
+    and spart.index_id < 2""".format(
+        tableName=tableName
+    )
     tableCount = list(DB.DB_query(qry))[0]
     return tableCount

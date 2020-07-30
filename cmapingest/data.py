@@ -55,7 +55,7 @@ def format_time_col(df, time_col, format="%Y-%m-%d %H:%M:%S"):
 
 
 def mapTo180180(df):
-    df.loc[df['lon'] > 180, 'lon'] = df.loc[df['lon'] > 180, 'lon'] - 360
+    df.loc[df["lon"] > 180, "lon"] = df.loc[df["lon"] > 180, "lon"] - 360
     return df
 
 
@@ -103,7 +103,7 @@ def read_csv(path_and_filename, delim=","):
     return df
 
 
-def fetch_single_datafile(branch, tableName, process_level="REP",file_ext=".csv"):
+def fetch_single_datafile(branch, tableName, process_level="REP", file_ext=".csv"):
     """Finds first file in glob with input path to vault structure. Returns path_filename """
     vault_path = cmn.vault_struct_retrieval(branch)
     print(vault_path)
@@ -113,8 +113,8 @@ def fetch_single_datafile(branch, tableName, process_level="REP",file_ext=".csv"
     return flist
 
 
-def importDataMemory(branch, tableName,process_level):
-    data_file_name = fetch_single_datafile(branch, tableName,process_level)
+def importDataMemory(branch, tableName, process_level):
+    data_file_name = fetch_single_datafile(branch, tableName, process_level)
     data_df = read_csv(data_file_name)
     data_df.rename(columns={"latitude": "lat", "longitude": "lon"}, inplace=True)
     dataset_metadata_df, variable_metadata_df = metadata.import_metadata(
@@ -141,6 +141,7 @@ def data_df_to_db(df, tableName, clean_data_df=True, server="Rainier"):
     print(temp_file_path)
     # os.remove(temp_file_path)
 
+
 ##############   Data Transform    ############
 def netcdf4_to_vaexdf(netcdf_file):
     """Imports a netcdf file into a vaex dataframe using pandas"""
@@ -148,4 +149,3 @@ def netcdf4_to_vaexdf(netcdf_file):
     df = xdf.to_dataframe()
     vdf = vaex.from_pandas(df=df, copy_index=True)
     return vdf
-

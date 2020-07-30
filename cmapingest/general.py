@@ -12,7 +12,6 @@ pycmap.API(cr.api_key)
 import argparse
 
 
-
 from cmapingest import vault_structure as vs
 from cmapingest import transfer
 from cmapingest import data
@@ -37,8 +36,8 @@ def staging_to_vault(staging_filename, branch, tableName, remove_file_flag=False
     transfer.staging_to_vault(staging_filename, branch, tableName, remove_file_flag)
 
 
-def importDataMemory(branch, tableName,process_level):
-    data_file_name = data.fetch_single_datafile(branch, tableName,process_level)
+def importDataMemory(branch, tableName, process_level):
+    data_file_name = data.fetch_single_datafile(branch, tableName, process_level)
     data_df = data.read_csv(data_file_name)
     dataset_metadata_df, variable_metadata_df = metadata.import_metadata(
         branch, tableName
@@ -129,7 +128,6 @@ def full_ingestion(args):
     # createIcon(data_dict, args.tableName)
 
 
-
 def partial_ingestion():
     print("Partial Ingestion")
     pass
@@ -165,8 +163,13 @@ def main():
     )
     parser.add_argument("-P", "--Partial_Ingestion", nargs="?", const=True)
 
-    parser.add_argument("-S", "--Server",help="Server choice: Rainier, Mariana, Beast", nargs="?", default="Rainier")
-
+    parser.add_argument(
+        "-S",
+        "--Server",
+        help="Server choice: Rainier, Mariana, Beast",
+        nargs="?",
+        default="Rainier",
+    )
 
     args = parser.parse_args()
 
@@ -175,7 +178,6 @@ def main():
 
     else:
         full_ingestion(args)
-        
 
 
 if __name__ == main():

@@ -13,9 +13,10 @@ def requests_Download(download_str, filename, path):
     with open(path + filename, "wb") as f:
         f.write(r.content)
 
+
 def clear_directory(directory):
     try:
-        flist = glob.glob(directory + '*')
+        flist = glob.glob(directory + "*")
         [os.remove(fil) for fil in flist]
     except:
         pass
