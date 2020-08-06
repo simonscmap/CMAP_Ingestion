@@ -121,11 +121,11 @@ def full_ingestion(args):
     )
 
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    SQL_suggestion(data_dict, args.tableName, args.branch, server=args.Server)
-    insertData(data_dict, args.tableName, server=args.Server)
-    insertMetadata(data_dict, args.tableName, args.DOI_link_append, server=args.Server)
-    insertStats(data_dict, args.tableName, args.Server)
-    createIcon(data_dict, args.tableName)
+    SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
+    insertData(data_dict, args.tableName, args.Server)
+    # insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
+    # insertStats(data_dict, args.tableName, args.Server)
+    # createIcon(data_dict, args.tableName)
 
 
 def partial_ingestion():
