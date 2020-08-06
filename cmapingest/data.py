@@ -12,6 +12,9 @@ from cmapingest import common as cmn
 from cmapingest import metadata
 
 
+""" Data Cleaning"""
+
+
 def removeMissings(df, cols):
     """Removes missing rows for all columns provided
 
@@ -51,6 +54,8 @@ def format_time_col(df, time_col, format="%Y-%m-%d %H:%M:%S"):
     """
     df["time"] = pd.to_datetime(df[time_col].astype(str), errors="coerce")
     df["time"].dt.strftime(format)
+
+    # df["time"] = df["time"].dt.strftime(format)
     return df
 
 
@@ -85,16 +90,17 @@ def ST_columns(df):
     return ST_vars
 
 
-##############   Data Import    ############
-
-
 def clean_data_df(df):
+    """Combines multiple data functions to apply a clean to a pandas df"""
     df = cmn.strip_whitespace_headers(df)
     df = cmn.nanToNA(df)
     df = format_time_col(df, "time")
     df = removeMissings(df, ST_columns(df))
     df = sort_values(df, ST_columns(df))
     return df
+
+
+##############   Data Import    ############
 
 
 def read_csv(path_and_filename, delim=","):
@@ -131,21 +137,31 @@ def importDataMemory(branch, tableName, process_level):
 ##############   Data Insert    ############
 
 
-def data_df_to_db(df, tableName, clean_data_df=True, server="Rainier"):
+def data_df_to_db(df, tableName, server, clean_data_df_flag=True):
     """Inserts dataframe into SQL tbl"""
-    if clean_data_df == True:
+    if clean_data_df_flag == True:
         clean_data_df(df)
     temp_file_path = vs.BCP + tableName + ".csv"
     df.to_csv(temp_file_path, index=False, header=False)
     DB.toSQLbcp(temp_file_path, tableName, server)
-    print(temp_file_path)
     # os.remove(temp_file_path)
 
 
 ##############   Data Transform    ############
-def netcdf4_to_vaexdf(netcdf_file):
+def netcdf4_to_vaexdf(netcdf_file, data_var=None):
     """Imports a netcdf file into a vaex dataframe using pandas"""
     xdf = xr.open_dataset(netcdf_file)
-    df = xdf.to_dataframe()
-    vdf = vaex.from_pandas(df=df, copy_index=True)
+    if data_var != None:
+        xdf = xdf[data_var]
+    df = xdf.to_dataframe().reset_index()
+    vdf = vaex.from_pandas(df=df, copy_index=False)
     return vdf
+
+
+def netcdf4_to_pandas(netcdf_file, data_var=None):
+    """Imports a netcdf file into a pandas dataframe """
+    xdf = xr.open_dataset(netcdf_file)
+    if data_var != None:
+        xdf = xdf[data_var]
+    df = xdf.to_dataframe().reset_index()
+    return df

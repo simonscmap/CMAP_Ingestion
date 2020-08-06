@@ -34,7 +34,7 @@ collected_data = (
     str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
 )
 
-################# AWS Staging Area Structure  ##################
+################# Staging Area Structure  ##################
 makedir(staging)
 
 #########  data  #########

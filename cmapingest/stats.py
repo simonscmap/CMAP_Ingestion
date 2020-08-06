@@ -22,14 +22,14 @@ def updateStatsTable(ID, json_str, server):
         ID, json_str
     )
     try:
-        DB.DB_modify(deleteQuery)
-        DB.DB_modify(insertQuery)
+        DB.DB_modify(deleteQuery, server)
+        DB.DB_modify(insertQuery, server)
 
     except Exception as e:
         print(e)
 
 
-def updateStats_Small(tableName, data_df=None, server="Rainier"):
+def updateStats_Small(tableName, server, data_df=None):
     if data_df is not None:
         data_df = data_df
     else:

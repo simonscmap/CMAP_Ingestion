@@ -107,7 +107,6 @@ def single_file_split(filename, metadata_filename):
     """
 
     base_filename = os.path.splitext(os.path.basename(filename))[0]
-
     if metadata_filename == None:
         metadata_filename = filename
         data_df = pd.read_excel(vs.combined + filename, sheet_name=0)
@@ -115,11 +114,12 @@ def single_file_split(filename, metadata_filename):
     else:
         data_df = pd.read_csv(vs.data + filename)
     #
+    # print(vs.metadata + metadata_filename)
     dataset_metadata_df = pd.read_excel(
-        vs.metadata + metadata_filename, sheet_name="dataset_meta_data"
+        vs.combined + metadata_filename, sheet_name="dataset_meta_data"
     )
     vars_metadata_df = pd.read_excel(
-        vs.metadata + metadata_filename, sheet_name="vars_meta_data"
+        vs.combined + metadata_filename, sheet_name="vars_meta_data"
     )
 
     dataset_metadata_df.to_csv(

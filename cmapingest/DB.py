@@ -18,7 +18,7 @@ def DB_query(query):
     return query_result
 
 
-def DB_modify(cmnd, server="Rainier"):
+def DB_modify(cmnd, server):
 
     try:
         conn, cursor = dbConnect(server)
@@ -38,22 +38,24 @@ def dbRead(query, server="Rainier"):
 
 
 def server_select_credentials(server):
-
-    if server == "Rainier":
+    if server.lower() == "rainier":
         usr = cr.usr_rainier
         psw = cr.psw_rainier
         ip = cr.ip_rainier
         port = cr.port_rainier
-    elif server == "Mariana":
+    elif server.lower() == "mariana":
         usr = cr.usr_mariana
         psw = cr.psw_mariana
         ip = cr.ip_mariana
         port = cr.port_mariana
-    else:
+    elif server.lower() == "beast":
         usr = cr.usr_beast
         psw = cr.psw_beast
         ip = cr.ip_beast
         port = cr.port_beast
+    else:
+        print("invalid server selected. exiting...")
+        sys.exit()
 
     return usr, psw, ip, port
 

@@ -50,7 +50,7 @@ def importDataMemory(branch, tableName, process_level):
     return data_dict
 
 
-def SQL_suggestion(data_dict, tableName, branch):
+def SQL_suggestion(data_dict, tableName, branch, server):
     if branch != "model" or branch != "satellite":
         make = "observation"
     else:
@@ -62,8 +62,8 @@ def SQL_suggestion(data_dict, tableName, branch):
     print(sql_combined_str)
     contYN = input("Do you want to build this table in SQL? " + " ?  [yes/no]: ")
     if contYN.lower() == "yes":
-        DB.DB_modify(sql_tbl["sql_tbl"])
-        DB.DB_modify(sql_index["sql_index"])
+        DB.DB_modify(sql_tbl["sql_tbl"], server)
+        DB.DB_modify(sql_index["sql_index"], server)
 
     else:
         sys.exit()
@@ -102,8 +102,8 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server):
 #########################
 
 
-def insertStats(data_dict, tableName):
-    stats.updateStats_Small(tableName, data_dict["data_df"])
+def insertStats(data_dict, tableName, server):
+    stats.updateStats_Small(tableName, server, data_dict["data_df"])
 
 
 def createIcon(data_dict, tableName):
@@ -112,20 +112,20 @@ def createIcon(data_dict, tableName):
 
 def full_ingestion(args):
     print("Full Ingestion")
-    print(args.Server)
-    # splitExcel(args.staging_filename, args.metadata_filename)
-    # staging_to_vault(
-    #     args.staging_filename,
-    #     getBranch_Path(args),
-    #     args.tableName,
-    #     remove_file_flag=True,
-    # )
-    # data_dict = data.importDataMemory(args.branch, args.tableName,args.process_level)
-    # SQL_suggestion(data_dict, args.tableName, args.branch)
-    # insertData(data_dict, args.tableName, server=args.Server)
-    # insertMetadata(data_dict, args.tableName, args.DOI_link_append, server=args.Server)
-    # insertStats(data_dict, args.tableName)
-    # createIcon(data_dict, args.tableName)
+    splitExcel(args.staging_filename, args.metadata_filename)
+    staging_to_vault(
+        args.staging_filename,
+        getBranch_Path(args),
+        args.tableName,
+        remove_file_flag=True,
+    )
+
+    data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
+    SQL_suggestion(data_dict, args.tableName, args.branch, server=args.Server)
+    insertData(data_dict, args.tableName, server=args.Server)
+    insertMetadata(data_dict, args.tableName, args.DOI_link_append, server=args.Server)
+    insertStats(data_dict, args.tableName, args.Server)
+    createIcon(data_dict, args.tableName)
 
 
 def partial_ingestion():
@@ -149,9 +149,7 @@ def main():
         type=str,
         help="Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'",
     )
-    parser.add_argument(
-        "-p", "--process_level", nargs="?",
-    )
+    parser.add_argument("-p", "--process_level", nargs="?", default="REP")
     parser.add_argument(
         "-m", "--metadata_filename", nargs="?",
     )
