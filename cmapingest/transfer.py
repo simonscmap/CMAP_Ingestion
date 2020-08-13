@@ -4,6 +4,9 @@ import glob
 import shutil
 import pandas as pd
 import requests
+from tqdm import tqdm
+import dropbox
+from cmapingest import credentials as cr
 
 from cmapingest import vault_structure as vs
 
@@ -158,3 +161,46 @@ def remove_data_metadata_fnames_staging(staging_sep_flag="combined"):
                 vs.metadata + base_filename,
                 vs.metadata + base_filename.replace("metadata", ""),
             )
+
+
+def dropbox_file_transfer(input_file_path, output_file_path):
+
+    """
+    Transfers a file to dropbox using the dropbox v2 python api
+
+    Parameters
+    ----------
+    input_file_path : string
+        Input filepath, filename and extension to be transfered.
+    output_file_path : string
+        Output filepath, filename and extension to be transfered.
+    """
+    dbx = dropbox.Dropbox(cr.dropbox_api_key, timeout=900)
+    chunk_size = 1024 * 1024
+    with open(input_file_path, "rb") as f:
+        file_size = os.path.getsize(input_file_path)
+        if file_size <= chunk_size:
+            dbx.files_upload(f.read(), output_file_path)
+        else:
+            with tqdm(total=file_size, desc="%transfer") as pbar:
+                upload_session_start_result = dbx.files_upload_session_start(
+                    f.read(chunk_size)
+                )
+                pbar.update(chunk_size)
+                cursor = dropbox.files.UploadSessionCursor(
+                    session_id=upload_session_start_result.session_id, offset=f.tell(),
+                )
+                commit = dropbox.files.CommitInfo(path=output_file_path)
+
+                while f.tell() < file_size:
+                    if (file_size - f.tell()) <= chunk_size:
+                        dbx.files_upload_session_finish(
+                            f.read(chunk_size), cursor, commit
+                        )
+
+                    else:
+                        dbx.files_upload_session_append(
+                            f.read(chunk_size), cursor.session_id, cursor.offset,
+                        )
+                        cursor.offset = f.tell()
+                    pbar.update(chunk_size)

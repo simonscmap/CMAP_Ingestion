@@ -27,12 +27,29 @@ def leafStruc(base):
     return nrt, rep, metadata, stats, doc, code
 
 
-vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
-staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
-# staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/Apps/Simons CMAP Web Data Submission/"
-collected_data = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
-)
+"""synced dropbox path"""
+# vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
+# staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
+# collected_data = (
+#     str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
+# )
+# download_transfer = (
+#     str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/"
+# )
+"""mounted NAS - dropbox sync paths"""
+
+vault = str(Path.home()) + r"/Vault/vault/"
+staging = str(Path.home()) + r"/Vault/staging/"
+collected_data = str(Path.home()) + r"/Vault/collected_data/"
+download_transfer = str(Path.home()) + r"/Vault/download_transfer/"
+
+
+################# Download Transfer Structure  ##################
+makedir(download_transfer)
+
+################# Collected Data Structure  ##################
+makedir(collected_data)
+
 
 ################# Staging Area Structure  ##################
 makedir(staging)
