@@ -12,17 +12,19 @@ def len_comparison_data_SQL(tableName, data_df):
     length_diff_int = np.abs(length_SQL - length_data_df)
     if length_diff_int != 0:
         len_comparison_data_SQL = False
-        err_msg = """The lengths of the SQL table and the pandas dataframe do not match. Length of SQL Table: {sql_len}. Length of DataFrame: {data_df}""".format(sql_len=length_SQL,data_df=length_data_df)
+        err_msg = """The lengths of the SQL table and the pandas dataframe do not match. Length of SQL Table: {sql_len}. Length of DataFrame: {data_df}""".format(
+            sql_len=length_SQL, data_df=length_data_df
+        )
     else:
         len_comparison_data_SQL = True
         err_msg = ""
-    error_dict = {'bool':len_comparison_data_SQL, 'msg'=err_msg}
+    error_dict = {"bool": len_comparison_data_SQL, "msg": err_msg}
     return error_dict
 
 
 def data_tests(data_df, tableName):
     tableInDB_bool = tableInDB(tableName)
-    error_dict =len_comparison_data_SQL(tableName, data_df)
+    error_dict = len_comparison_data_SQL(tableName, data_df)
     pass
 
 

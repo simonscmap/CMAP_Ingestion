@@ -137,8 +137,8 @@ def full_ingestion(args):
     # )
 
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    return data_dict['data_df']
-    print(data_dict['data_df'].dtypes)
+    return data_dict["data_df"]
+    print(data_dict["data_df"].dtypes)
     # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
     # insertData(data_dict, args.tableName, args.Server)
     # insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
@@ -152,23 +152,33 @@ def append_ingestion(args):
     # start_date = input("please input start_date in YYYY-mm-dd")
     # end_date = input("please input end_date in YYYY-mm-dd")
     # dir_path = vs.satellite + 'tblModis_PAR/rep/'
-    base_path = cmn.vault_struct_retrieval(args.branch) +  args.tableName + '/' + args.process_level + '/' 
+    base_path = (
+        cmn.vault_struct_retrieval(args.branch)
+        + args.tableName
+        + "/"
+        + args.process_level
+        + "/"
+    )
     flist = glob.glob(base_path + "*.parquet")
     # startdate = '2010002'
     # enddate = '201030'
-    startdate = '2010031'
-    enddate = '2010365'
+    startdate = "2010031"
+    enddate = "2010365"
     flist_base = [os.path.basename(filename) for filename in flist]
     files_in_range = []
     for i in flist_base:
-        strpted_time = i.replace('.L3m_DAY_PAR_par_9km.parquet','').replace('A','')
+        strpted_time = i.replace(".L3m_DAY_PAR_par_9km.parquet", "").replace("A", "")
         zfill_time = strpted_time[:4] + strpted_time[4:].zfill(3)
-        fdate = pd.to_datetime(zfill_time,format='%Y%j')
-        if pd.to_datetime(startdate,format='%Y%j') <= fdate <=pd.to_datetime(enddate,format='%Y%j'):
+        fdate = pd.to_datetime(zfill_time, format="%Y%j")
+        if (
+            pd.to_datetime(startdate, format="%Y%j")
+            <= fdate
+            <= pd.to_datetime(enddate, format="%Y%j")
+        ):
             files_in_range.append(i)
     for selfile in files_in_range:
         df = pd.read_parquet(base_path + selfile)
-        data.data_df_to_db(df, args.tableName, args.Server,clean_data_df_flag=False)
+        data.data_df_to_db(df, args.tableName, args.Server, clean_data_df_flag=False)
         print("processed: " + selfile)
 
     # print(flist[0], args.tableName, args.Server)
@@ -252,6 +262,7 @@ def main():
     else:
         df = full_ingestion(args)
         return df
+
 
 df = main()
 # if __name__ == main():

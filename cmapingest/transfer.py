@@ -180,11 +180,14 @@ def dropbox_file_transfer(input_file_path, output_file_path):
     with open(input_file_path, "rb") as f:
         file_size = os.path.getsize(input_file_path)
         if file_size <= chunk_size:
-            dbx.files_upload(f.read(), output_file_path,mode=dropbox.files.WriteMode.overwrite)
+            dbx.files_upload(
+                f.read(), output_file_path, mode=dropbox.files.WriteMode.overwrite
+            )
         else:
             with tqdm(total=file_size, desc="%transfer") as pbar:
                 upload_session_start_result = dbx.files_upload_session_start(
-                    f.read(chunk_size))
+                    f.read(chunk_size)
+                )
                 pbar.update(chunk_size)
                 cursor = dropbox.files.UploadSessionCursor(
                     session_id=upload_session_start_result.session_id, offset=f.tell(),

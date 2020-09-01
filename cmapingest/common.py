@@ -20,10 +20,12 @@ def strip_whitespace_headers(df):
     df.columns = df.columns.str.strip()
     return df
 
-def strip_leading_trailing_whitespace_column(df,col_name):
+
+def strip_leading_trailing_whitespace_column(df, col_name):
     df[col_name] = df[col_name].str.lstrip()
     df[col_name] = df[col_name].str.rstrip()
     return df
+
 
 def nanToNA(df):
     """Replaces and numpy nans with '' """
@@ -218,7 +220,9 @@ def find_File_Path_guess_tree(name):
 
 def verify_cruise_lists(dataset_metadata_df):
     """Returns matching and non matching cruises"""
-    cruise_series = strip_leading_trailing_whitespace_column(dataset_metadata_df,"cruise_names")["cruise_names"]
+    cruise_series = strip_leading_trailing_whitespace_column(
+        dataset_metadata_df, "cruise_names"
+    )["cruise_names"]
     # cruise_series = dataset_metadata_df["cruise_names"]
     """ check that every cruise_name in column exists in the database. map those that don't exist into return"""
     cruise_set = set(lowercase_List(cruise_series.to_list()))
@@ -321,6 +325,9 @@ def length_of_tbl(tableName):
     tableCount = list(DB.DB_query(qry))[0]
     return tableCount
 
-def flist_in_daterange(start_date,end_date,tableName, branch, processing_lvl):
-    base_path = vault_struct_retrieval(branch) +  'tableName' + '/' + processing_lvl + '/' 
+
+def flist_in_daterange(start_date, end_date, tableName, branch, processing_lvl):
+    base_path = (
+        vault_struct_retrieval(branch) + "tableName" + "/" + processing_lvl + "/"
+    )
     pass

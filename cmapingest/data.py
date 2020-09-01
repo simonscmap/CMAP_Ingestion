@@ -31,7 +31,7 @@ def removeMissings(df, cols):
         Pandas DataFrame with missing rows removed
     """
     for col in cols:
-        df[col].replace(r'^\s*$', np.nan, regex=True,inplace=True)
+        df[col].replace(r"^\s*$", np.nan, regex=True, inplace=True)
         # df[col].replace("", np.nan, inplace=True)
         df.dropna(subset=[col], inplace=True)
     return df

@@ -47,19 +47,36 @@ def updateStats_Small(tableName, server, data_df=None):
     updateStatsTable(Dataset_ID, json_str, server)
     print("Updated stats for " + tableName)
 
-def buildLarge_Stats(df,datetime_slice,tableName,branch,transfer_flag='dropbox'):
+
+def buildLarge_Stats(df, datetime_slice, tableName, branch, transfer_flag="dropbox"):
     """Input is dataframe slice (daily, 8 day, monthly etc.) of a dataset that is split into multiple files"""
     df_stats = df.describe()
-    df_stats.insert(loc=0, column='time', value='')
-    df_stats.at['count','time'] = len(df['time'])
-    df_stats.at['min','time'] = min(df['time'])
-    df_stats.at['max','time'] = max(df['time'])
+    df_stats.insert(loc=0, column="time", value="")
+    df_stats.at["count", "time"] = len(df["time"])
+    df_stats.at["min", "time"] = min(df["time"])
+    df_stats.at["max", "time"] = max(df["time"])
     branch_path = cmn.vault_struct_retrieval(branch)
 
-    if transfer_flag == 'dropbox':
+    if transfer_flag == "dropbox":
         df_stats.to_csv("stats_temp.csv")
-        transfer.dropbox_file_transfer("stats_temp.csv",  branch_path.split('Vault')[1] + tableName +  '/stats/' + datetime_slice + "_summary_stats.csv")
+        transfer.dropbox_file_transfer(
+            "stats_temp.csv",
+            branch_path.split("Vault")[1]
+            + tableName
+            + "/stats/"
+            + datetime_slice
+            + "_summary_stats.csv",
+        )
         os.remove("stats_temp.csv")
     else:
-        df_stats.to_csv(branch_path + tableName + '/stats/' + datetime_slice + "_summary_stats.csv")
-    print("stats built for :" + tableName + "  in branch: " + branch + " for date: " + datetime_slice)
+        df_stats.to_csv(
+            branch_path + tableName + "/stats/" + datetime_slice + "_summary_stats.csv"
+        )
+    print(
+        "stats built for :"
+        + tableName
+        + "  in branch: "
+        + branch
+        + " for date: "
+        + datetime_slice
+    )
