@@ -27,8 +27,6 @@ def write_SQL_file(sql_str, tableName, make="observation"):
 def build_SQL_suggestion_df(df):
     """Builds a dataframe of colulmn name and datatype for an input data specific dataframe"""
     sug_df = pd.DataFrame(columns=["column_name", "dtype"])
-    df = cmn.nanToNA(df)
-    df = cmn.strip_whitespace_headers(df)
     exclude_list = [1, "", " ", np.nan, "nan", "NaN", "NAN"]
     for cn in list(df):
         if cn == "time":

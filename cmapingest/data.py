@@ -97,7 +97,16 @@ def clean_data_df(df):
     # df = cmn.nanToNA(df)
     df = format_time_col(df, "time")
     df = removeMissings(df, ST_columns(df))
+    df = ensureST_numeric(df)
     df = sort_values(df, ST_columns(df))
+    return df
+
+
+def ensureST_numeric(df):
+    ST_cols = ST_columns(df)
+    ST_cols.remove("time")
+    for col in ST_cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
 
 
@@ -123,6 +132,7 @@ def fetch_single_datafile(branch, tableName, process_level="REP", file_ext=".csv
 def importDataMemory(branch, tableName, process_level):
     data_file_name = fetch_single_datafile(branch, tableName, process_level)
     data_df = read_csv(data_file_name)
+    data_df = clean_data_df(data_df)
     data_df.rename(columns={"latitude": "lat", "longitude": "lon"}, inplace=True)
     dataset_metadata_df, variable_metadata_df = metadata.import_metadata(
         branch, tableName

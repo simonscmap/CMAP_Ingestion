@@ -137,13 +137,11 @@ def full_ingestion(args):
     # )
 
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    return data_dict["data_df"]
-    print(data_dict["data_df"].dtypes)
     # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
     # insertData(data_dict, args.tableName, args.Server)
     # insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
     # insertStats(data_dict, args.tableName, args.Server)
-    # createIcon(data_dict, args.tableName)
+    createIcon(data_dict, args.tableName)
 
 
 def append_ingestion(args):
@@ -260,10 +258,10 @@ def main():
     elif args.Append_Ingestion:
         append_ingestion(args)
     else:
-        df = full_ingestion(args)
-        return df
+        data_dict = full_ingestion(args)
+        return data_dict
 
 
-df = main()
+data_dict = main()
 # if __name__ == main():
 #     main()

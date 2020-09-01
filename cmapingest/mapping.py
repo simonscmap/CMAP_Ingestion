@@ -78,8 +78,7 @@ def folium_map(df, tableName):
     if len(df) > 5000:
         df = df.sample(5000)
     df.reset_index(drop=True, inplace=True)
-    data = list(zip(df.lat, df.lon))
-
+    mapdata = list(zip(df.lat, df.lon))
     m = folium.Map(
         [df.lat.mean(), df.lon.mean()],
         tiles=None,
@@ -97,6 +96,6 @@ def folium_map(df, tableName):
         m.fit_bounds([sw, ne])
 
     m = addLayers(m)
-    HeatMap(data, gradient={0.65: "#0A8A9F", 1: "#5F9EA0"}).add_to(m)
+    HeatMap(mapdata, gradient={0.65: "#0A8A9F", 1: "#5F9EA0"}).add_to(m)
     m = addMarkers(m, df)
     html_to_static(m, tableName)
