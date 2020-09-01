@@ -31,7 +31,8 @@ def removeMissings(df, cols):
         Pandas DataFrame with missing rows removed
     """
     for col in cols:
-        df[col].replace("", np.nan, inplace=True)
+        df[col].replace(r'^\s*$', np.nan, regex=True,inplace=True)
+        # df[col].replace("", np.nan, inplace=True)
         df.dropna(subset=[col], inplace=True)
     return df
 
@@ -53,9 +54,9 @@ def format_time_col(df, time_col, format="%Y-%m-%d %H:%M:%S"):
         Pandas DataFrame with time col formatted
     """
     df["time"] = pd.to_datetime(df[time_col].astype(str), errors="coerce")
-    df["time"].dt.strftime(format)
+    # df["time"].dt.strftime(format)
 
-    # df["time"] = df["time"].dt.strftime(format)
+    df["time"] = df["time"].dt.strftime(format)
     return df
 
 
@@ -93,7 +94,7 @@ def ST_columns(df):
 def clean_data_df(df):
     """Combines multiple data functions to apply a clean to a pandas df"""
     df = cmn.strip_whitespace_headers(df)
-    df = cmn.nanToNA(df)
+    # df = cmn.nanToNA(df)
     df = format_time_col(df, "time")
     df = removeMissings(df, ST_columns(df))
     df = sort_values(df, ST_columns(df))
@@ -144,7 +145,6 @@ def data_df_to_db(df, tableName, server, clean_data_df_flag=True):
     temp_file_path = vs.BCP + tableName + ".csv"
     df.to_csv(temp_file_path, index=False, header=False)
     DB.toSQLbcp(temp_file_path, tableName, server)
-    # os.remove(temp_file_path)
 
 
 ##############   Data Transform    ############

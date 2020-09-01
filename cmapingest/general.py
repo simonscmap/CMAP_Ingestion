@@ -1,6 +1,22 @@
 # dev note: make sure keywords are set(). keyword with bcp insert? slow section
+"""
+two options:
+dataset that can easily fit in memory:
+-fully ingested, stats made, tests run on ingested DB. if tests fail, option for full deletion. If passes normal checks, "report" of plots etc zipped and rdy to send to data owner"
+
+- partial ingestion (sat/model/large etc.)
+- single file(1st in glob?) ingested, stats(from stats?) created. tests ran. if passed, 
+-all ingested, light tests ran? report of single file?
+
+-also needs flag for appending to table... 
+----- give data file directory, glob files to iterate through, 
+    ---update stats of stats from /stats/
+
+"""
+#
 import sys
 import os
+import glob
 import pandas as pd
 
 sys.path.append("../login/")
@@ -96,9 +112,9 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server):
 
 
 ###   TESTING SUITE   ###
-# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
-# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
-# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
+# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
+# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
+# ⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️⚙️ #
 #########################
 
 
@@ -112,23 +128,78 @@ def createIcon(data_dict, tableName):
 
 def full_ingestion(args):
     print("Full Ingestion")
-    splitExcel(args.staging_filename, args.metadata_filename)
-    staging_to_vault(
-        args.staging_filename,
-        getBranch_Path(args),
-        args.tableName,
-        remove_file_flag=True,
-    )
+    # splitExcel(args.staging_filename, args.metadata_filename)
+    # staging_to_vault(
+    #     args.staging_filename,
+    #     getBranch_Path(args),
+    #     args.tableName,
+    #     remove_file_flag=True,
+    # )
 
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
-    insertData(data_dict, args.tableName, args.Server)
+    return data_dict['data_df']
+    print(data_dict['data_df'].dtypes)
+    # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
+    # insertData(data_dict, args.tableName, args.Server)
     # insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
     # insertStats(data_dict, args.tableName, args.Server)
     # createIcon(data_dict, args.tableName)
 
 
-def partial_ingestion():
+def append_ingestion(args):
+    """The Append Ingestion function is for appending data onto a table. Example: Extending satellite or model datasets in time"""
+    print("append Ingestion")
+    # start_date = input("please input start_date in YYYY-mm-dd")
+    # end_date = input("please input end_date in YYYY-mm-dd")
+    # dir_path = vs.satellite + 'tblModis_PAR/rep/'
+    base_path = cmn.vault_struct_retrieval(args.branch) +  args.tableName + '/' + args.process_level + '/' 
+    flist = glob.glob(base_path + "*.parquet")
+    # startdate = '2010002'
+    # enddate = '201030'
+    startdate = '2010031'
+    enddate = '2010365'
+    flist_base = [os.path.basename(filename) for filename in flist]
+    files_in_range = []
+    for i in flist_base:
+        strpted_time = i.replace('.L3m_DAY_PAR_par_9km.parquet','').replace('A','')
+        zfill_time = strpted_time[:4] + strpted_time[4:].zfill(3)
+        fdate = pd.to_datetime(zfill_time,format='%Y%j')
+        if pd.to_datetime(startdate,format='%Y%j') <= fdate <=pd.to_datetime(enddate,format='%Y%j'):
+            files_in_range.append(i)
+    for selfile in files_in_range:
+        df = pd.read_parquet(base_path + selfile)
+        data.data_df_to_db(df, args.tableName, args.Server,clean_data_df_flag=False)
+        print("processed: " + selfile)
+
+    # print(flist[0], args.tableName, args.Server)
+    # wait_test = input("""Do you want to continue, [y/n]: """)
+    # if wait_test == "y":
+    #     adll_flist = flist[1:]
+    #     for adlfile in adll_flist:
+    #         print(adlfile)
+    #         # data.data_df_to_db(adlfile, args.tableName, args.server)
+
+    # #     pass
+    # else:
+    #     print("exiting..")
+    #     sys.exit()
+
+    # """
+    # 1. input start date and end date as input()
+    # 2. gather all files in range of start_end
+    # 3. user continue - > does this range look right?
+    # 4. BCP data ingestion
+    # 5. testing suite for that day
+    # 6.if OK, user input, Finish bcp all files in range
+    # 7. LARGE STATS TABLE ID: once tables are written to hdf5 or parquet, read all(in range) in vaex, df.describe().to_csv("stats_table_range_dates)
+    # 8. update stats
+    # 9. final test on random date/spatial range in bounds
+
+    # """
+    # pass
+
+
+def partial_ingestion(args):
     print("Partial Ingestion")
     pass
 
@@ -149,7 +220,7 @@ def main():
         type=str,
         help="Filename from staging area. Ex: 'SeaFlow_ScientificData_2019-09-18.csv'",
     )
-    parser.add_argument("-p", "--process_level", nargs="?", default="REP")
+    parser.add_argument("-p", "--process_level", nargs="?", default="rep")
     parser.add_argument(
         "-m", "--metadata_filename", nargs="?",
     )
@@ -160,6 +231,8 @@ def main():
         nargs="?",
     )
     parser.add_argument("-P", "--Partial_Ingestion", nargs="?", const=True)
+
+    parser.add_argument("-A", "--Append_Ingestion", nargs="?", const=True)
 
     parser.add_argument(
         "-S",
@@ -172,11 +245,14 @@ def main():
     args = parser.parse_args()
 
     if args.Partial_Ingestion:
-        partial_ingestion()
+        partial_ingestion(args)
 
+    elif args.Append_Ingestion:
+        append_ingestion(args)
     else:
-        full_ingestion(args)
+        df = full_ingestion(args)
+        return df
 
-
-if __name__ == main():
-    main()
+df = main()
+# if __name__ == main():
+#     main()

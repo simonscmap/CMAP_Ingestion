@@ -20,6 +20,10 @@ def strip_whitespace_headers(df):
     df.columns = df.columns.str.strip()
     return df
 
+def strip_leading_trailing_whitespace_column(df,col_name):
+    df[col_name] = df[col_name].str.lstrip()
+    df[col_name] = df[col_name].str.rstrip()
+    return df
 
 def nanToNA(df):
     """Replaces and numpy nans with '' """
@@ -102,7 +106,8 @@ def getDatasetID_DS_Name(datasetName):
         + datasetName
         + """'"""
     )
-    query_return = DB.DB_query(cur_str)
+    query_return = DB.dbRead(cur_str, server="Rainier")
+    # query_return = DB.DB_query(cur_str)
     dsID = query_return.iloc[0][0]
     return dsID
 
@@ -114,7 +119,9 @@ def getDatasetID_Tbl_Name(tableName):
         + tableName
         + """'"""
     )
-    query_return = DB.DB_query(cur_str)
+    query_return = DB.dbRead(cur_str, server="Rainier")
+
+    # query_return = DB.DB_query(cur_str)
     dsID = query_return.iloc[0][0]
     return dsID
 
@@ -126,7 +133,10 @@ def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
     )
     if len(var_short_name_list) == 1:
         cur_str = cur_str.replace(",)", ")")
-    query_return = DB.DB_query(cur_str)["ID"].to_list()
+
+    query_return = DB.dbRead(cur_str, server="Rainier")["ID"].to_list()
+
+    # query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return
 
 
@@ -135,7 +145,9 @@ def getKeywordsIDDataset(dataset_ID):
     cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(
         dataset_ID=str(dataset_ID)
     )
-    query_return = DB.DB_query(cur_str)["ID"].to_list()
+    query_return = DB.dbRead(cur_str, server="Rainier")
+
+    # query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return
 
 
@@ -146,7 +158,9 @@ def getTableName_Dtypes(tableName):
         + tableName
         + """'"""
     )
-    query_return = DB.DB_query(query)
+    # query_return = DB.DB_query(query)
+    query_return = DB.dbRead(query, server="Rainier")
+
     return query_return
 
 
@@ -173,7 +187,9 @@ def findVarID(datasetID, Short_Name, server="Rainier"):
         + Short_Name
         + """'"""
     )
-    query = DB.DB_query(cur_str)
+    # query = DB.DB_query(cur_str)
+    query = DB.dbRead(cur_str, server="Rainier")
+    print(query)
     VarID = query.iloc[0][0]
     return VarID
 
@@ -202,7 +218,8 @@ def find_File_Path_guess_tree(name):
 
 def verify_cruise_lists(dataset_metadata_df):
     """Returns matching and non matching cruises"""
-    cruise_series = dataset_metadata_df["cruise_names"]
+    cruise_series = strip_leading_trailing_whitespace_column(dataset_metadata_df,"cruise_names")["cruise_names"]
+    # cruise_series = dataset_metadata_df["cruise_names"]
     """ check that every cruise_name in column exists in the database. map those that don't exist into return"""
     cruise_set = set(lowercase_List(cruise_series.to_list()))
     db_cruise_set = set(lowercase_List(getListCruises()["Name"].to_list()))
@@ -303,3 +320,7 @@ def length_of_tbl(tableName):
     )
     tableCount = list(DB.DB_query(qry))[0]
     return tableCount
+
+def flist_in_daterange(start_date,end_date,tableName, branch, processing_lvl):
+    base_path = vault_struct_retrieval(branch) +  'tableName' + '/' + processing_lvl + '/' 
+    pass
