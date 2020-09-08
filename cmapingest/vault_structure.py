@@ -39,7 +39,8 @@ dbx_download_transfer = (
 """mounted NAS - dropbox sync paths"""
 
 vault = str(Path.home()) + r"/Vault/vault/"
-staging = str(Path.home()) + r"/Vault/staging/"
+# staging = str(Path.home()) + r"/Vault/staging/"
+staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
 collected_data = str(Path.home()) + r"/Vault/collected_data/"
 download_transfer = str(Path.home()) + r"/Vault/download_transfer/"
 

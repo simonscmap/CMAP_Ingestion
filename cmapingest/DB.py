@@ -23,10 +23,10 @@ def DB_modify(cmnd, server):
     try:
         conn, cursor = dbConnect(server)
         conn.autocommit = True
-
         cursor.execute(cmnd)
         conn.close()
     except Exception as e:
+        print(e)
         conn.close()
 
 

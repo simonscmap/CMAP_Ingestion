@@ -147,7 +147,7 @@ def getKeywordsIDDataset(dataset_ID):
     cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(
         dataset_ID=str(dataset_ID)
     )
-    query_return = DB.dbRead(cur_str, server="Rainier")
+    query_return = DB.dbRead(cur_str, server="Rainier")["ID"].to_list()
 
     # query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return

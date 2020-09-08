@@ -128,20 +128,22 @@ def createIcon(data_dict, tableName):
 
 def full_ingestion(args):
     print("Full Ingestion")
-    # splitExcel(args.staging_filename, args.metadata_filename)
-    # staging_to_vault(
-    #     args.staging_filename,
-    #     getBranch_Path(args),
-    #     args.tableName,
-    #     remove_file_flag=True,
-    # )
+    splitExcel(args.staging_filename, args.metadata_filename)
+    staging_to_vault(
+        args.staging_filename,
+        getBranch_Path(args),
+        args.tableName,
+        remove_file_flag=True,
+    )
 
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
-    # insertData(data_dict, args.tableName, args.Server)
-    # insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
-    # insertStats(data_dict, args.tableName, args.Server)
-    createIcon(data_dict, args.tableName)
+    SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
+    insertData(data_dict, args.tableName, args.Server)
+    print(args.Server)
+    if args.Server == "Rainier":
+        insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
+        insertStats(data_dict, args.tableName, args.Server)
+        createIcon(data_dict, args.tableName)
 
 
 def append_ingestion(args):
@@ -160,7 +162,7 @@ def append_ingestion(args):
     flist = glob.glob(base_path + "*.parquet")
     # startdate = '2010002'
     # enddate = '201030'
-    startdate = "2010031"
+    startdate = "2010267"
     enddate = "2010365"
     flist_base = [os.path.basename(filename) for filename in flist]
     files_in_range = []
@@ -258,10 +260,8 @@ def main():
     elif args.Append_Ingestion:
         append_ingestion(args)
     else:
-        data_dict = full_ingestion(args)
-        return data_dict
+        full_ingestion(args)
 
 
-data_dict = main()
-# if __name__ == main():
-#     main()
+if __name__ == main():
+    main()

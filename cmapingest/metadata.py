@@ -4,6 +4,7 @@ from cmapingest import credentials as cr
 
 
 import glob
+import markdown
 import pandas as pd
 import pycmap
 
@@ -44,6 +45,7 @@ def import_metadata(branch, tableName):
 
 def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     dataset_metadata_df = cmn.nanToNA(dataset_metadata_df)
+    dataset_metadata_df.replace({"'": "''"}, regex=True, inplace=True)
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
     Dataset_Long_Name = dataset_metadata_df["dataset_long_name"].iloc[0]
     Dataset_Version = dataset_metadata_df["dataset_version"].iloc[0]
@@ -290,6 +292,7 @@ def tblDataset_Cruises_Insert(dataset_metadata_df, server="Rainier"):
 def deleteFromtblKeywords(Dataset_ID, server):
     Keyword_ID_list = cmn.getKeywordsIDDataset(Dataset_ID)
     Keyword_ID_str = "','".join(str(key) for key in Keyword_ID_list)
+    # print(Keyword_ID_str)
     cur_str = (
         """DELETE FROM [Opedia].[dbo].[tblKeywords] WHERE [var_ID] IN ('"""
         + Keyword_ID_str
