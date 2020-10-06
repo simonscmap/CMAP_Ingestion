@@ -9,7 +9,10 @@ import pycmap
 from cmapingest import common as cmn
 from cmapingest import DB
 from cmapingest import transfer
+from cmapingest import data
 
+
+import dask.dataframe as dd
 
 pycmap.API(cr.api_key)
 
@@ -80,3 +83,40 @@ def buildLarge_Stats(df, datetime_slice, tableName, branch, transfer_flag="dropb
         + " for date: "
         + datetime_slice
     )
+
+def aggregate_large_stats(branch, tableName):
+    """aggregates summary stats files and computes stats of stats. Returns stats dataframe"""
+    tableName = "tblModis_POC"
+    branch_path = cmn.vault_struct_retrieval("satellite")
+    df = dd.read_csv(branch_path + tableName + '/stats/' + '*.csv*')
+    df = df.compute().set_index(df.columns[0])
+    df.index.name = 'Stats'
+    st_cols = data.ST_columns(df)
+    var_list = list(set(list(df)) - set(st_cols))
+    var_max_list, var_min_list, var_mean_list, var_std_list = [],[],[],[]
+    max_var_count_list = [cmn.getLatCount(tableName)] * len(list(df))
+    for var in list(df):#var_list:
+        var_max = max(df.loc['max', var])
+        var_max_list.append(var_max)
+        var_min = min(df.loc['min', var])
+        var_min_list.append(var_min)
+        var_mean = np.mean(df.loc['mean', var])
+        var_mean_list.append(var_mean)
+        var_std = np.std(df.loc['std', var])
+        var_std_list.append(var_std)
+    stats_DF = pd.DataFrame(index=['count','max','mean','min','std'])
+
+    for var, max_var_count, var_max, var_min, var_mean, var_std  in zip(list(df),max_var_count_list, var_max_list, var_min_list, var_mean_list, var_std_list):
+        stats_DF[var] = '' # create empty column to fill
+        stats_DF.at['count', var] = max_var_count
+        stats_DF.at['max', var] = var_max
+        stats_DF.at['mean', var] = var_mean
+        stats_DF.at['min', var] = var_min
+        stats_DF.at['std', var] = var_std
+    return stats_DF
+
+def update_stats_large(tableName, stats_df,server):
+    Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName)
+    json_str = stats_df.to_json(date_format="iso")
+    sql_df = pd.DataFrame({"Dataset_ID": [Dataset_ID], "JSON": [json_str]})
+    updateStatsTable(Dataset_ID, json_str, server)

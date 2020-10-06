@@ -56,7 +56,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     Acknowledgement = dataset_metadata_df["dataset_acknowledgement"].iloc[0]
     Contact_Email = ""  # dataset_metadata_df["contact_email"].iloc[0]
     Dataset_History = dataset_metadata_df["dataset_history"].iloc[0]
-    Description = dataset_metadata_df["dataset_description"].iloc[0]
+    Description = dataset_metadata_df["dataset_description"].iloc[0].replace("'","").replace("’","").replace("‘","").replace("\n","")
     Climatology = dataset_metadata_df["climatology"].iloc[0]
     Db = "Opedia"
     # Temps
