@@ -4,6 +4,9 @@ from cmapingest import credentials as cr
 
 
 import glob
+import geopandas
+from geopandas.tools import sjoin
+
 import markdown
 import pandas as pd
 import pycmap
@@ -56,7 +59,14 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     Acknowledgement = dataset_metadata_df["dataset_acknowledgement"].iloc[0]
     Contact_Email = ""  # dataset_metadata_df["contact_email"].iloc[0]
     Dataset_History = dataset_metadata_df["dataset_history"].iloc[0]
-    Description = dataset_metadata_df["dataset_description"].iloc[0].replace("'","").replace("’","").replace("‘","").replace("\n","")
+    Description = (
+        dataset_metadata_df["dataset_description"]
+        .iloc[0]
+        .replace("'", "")
+        .replace("’", "")
+        .replace("‘", "")
+        .replace("\n", "")
+    )
     Climatology = dataset_metadata_df["climatology"].iloc[0]
     Db = "Opedia"
     # Temps
@@ -367,6 +377,7 @@ def deleteCatalogTables(tableName, server="Rainier"):
         deleteFromtblVariables(Dataset_ID, server)
         deleteFromtblDatasets(Dataset_ID, server)
         dropTable(tableName, server)
+        dropTable(tableName, "Mariana")
     else:
         print("Catalog tables for " + datasetName + " not deleted")
 
@@ -412,3 +423,86 @@ def addKeywords(keywords_list, var_short_name_list, tableName, server="Rainier")
                 DB.lineInsert(server, "[opedia].[dbo].[tblKeywords]", columnList, query)
             except Exception as e:
                 print(e)
+
+
+"""
+###############################################
+###############################################
+     Ocean Region Classification Functions
+###############################################
+###############################################
+"""
+
+
+def geopandas_load_gpkg(input_df):
+    """[summary]
+
+    Args:
+        input_df (Pandas DataFrame): CMAP formatted DataFrame
+    Returns:
+        gdf (Geopandas GeoDataFrame): Geopandas formatted DataFrame. ie. geometry column.
+    """
+    gdf = geopandas.GeoDataFrame(
+        input_df, geometry=geopandas.points_from_xy(input_df.lon, input_df.lat)
+    )
+    return gdf
+
+
+def load_gpkg_ocean_region(input_gpkg_fpath):
+    """Uses Geopandas to load input geopackage (gpkg)
+
+    Args:
+        input_gpkg_fpath (Geopackage - .gpkg): Input Geopackage containing geometries used for ocean region classifcation.
+    Returns:
+        gpkg_region (GeoDataFrame): Outputs geodataframe of ocean region geometries.
+    """
+    gdf = geopandas.read_file(input_gpkg_fpath)
+    return gdf
+
+
+def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
+    """Takes sparse data geodataframe and classifies it to an ocean region
+
+    Args:
+        data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe. 
+        region_gdf (geopandas geodataframe): A geodataframe created from ocean region gpkg.
+    """
+    classified_gdf = sjoin(data_gdf, region_gdf, how="left")
+    return classified_gdf
+
+
+def classified_gdf_to_list(classified_gdf):
+    """Takes a classified/joined geodataframe and returns a set of ocean regions
+
+    Args:
+        classified_gdf (geopandas geodataframe): The joined geodataframe that contains points as well as regions.
+    Returns:
+        region_set : A unique list of regions belonging to that dataset.
+    """
+    region_set = list(set(classified_gdf["NAME"]))
+    return region_set
+
+
+def ocean_region_classification(df):
+    """This function geographically classifes a sparse dataset into a specific ocean region
+
+    Args:
+        df (Pandas DataFrame): Input CMAP formatted DataFrame (ST Index: time,lat,lon,<depth>)
+
+    Returns:
+        ????? list of regions? or series or...
+
+    """
+    """
+    1. df -> gdf
+    2. load regions as gdf
+    3. classify
+    4. output set list
+    """
+    data_gdf = geopandas_load_gpkg(df)
+    region_gdf = load_gpkg_ocean_region(
+        vs.spatial_data + "World_Seas_IHO_v3/World_Seas_IHO_v3.gpkg"
+    )
+    classified_gdf = classify_gdf_with_gpkg_regions(data_gdf, region_gdf)
+    region_set = classified_gdf_to_list(classified_gdf)
+    return region_set

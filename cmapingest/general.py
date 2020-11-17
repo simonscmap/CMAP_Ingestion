@@ -121,9 +121,11 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server):
 def insert_small_stats(data_dict, tableName, server):
     stats.updateStats_Small(tableName, server, data_dict["data_df"])
 
-def insert_large_stats(tableName, branch,server):
+
+def insert_large_stats(tableName, branch, server):
     stats_df = stats.aggregate_large_stats(branch, tableName)
-    stats.update_stats_large(tableName, stats_df,server) 
+    stats.update_stats_large(tableName, stats_df, server)
+
 
 def createIcon(data_dict, tableName):
     mapping.folium_map(data_dict["data_df"], tableName)
@@ -141,12 +143,12 @@ def full_ingestion(args):
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
     SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
     insertData(data_dict, args.tableName, args.Server)
-    # if args.Server == "Rainier":
-    #     insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
-    #     insert_small_stats(data_dict, args.tableName, args.Server)
-    #     createIcon(data_dict, args.tableName)
+    if args.Server == "Rainier":
+        insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
+        insert_small_stats(data_dict, args.tableName, args.Server)
+        createIcon(data_dict, args.tableName)
 
- 
+
 def append_ingestion(args):
     """The Append Ingestion function is for appending data onto a table. Example: Extending satellite or model datasets in time"""
     print("append Ingestion")

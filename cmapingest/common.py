@@ -6,6 +6,7 @@ from cmapingest import DB
 from cmapingest import vault_structure as vs
 import pycmap
 
+
 def normalize(vals, min_max=False):
     """Takes an array and either normalize to min/max, standardize it (remove the mean and divide by standard deviation)."""
     if min_max:
@@ -288,20 +289,26 @@ def cruise_has_trajectory(cruiseName):
 
     return cruise_has_traj
 
+
 def getLatCount(tableName):
-    query = """SELECT SUM(p.rows) FROM sys.partitions AS p
+    query = (
+        """SELECT SUM(p.rows) FROM sys.partitions AS p
     INNER JOIN sys.tables AS t
     ON p.[object_id] = t.[object_id]
     INNER JOIN sys.schemas AS s
     ON s.[schema_id] = t.[schema_id]
-    WHERE t.name = N'""" + tableName + """'
+    WHERE t.name = N'"""
+        + tableName
+        + """'
     AND s.name = N'dbo'
     AND p.index_id IN (0,1);"""
+    )
 
     api = pycmap.API()
     df = api.query(query)
     lat_count = df.columns[0]
     return lat_count
+
 
 def tableInDB(tableName):
     """Returns a boolean if tableName exists in DB."""
@@ -345,4 +352,3 @@ def flist_in_daterange(start_date, end_date, tableName, branch, processing_lvl):
         vault_struct_retrieval(branch) + "tableName" + "/" + processing_lvl + "/"
     )
     pass
-
