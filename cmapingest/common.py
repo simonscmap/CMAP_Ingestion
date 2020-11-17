@@ -242,6 +242,15 @@ def get_cruise_IDS(cruise_name_list):
     ].to_list()
     return cruise_ID_list
 
+def get_region_IDS(region_name_list):
+    """Returns IDs of input region names"""
+    region_db_df = DB.DB_query("""SELECT * FROM tblRegions""")
+    region_name_list = lowercase_List(region_name_list)
+    region_ID_list = region_db_df["Region_ID"][
+        region_db_df["Region_Name"].str.lower().isin(region_name_list)
+    ].to_list()
+    return region_ID_list
+
 
 def exclude_val_from_col(series, exclude_list):
     """

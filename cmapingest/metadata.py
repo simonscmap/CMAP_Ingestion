@@ -13,7 +13,7 @@ import pycmap
 
 from cmapingest import common as cmn
 from cmapingest import DB
-
+from cmapingest import vault_structure as vs
 pycmap.API(cr.api_key)
 
 api = pycmap.API(token=cr.api_key)
@@ -468,7 +468,9 @@ def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
         region_gdf (geopandas geodataframe): A geodataframe created from ocean region gpkg.
     """
     classified_gdf = sjoin(data_gdf, region_gdf, how="left")
-    return classified_gdf
+    # This line removes any rows where null exists. This might be do to points to close to land.
+    classified_gdf_nonull =classified_gdf[~classified_gdf["NAME"].isnull()]
+    return classified_gdf_nonull
 
 
 def classified_gdf_to_list(classified_gdf):
@@ -483,26 +485,51 @@ def classified_gdf_to_list(classified_gdf):
     return region_set
 
 
-def ocean_region_classification(df):
+def ocean_region_classification(data_df,dataset_name):
     """This function geographically classifes a sparse dataset into a specific ocean region
 
     Args:
         df (Pandas DataFrame): Input CMAP formatted DataFrame (ST Index: time,lat,lon,<depth>)
+        dataset_name (string): name of dataset in CMAP 
+    """
 
-    Returns:
-        ????? list of regions? or series or...
 
-    """
-    """
-    1. df -> gdf
-    2. load regions as gdf
-    3. classify
-    4. output set list
-    """
-    data_gdf = geopandas_load_gpkg(df)
+    data_gdf = geopandas_load_gpkg(data_df)
     region_gdf = load_gpkg_ocean_region(
         vs.spatial_data + "World_Seas_IHO_v3/World_Seas_IHO_v3.gpkg"
     )
     classified_gdf = classify_gdf_with_gpkg_regions(data_gdf, region_gdf)
     region_set = classified_gdf_to_list(classified_gdf)
-    return region_set
+
+    dataset_ID = cmn.getDatasetID_DS_Name(dataset_name
+    )
+    region_ID_list = cmn.get_region_IDS(region_set)
+    print("Dataset matched to the following Regions: ", region_set)
+
+    for region_ID in region_ID_list:
+        query = (dataset_ID, region_ID)
+        DB.lineInsert(
+            "Rainier",
+            "[opedia].[dbo].[tblDataset_Regions]",
+            "(Dataset_ID, Region_ID)",
+            query,
+        )
+# import pycmap
+# data_df = api.get_dataset('tblSeaFlow')
+# dataset_name = "all_SeaFlow_cruises"
+# ocean_region_classification(data_df,dataset_name)
+
+
+
+
+
+""" tblDatasets: ID,Name, etc...
+tblDataset_Region: Dataset_ID, Region_ID
+tblRegion: ID, Name of Region
+
+
+-Fill tblDataset_Region with ID's from gpkg...When/where?
+-How to handle if Name of Region is missing...Warning/Flag? Warning then add..
+-
+
+"""
