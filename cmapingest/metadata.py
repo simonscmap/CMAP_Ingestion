@@ -493,10 +493,9 @@ def ocean_region_classification(data_df,dataset_name):
         dataset_name (string): name of dataset in CMAP 
     """
 
-
     data_gdf = geopandas_load_gpkg(data_df)
     region_gdf = load_gpkg_ocean_region(
-        vs.spatial_data + "World_Seas_IHO_v3/World_Seas_IHO_v3.gpkg"
+        vs.spatial_data + "World_Seas_IHO_v1_simplified/World_Seas_Simplifed.gpkg"
     )
     classified_gdf = classify_gdf_with_gpkg_regions(data_gdf, region_gdf)
     region_set = classified_gdf_to_list(classified_gdf)
