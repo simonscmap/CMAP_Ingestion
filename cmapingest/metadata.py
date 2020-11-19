@@ -14,7 +14,6 @@ import pycmap
 from cmapingest import common as cmn
 from cmapingest import DB
 from cmapingest import vault_structure as vs
-pycmap.API(cr.api_key)
 
 api = pycmap.API(token=cr.api_key)
 
@@ -467,9 +466,9 @@ def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
         data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe. 
         region_gdf (geopandas geodataframe): A geodataframe created from ocean region gpkg.
     """
-    classified_gdf = sjoin(data_gdf, region_gdf, how="left")
+    classified_gdf = sjoin(data_gdf, region_gdf, how="left",op='within')
     # This line removes any rows where null exists. This might be do to points to close to land.
-    classified_gdf_nonull =classified_gdf[~classified_gdf["NAME"].isnull()]
+    classified_gdf_nonull = classified_gdf[~classified_gdf["NAME"].isnull()]
     return classified_gdf_nonull
 
 
@@ -485,7 +484,7 @@ def classified_gdf_to_list(classified_gdf):
     return region_set
 
 
-def ocean_region_classification(data_df,dataset_name):
+def ocean_region_classification(data_df, dataset_name):
     """This function geographically classifes a sparse dataset into a specific ocean region
 
     Args:
@@ -500,8 +499,7 @@ def ocean_region_classification(data_df,dataset_name):
     classified_gdf = classify_gdf_with_gpkg_regions(data_gdf, region_gdf)
     region_set = classified_gdf_to_list(classified_gdf)
 
-    dataset_ID = cmn.getDatasetID_DS_Name(dataset_name
-    )
+    dataset_ID = cmn.getDatasetID_DS_Name(dataset_name)
     region_ID_list = cmn.get_region_IDS(region_set)
     print("Dataset matched to the following Regions: ", region_set)
 
@@ -513,12 +511,51 @@ def ocean_region_classification(data_df,dataset_name):
             "(Dataset_ID, Region_ID)",
             query,
         )
-# import pycmap
-# data_df = api.get_dataset('tblSeaFlow')
-# dataset_name = "all_SeaFlow_cruises"
-# ocean_region_classification(data_df,dataset_name)
 
 
+
+insitu_df = DB.dbRead("""select distinct tblD.Dataset_Name, tblV.Table_Name from tblDatasets tblD 
+inner join
+tblVariables tblV 
+on tblD.ID = tblV.Dataset_ID
+
+where tblV.Make_ID = 1
+and tblV.Sensor_ID <> 1
+AND
+tblD.Dataset_Name <>  'Argo_BGC_REP' AND tblD.Dataset_Name <>  'ESV' AND tblD.Dataset_Name <>  'Global_Drifter_Program' AND tblD.Dataset_Name <> 'WOA_Climatology'""")
+
+
+def if_exists_dataset_region(dataset_name):
+    """Checks if dataset ID is already in tblDatasets_Regions
+
+    Args:
+        dataset_name (string): The short name of the dataset in CMAP tblDatasets.
+    Returns: Boolean
+    """
+    ds_ID = cmn.getDatasetID_DS_Name(dataset_name)
+    cur_str = """SELECT * FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = {Dataset_ID}""".format(Dataset_ID=ds_ID)
+    query_return = DB.dbRead(cur_str, server="Rainier")
+    if query_return.empty:
+        bool_return = False
+    else:
+        bool_return = True
+    return bool_return
+
+
+# for index, row in insitu_df.iterrows():
+#     print(row['Dataset_Name'], row['Table_Name'])
+#     bool_return = if_exists_dataset_region(row['Dataset_Name'])
+#     if bool_return == False:
+#         data_df = DB.dbRead("""SELECT * FROM {tblname}""".format(tblname=row['Table_Name']))
+#         ocean_region_classification(data_df,row['Dataset_Name'])
+
+
+
+
+
+
+# for val in region_gdf["NAME"]:
+#     DB.DB_modify("""INSERT INTO tblRegions (Region_Name) VALUES ('{val}')""".format(val=val),"Rainier")
 
 
 

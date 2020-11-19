@@ -242,6 +242,7 @@ def get_cruise_IDS(cruise_name_list):
     ].to_list()
     return cruise_ID_list
 
+
 def get_region_IDS(region_name_list):
     """Returns IDs of input region names"""
     region_db_df = DB.DB_query("""SELECT * FROM tblRegions""")
