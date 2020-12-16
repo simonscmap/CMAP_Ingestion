@@ -362,3 +362,8 @@ def flist_in_daterange(start_date, end_date, tableName, branch, processing_lvl):
         vault_struct_retrieval(branch) + "tableName" + "/" + processing_lvl + "/"
     )
     pass
+
+
+def get_var_list_dataset(tableName):
+    col_name_list = DB.DB_query("""EXEC uspColumns '{tableName}'""".format(tableName=tableName))["Columns"].to_list()
+    return col_name_list

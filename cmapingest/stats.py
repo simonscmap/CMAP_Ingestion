@@ -87,8 +87,7 @@ def buildLarge_Stats(df, datetime_slice, tableName, branch, transfer_flag="dropb
 
 def aggregate_large_stats(branch, tableName):
     """aggregates summary stats files and computes stats of stats. Returns stats dataframe"""
-    tableName = "tblModis_POC"
-    branch_path = cmn.vault_struct_retrieval("satellite")
+    branch_path = cmn.vault_struct_retrieval(branch)
     df = dd.read_csv(branch_path + tableName + "/stats/" + "*.csv*")
     df = df.compute().set_index(df.columns[0])
     df.index.name = "Stats"

@@ -404,7 +404,9 @@ def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainie
     )
 
 
-def addKeywords(keywords_list, var_short_name_list, tableName, server="Rainier"):
+def addKeywords(keywords_list,tableName, var_short_name_list="*", server="Rainier"):
+    if var_short_name_list == "*":
+        var_short_name_list = cmn.get_var_list_dataset(tableName)
     """Inserts list of keywords for list of variables in a table"""
     keywords_list = cmn.lowercase_List(keywords_list)
     """Removes keyword from specific variable in table"""
@@ -420,6 +422,7 @@ def addKeywords(keywords_list, var_short_name_list, tableName, server="Rainier")
             )
             try:
                 DB.lineInsert(server, "[opedia].[dbo].[tblKeywords]", columnList, query)
+                print("Added keyword: ")
             except Exception as e:
                 print(e)
 

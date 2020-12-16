@@ -83,12 +83,29 @@ def sort_values(df, cols):
     df = df.sort_values(cols, ascending=[True] * len(cols))
     return df
 
+def check_ST_ordering(ST_vars):
+    """Ensures that ST column list is in correct order. ie ['time','lat','lon'] not ['time','lon','lat]
+
+    Args:
+        ST_vars ([type]): [description]
+    Returns: ST_vars (sorted)
+    """
+    if len(ST_vars) == 4:
+        st_bool = ST_vars == ['time','lat','lon','depth']
+        if st_bool == False:
+            ST_vars = ['time','lat','lon','depth']
+    elif len(ST_vars) == 3:
+        st_bool = ST_vars == ['time','lat','lon']
+        if st_bool == False:
+            ST_vars = ['time','lat','lon']
+    return ST_vars
 
 def ST_columns(df):
     """Returns SpaceTime related columns in a dataset as a list"""
     df_cols = cmn.lowercase_List(list(df))
     ST_vars = [i for i in df_cols if i in ["time", "lat", "lon", "depth"]]
-    return ST_vars
+    ST_vars_ordered = check_ST_ordering(ST_vars)
+    return ST_vars_ordered
 
 
 def clean_data_df(df):
@@ -109,13 +126,24 @@ def ensureST_numeric(df):
         df[col] = pd.to_numeric(df[col], errors="coerce")
     return df
 
+def decode_df_columns(df):
+    """Decodes any bytestring columns in pandas
 
+    Args:
+        df (Pandas DataFrame): Input DataFrame
+
+    Returns:
+        df: Pandas DataFrame
+    """
+    df = df.applymap(lambda x: x.decode() if isinstance(x, bytes) else x)
+    return df
+    
 ##############   Data Import    ############
 
 
 def read_csv(path_and_filename, delim=","):
     """Imports csv into pandas DataFrame"""
-    df = pd.read_csv(path_and_filename, sep=delim, parse_dates=["time"])
+    df = pd.read_csv(path_and_filename, sep=delim, skipinitialspace=True,parse_dates=["time"])
     return df
 
 
