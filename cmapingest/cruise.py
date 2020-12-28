@@ -1,4 +1,6 @@
-##dev note: Download metadata for cruises without trajectories. If dataset has listed cruise that has metadata in vault, but no r2r traj. Can create cruise traj based on dataset ST.
+##dev note: If dataset doesn't have any cruise, have user input to add cruise to DB.
+# if yes: create cruise traj from lat/lon/time pairs, cruise stats, cruise metadata from user input.
+
 import sys
 import os
 import shutil

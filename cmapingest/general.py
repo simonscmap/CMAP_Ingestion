@@ -107,6 +107,10 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server):
     metadata.tblKeywords_Insert(
         data_dict["variable_metadata_df"], data_dict["dataset_metadata_df"], tableName
     )
+    metadata.ocean_region_classification(
+        data_dict["data_df"],
+        data_dict["dataset_metadata_df"]["dataset_short_name"].iloc[0],
+    )
     if data_dict["dataset_metadata_df"]["cruise_names"].dropna().empty == False:
         metadata.tblDataset_Cruises_Insert(data_dict["dataset_metadata_df"])
 
@@ -129,6 +133,12 @@ def insert_large_stats(tableName, branch, server):
 
 def createIcon(data_dict, tableName):
     mapping.folium_map(data_dict["data_df"], tableName)
+    os.chdir()
+
+
+def push_icon():
+    os.chdir(vs.static)
+    os.system('git add -A && git commit -m "add mission icons to git repo" && git push')
 
 
 def full_ingestion(args):
@@ -147,6 +157,7 @@ def full_ingestion(args):
         insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
         insert_small_stats(data_dict, args.tableName, args.Server)
         createIcon(data_dict, args.tableName)
+        push_icon()
 
 
 def append_ingestion(args):

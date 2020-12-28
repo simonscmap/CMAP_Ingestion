@@ -21,9 +21,6 @@ from cmapingest import DB
 from cmapingest import common as cmn
 
 
-static_outputdir = "/home/nrhagen/Documents/CMAP/cmapingest/static/mission_icons/"
-
-
 def addLayers(m):
     """Adds webtiles to folium map"""
     tiles = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -51,12 +48,12 @@ def addMarkers(m, df):
 
 def html_to_static(m, tableName):
     """Outputs folium map to html and static map"""
-    m.save(static_outputdir + tableName + ".html")
+    m.save(vs.static + tableName + ".html")
     options = FirefoxOptions()
     options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     fpath = os.getcwd()
-    driver.get("file://" + static_outputdir + tableName + ".html")
+    driver.get("file://" + vs.static + tableName + ".html")
     container = driver.find_element_by_class_name("leaflet-control-attribution")
     driver.execute_script(
         "document.getElementsByClassName('leaflet-control-attribution')[0].style.display = 'none';"
@@ -68,7 +65,7 @@ def html_to_static(m, tableName):
         "document.getElementsByClassName('leaflet-bottom leaflet-left')[0].style.display = 'none';"
     )
     time.sleep(4)
-    driver.save_screenshot(static_outputdir + tableName + ".png")
+    driver.save_screenshot(vs.static + tableName + ".png")
     driver.close()
 
 

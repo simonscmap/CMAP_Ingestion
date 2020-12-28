@@ -404,7 +404,7 @@ def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainie
     )
 
 
-def addKeywords(keywords_list,tableName, var_short_name_list="*", server="Rainier"):
+def addKeywords(keywords_list, tableName, var_short_name_list="*", server="Rainier"):
     if var_short_name_list == "*":
         var_short_name_list = cmn.get_var_list_dataset(tableName)
     """Inserts list of keywords for list of variables in a table"""
@@ -469,7 +469,7 @@ def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
         data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe. 
         region_gdf (geopandas geodataframe): A geodataframe created from ocean region gpkg.
     """
-    classified_gdf = sjoin(data_gdf, region_gdf, how="left",op='within')
+    classified_gdf = sjoin(data_gdf, region_gdf, how="left", op="within")
     # This line removes any rows where null exists. This might be do to points to close to land.
     classified_gdf_nonull = classified_gdf[~classified_gdf["NAME"].isnull()]
     return classified_gdf_nonull
@@ -516,8 +516,8 @@ def ocean_region_classification(data_df, dataset_name):
         )
 
 
-
-insitu_df = DB.dbRead("""select distinct tblD.Dataset_Name, tblV.Table_Name from tblDatasets tblD 
+insitu_df = DB.dbRead(
+    """select distinct tblD.Dataset_Name, tblV.Table_Name from tblDatasets tblD 
 inner join
 tblVariables tblV 
 on tblD.ID = tblV.Dataset_ID
@@ -525,7 +525,8 @@ on tblD.ID = tblV.Dataset_ID
 where tblV.Make_ID = 1
 and tblV.Sensor_ID <> 1
 AND
-tblD.Dataset_Name <>  'Argo_BGC_REP' AND tblD.Dataset_Name <>  'ESV' AND tblD.Dataset_Name <>  'Global_Drifter_Program' AND tblD.Dataset_Name <> 'WOA_Climatology'""")
+tblD.Dataset_Name <>  'Argo_BGC_REP' AND tblD.Dataset_Name <>  'ESV' AND tblD.Dataset_Name <>  'Global_Drifter_Program' AND tblD.Dataset_Name <> 'WOA_Climatology'"""
+)
 
 
 def if_exists_dataset_region(dataset_name):
@@ -536,7 +537,9 @@ def if_exists_dataset_region(dataset_name):
     Returns: Boolean
     """
     ds_ID = cmn.getDatasetID_DS_Name(dataset_name)
-    cur_str = """SELECT * FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = {Dataset_ID}""".format(Dataset_ID=ds_ID)
+    cur_str = """SELECT * FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = {Dataset_ID}""".format(
+        Dataset_ID=ds_ID
+    )
     query_return = DB.dbRead(cur_str, server="Rainier")
     if query_return.empty:
         bool_return = False
@@ -553,13 +556,8 @@ def if_exists_dataset_region(dataset_name):
 #         ocean_region_classification(data_df,row['Dataset_Name'])
 
 
-
-
-
-
 # for val in region_gdf["NAME"]:
 #     DB.DB_modify("""INSERT INTO tblRegions (Region_Name) VALUES ('{val}')""".format(val=val),"Rainier")
-
 
 
 """ tblDatasets: ID,Name, etc...

@@ -46,7 +46,10 @@ download_transfer = str(Path.home()) + r"/Vault/download_transfer/"
 spatial_data = str(Path.home()) + r"/Vault/spatial_data/"
 
 
-################# Download Transfer Structure  ##################
+################# Static Mission Icon Directory ##################
+static = "/home/nrhagen/Documents/CMAP/cmapingest/static/mission_icons/"
+
+################# Download Transfer Structure   ##################
 makedir(download_transfer)
 
 ################# Collected Data Structure  ##################
@@ -106,8 +109,8 @@ station = in_situ + "station/"
 makedir(station)
 
 #########  obs/in-situ/float  #########
-float = in_situ + "float/"
-makedir(float)
+float_dir = in_situ + "float/"
+makedir(float_dir)
 
 ########  obs/remote/satellite  ########
 satellite = remote + "satellite/"
