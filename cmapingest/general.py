@@ -143,21 +143,21 @@ def push_icon():
 
 def full_ingestion(args):
     print("Full Ingestion")
-    splitExcel(args.staging_filename, args.metadata_filename)
-    staging_to_vault(
-        args.staging_filename,
-        getBranch_Path(args),
-        args.tableName,
-        remove_file_flag=True,
-    )
-    data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
-    insertData(data_dict, args.tableName, args.Server)
-    if args.Server == "Rainier":
-        insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
-        insert_small_stats(data_dict, args.tableName, args.Server)
-        createIcon(data_dict, args.tableName)
-        push_icon()
+    # splitExcel(args.staging_filename, args.metadata_filename)
+    # staging_to_vault(
+    #     args.staging_filename,
+    #     getBranch_Path(args),
+    #     args.tableName,
+    #     remove_file_flag=True,
+    # )
+    # data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
+    # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
+    # insertData(data_dict, args.tableName, args.Server)
+    # if args.Server == "Rainier":
+    #     insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
+    #     insert_small_stats(data_dict, args.tableName, args.Server)
+    #     createIcon(data_dict, args.tableName)
+    #     push_icon()
 
 
 def append_ingestion(args):

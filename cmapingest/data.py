@@ -142,6 +142,23 @@ def decode_df_columns(df):
     return df
 
 
+def add_day_week_month_year_clim(df):
+    """Takes input pandas DataFrame and adds year, month, week, dayofyear columns to end.
+    IMPORTANT, time column must be in dataframe and be named [time]
+
+    Args:
+        df (Pandas DataFrame): Input Pandas DataFrame containing 'time' column.
+
+    Returns:
+        df Pandas DataFrame: Output Pandas DataFrame with appended climatology columns
+    """
+    df["year"] = pd.to_datetime(df["time"]).dt.year
+    df["month"] = pd.to_datetime(df["time"]).dt.month
+    df["week"] = pd.to_datetime(df["time"]).dt.weekofyear
+    df["dayofyear"] = pd.to_datetime(df["time"]).dt.dayofyear
+    return df
+
+
 ##############   Data Import    ############
 
 
