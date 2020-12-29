@@ -15,6 +15,10 @@ def normalize(vals, min_max=False):
         normalized_vals = (vals - np.nanmean(vals)) / np.nanstd(vals)
     return normalized_vals
 
+def strip_whitespace_data(df):
+    """Strips any whitespace from data"""
+    df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+    return df
 
 def strip_whitespace_headers(df):
     """Strips any whitespace from dataframe headers"""
