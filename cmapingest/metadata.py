@@ -21,13 +21,12 @@ api = pycmap.API(token=cr.api_key)
 def ID_Var_Map(series_to_map, res_col, tableName):
     api = pycmap.API()
     query = """SELECT * FROM """ + tableName
-    call = DB.DB_query(query)
+    call = DB.dbRead(query)
     series = series_to_map.astype(str).str.lower()
     sdict = dict(zip(call[res_col].str.lower(), call.ID))
     mapped_series = series.map(sdict)
     mapped_series = list(cmn.nanToNA(mapped_series).replace("", 0))
     return mapped_series
-
 
 def import_metadata(branch, tableName):
     branch_path = cmn.vault_struct_retrieval(branch)
