@@ -327,6 +327,14 @@ def deleteFromtblDataset_Cruises(Dataset_ID, server):
     DB.DB_modify(cur_str, server)
     print("tblDataset_Cruises entries deleted for Dataset_ID: ", Dataset_ID)
 
+def deleteFromtblDataset_Regions(Dataset_ID, server):
+    cur_str = (
+        """DELETE FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = """
+        + str(Dataset_ID)
+    )
+    DB.DB_modify(cur_str, server)
+    print("tblDataset_Regions entries deleted for Dataset_ID: ", Dataset_ID)
+
 
 def deleteFromtblDataset_References(Dataset_ID, server):
     cur_str = (
@@ -360,6 +368,7 @@ def dropTable(tableName, server):
     print(tableName, " Removed from DB")
 
 
+
 def deleteCatalogTables(tableName, server="Rainier"):
     contYN = input(
         "Are you sure you want to delete all of the catalog tables for "
@@ -371,6 +380,7 @@ def deleteCatalogTables(tableName, server="Rainier"):
         deleteFromtblKeywords(Dataset_ID, server)
         deleteFromtblDataset_Stats(Dataset_ID, server)
         deleteFromtblDataset_Cruises(Dataset_ID, server)
+        deleteFromtblDataset_Regions(Dataset_ID, server)
         deleteFromtblDataset_References(Dataset_ID, server)
         deleteFromtblVariables(Dataset_ID, server)
         deleteFromtblDatasets(Dataset_ID, server)
