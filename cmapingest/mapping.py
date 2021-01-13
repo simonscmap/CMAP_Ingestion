@@ -21,6 +21,7 @@ from cmapingest import DB
 from cmapingest import common as cmn
 from cmapingest import vault_structure as vs
 
+
 def addLayers(m):
     """Adds webtiles to folium map"""
     tiles = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"

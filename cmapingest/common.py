@@ -375,3 +375,19 @@ def get_var_list_dataset(tableName):
         """EXEC uspColumns '{tableName}'""".format(tableName=tableName)
     )["Columns"].to_list()
     return col_name_list
+
+
+def double_chars_in_col(df, col, list_of_chars):
+    """Replaces a single character with two of the same character. To be used in SQL Server escaping.
+
+    Args:
+        df (Pandas DataFrame): Input Pandas DataFrame
+        col (str): column of DataFrame used in replace
+        list_of_chars (list): A list of strings to be doubled
+
+    Returns:
+        df (Pandas DataFrame): Modified Pandas DataFrame
+    """
+    for char in list_of_chars:
+        df[col] = df[col].str.replace(char, char * 2)
+    return df

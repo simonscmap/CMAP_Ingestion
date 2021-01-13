@@ -176,3 +176,14 @@ def test_length_of_tbl():
     tableName = "tblMakes"
     len_table_func = cmn.length_of_tbl(tableName)
     assert len_table_func == "3"
+
+
+def test_double_chars_in_col():
+    test_df = pd.DataFrame({"col_to_double": ["nomatchingchars", "={[]}:';"]})
+    expected_df = pd.DataFrame(
+        {"col_to_double": ["nomatchingchars", "=={{[[]]}}::'';;"]}
+    )
+    func_df = cmn.double_chars_in_col(
+        test_df, "col_to_double", ["=", "{", "[", "]", "}", ":", "'", ";"]
+    )
+    assert_frame_equal(func_df, expected_df, obj="double_chars_in_col test failed")

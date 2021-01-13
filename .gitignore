@@ -2,6 +2,6 @@
 *.csv
 *.pyc
 conf/
-cmapingest/credentials.py
+#cmapingest/credentials.py
 cmapingest/error
 cmapingest/*.log

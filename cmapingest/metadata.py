@@ -28,6 +28,7 @@ def ID_Var_Map(series_to_map, res_col, tableName):
     mapped_series = list(cmn.nanToNA(mapped_series).replace("", 0))
     return mapped_series
 
+
 def import_metadata(branch, tableName):
     branch_path = cmn.vault_struct_retrieval(branch)
     ds_meta_list = glob.glob(
@@ -327,6 +328,7 @@ def deleteFromtblDataset_Cruises(Dataset_ID, server):
     DB.DB_modify(cur_str, server)
     print("tblDataset_Cruises entries deleted for Dataset_ID: ", Dataset_ID)
 
+
 def deleteFromtblDataset_Regions(Dataset_ID, server):
     cur_str = (
         """DELETE FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = """
@@ -366,7 +368,6 @@ def dropTable(tableName, server):
     cur_str = """DROP TABLE """ + tableName
     DB.DB_modify(cur_str, server)
     print(tableName, " Removed from DB")
-
 
 
 def deleteCatalogTables(tableName, server="Rainier"):
