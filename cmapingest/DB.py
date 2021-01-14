@@ -130,5 +130,4 @@ def toSQLbcp(export_path, tableName, server):
         + ""","""
         + port
     )
-    print(bcp_str)
     os.system(bcp_str)

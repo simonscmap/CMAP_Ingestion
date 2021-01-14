@@ -42,7 +42,7 @@ def build_cruise_metadata_from_user_input(df):
             "Chief_Name": [chief_sci],
         }
     )
-    return tblCruise_df
+    return tblCruise_df, cruise_name
 
 
 def return_cruise_trajectory_from_df(df, Cruise_ID):

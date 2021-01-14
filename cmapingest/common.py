@@ -183,7 +183,7 @@ def getCruiseDetails(cruiseName):
 def getListCruises():
     """Get list of available cruises using uspCruises"""
     query = """EXEC uspCruises"""
-    query_return = DB.DB_query(query)
+    query_return = DB.dbRead(query)
     return query_return
 
 

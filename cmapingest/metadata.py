@@ -276,15 +276,15 @@ def tblKeywords_Insert(
                     print(e)
 
 
-def user_input_build_cruise(df, cruise_name):
-    tblCruise_df = cruise.build_cruise_metadata_from_user_input(df)
+def user_input_build_cruise(df, dataset_metadata_df):
+    tblCruise_df, cruise_name = cruise.build_cruise_metadata_from_user_input(df)
     print("The cruise metadata dataframe you generated looks like: ")
     print(tblCruise_df)
     meta_cont = input(
         "Do you want to ingest this [y], cancel the proces [n] or go through the metadata build again [r]? "
     )
     if meta_cont.lower() == "r":
-        tblCruise_df = cruise.build_cruise_metadata_from_user_input(df)
+        tblCruise_df, cruise_name = cruise.build_cruise_metadata_from_user_input(df)
     elif meta_cont.lower() == "y":
         DB.lineInsert(
             "Rainier",
@@ -304,15 +304,23 @@ def user_input_build_cruise(df, cruise_name):
     )
 
 
-def tblDataset_Cruises_Insert(dataset_metadata_df, server="Rainier"):
-    matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
-    if unmatched_cruises != []:
-        print(
-            "The following cruises are not in CMAP: ",
-            unmatched_cruises,
-            " Please contact the CMAP team to add these cruises.",
-        )
+def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server="Rainier"):
+    """possible options:
+    1. some cruises are matched. continue with dataset_cruise link
+    2. cruises exist, but there are no matches (ie. matched_cruises = [])
+        -attempt build cruise traj/metadata
+        -return to continue with dataset cruise link
 
+    """
+    matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
+    if matched_cruises == []:
+        print(
+            "Building cruise trajectory and metadata from this dataset and user input. "
+        )
+        user_input_build_cruise(data_df, dataset_metadata_df)
+        matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
+            dataset_metadata_df
+        )
     cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
     dataset_ID = cmn.getDatasetID_DS_Name(
         dataset_metadata_df["dataset_short_name"].iloc[0]
