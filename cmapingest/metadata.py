@@ -12,6 +12,9 @@ import pandas as pd
 import pycmap
 
 from cmapingest import common as cmn
+from cmapingest import cruise
+from cmapingest import data
+
 from cmapingest import DB
 from cmapingest import vault_structure as vs
 
@@ -273,8 +276,35 @@ def tblKeywords_Insert(
                     print(e)
 
 
+def user_input_build_cruise(df, cruise_name):
+    tblCruise_df = cruise.build_cruise_metadata_from_user_input(df)
+    print("The cruise metadata dataframe you generated looks like: ")
+    print(tblCruise_df)
+    meta_cont = input(
+        "Do you want to ingest this [y], cancel the proces [n] or go through the metadata build again [r]? "
+    )
+    if meta_cont.lower() == "r":
+        tblCruise_df = cruise.build_cruise_metadata_from_user_input(df)
+    elif meta_cont.lower() == "y":
+        DB.lineInsert(
+            "Rainier",
+            "tblCruise",
+            "(Nickname,Name,Ship_Name,Start_Time,End_Time,Lat_Min,Lat_Max,Lon_Min,Lon_Max,Chief_Name)",
+            tuple(tblCruise_df.iloc[0].astype(str).to_list()),
+        )
+    elif meta_cont.lower() == "n":
+        sys.exit()
+
+    Cruise_ID = cmn.get_cruise_IDS([cruise_name])
+    rdf = cruise.resample_trajectory(df)
+    traj_df = cruise.return_cruise_trajectory_from_df(rdf, Cruise_ID)
+    # Dev note, in future generate map for QA? add user input
+    data.data_df_to_db(
+        traj_df, "tblCruise_Trajectory", "Rainier", clean_data_df_flag=False
+    )
+
+
 def tblDataset_Cruises_Insert(dataset_metadata_df, server="Rainier"):
-    """use pycmap cruise ID to find metatadata..."""
     matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
     if unmatched_cruises != []:
         print(

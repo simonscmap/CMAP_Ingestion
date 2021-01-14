@@ -134,6 +134,7 @@ def insert_large_stats(tableName, branch, server):
 def createIcon(data_dict, tableName):
     mapping.folium_map(data_dict["data_df"], tableName)
 
+
 def push_icon():
     os.chdir(vs.static)
     os.system('git add . && git commit -m "add mission icons to git repo" && git push')

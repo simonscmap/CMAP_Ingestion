@@ -114,7 +114,7 @@ def lineInsert(server, tableName, columnList, query):
 def toSQLbcp(export_path, tableName, server):
 
     usr, psw, ip, port = server_select_credentials(server)
-    str = (
+    bcp_str = (
         """bcp Opedia.dbo."""
         + tableName
         + """ in """
@@ -130,4 +130,5 @@ def toSQLbcp(export_path, tableName, server):
         + ""","""
         + port
     )
-    os.system(str)
+    print(bcp_str)
+    os.system(bcp_str)

@@ -18,6 +18,39 @@ from cmapingest import DB
 ##############################################
 ########## Cruise Helper Funcs ###############
 ##############################################
+
+
+def build_cruise_metadata_from_user_input(df):
+    cruise_name = input("Please enter the cruise name. ie. KM1906: ")
+    cruise_nickname = input("Please enter the cruise nickname. ie. Gradients 3: ")
+    cruise_shipname = input("Please enter the cruise ship name. ie. Kilo Moana: ")
+    chief_sci = input(
+        "Please enter the name of the Chief Scientist. ie. Ginger Armbrust: "
+    )
+    time_min, time_max, lat_min, lat_max, lon_min, lon_max = ST_bounds_from_df(df)
+    tblCruise_df = pd.DataFrame(
+        {
+            "Nickname": [cruise_nickname],
+            "Name": [cruise_name],
+            "Ship_Name": [cruise_shipname],
+            "Start_Time": time_min,
+            "End_Time": time_max,
+            "Lat_Min": lat_min,
+            "Lat_Max": lat_max,
+            "Lon_Min": lon_min,
+            "Lon_Max": lon_max,
+            "Chief_Name": [chief_sci],
+        }
+    )
+    return tblCruise_df
+
+
+def return_cruise_trajectory_from_df(df, Cruise_ID):
+    cdf = df[["time", "lat", "lon"]]
+    cdf.insert(loc=0, column="Cruise_ID", value=Cruise_ID[0])
+    return cdf
+
+
 def resample_trajectory(df, interval="1min"):
     df.index = pd.to_datetime(df.time)
     rs_df = df.resample(interval).mean()
@@ -53,6 +86,16 @@ def download_cruise_data_from_url(cruise_name, download_url_str, dataset_categor
     )
 
 
+def ST_bounds_from_df(df):
+    time_min = np.min(df["time"])
+    time_max = np.max(df["time"])
+    lat_min = np.min(df["lat"])
+    lat_max = np.max(df["lat"])
+    lon_min = np.min(df["lon"])
+    lon_max = np.max(df["lon"])
+    return time_min, time_max, lat_min, lat_max, lon_min, lon_max
+
+
 def fill_ST_bounds_metadata(cruise_name):
     traj_path = vs.r2r_cruise + cruise_name + "/" + cruise_name + "_trajectory.csv"
     meta_path = vs.r2r_cruise + cruise_name + "/" + cruise_name + "_cruise_metadata.csv"
@@ -65,12 +108,7 @@ def fill_ST_bounds_metadata(cruise_name):
     except:
         pass
 
-    time_min = np.min(traj_df["time"])
-    time_max = np.max(traj_df["time"])
-    lat_min = np.min(traj_df["lat"])
-    lat_max = np.max(traj_df["lat"])
-    lon_min = np.min(traj_df["lon"])
-    lon_max = np.max(traj_df["lon"])
+    time_min, time_max, lat_min, lat_max, lon_min, lon_max = ST_bounds_from_df(traj_df)
     meta_df["Start_Time"] = time_min
     meta_df["End_Time"] = time_max
     meta_df.at[0, "Lat_Min"] = lat_min
@@ -348,12 +386,12 @@ def download_all_cruises():
 # download_all_cruises()
 
 
-import pycmap
-import numpy as np
-import pandas as pd
+# import pycmap
+# import numpy as np
+# import pandas as pd
 
-api = pycmap.API()
-db_cruises = api.cruises()
+# api = pycmap.API()
+# db_cruises = api.cruises()
 
 
 # sfdf = api.query("""SELECT DISTINCT cruise,time FROM tblSeaFlow""")
@@ -361,56 +399,56 @@ db_cruises = api.cruises()
 # missing_from_db  = pd.merge(sfdf,db_cruises,how='left',left_on="cruise",right_on="Name")
 
 
-cruise_add_list = [
-    "KM1912",
-    "KM1915",
-    "KM1917",
-    "KOK1807",
-    "SR1917",
-]  # missing_from_db[missing_from_db["Nickname"].isnull()]["cruise"].to_list()
-cruise_add_traj = api.query(
-    """SELECT  cruise,time,lat,lon FROM tblSeaFlow WHERE cruise in {cruise_list}""".format(
-        cruise_list=tuple(cruise_add_list)
-    )
-)
+# cruise_add_list = [
+#     "KM1912",
+#     "KM1915",
+#     "KM1917",
+#     "KOK1807",
+#     "SR1917",
+# ]  # missing_from_db[missing_from_db["Nickname"].isnull()]["cruise"].to_list()
+# cruise_add_traj = api.query(
+#     """SELECT  cruise,time,lat,lon FROM tblSeaFlow WHERE cruise in {cruise_list}""".format(
+#         cruise_list=tuple(cruise_add_list)
+#     )
+# )
 
-add_to_db_cruise_meta_df = pd.DataFrame(
-    columns=[
-        "ID",
-        "Nickname",
-        "Name",
-        "Ship_Name",
-        "Start_Time",
-        "End_Time",
-        "Lat_Min",
-        "Lat_Max",
-        "Lon_Min",
-        "Lon_Max",
-        "Chief_Name",
-    ]
-)
-add_to_db_cruise_meta_df["Name"] = cruise_add_list
-add_to_db_cruise_meta_df["Nickname"] = [
-    "Investigating Diazotrophy in tropical and subtropical Pacific Ocean",
-    "HOT304",
-    "HOT313",
-    "HOT314",
-    "HOT315",
-]
-add_to_db_cruise_meta_df["Ship_Name"] = [
-    "Sally Ride",
-    "R/V Kaimikai O Kanaloa",
-    "R/V Kilo Moana",
-    "R/V Kilo Moana",
-    "R/V Kilo Moana",
-]
-add_to_db_cruise_meta_df["Chief_Name"] = [
-    "Kendra Turk-Kubo",
-    "David Karl",
-    "Daniel Sadler",
-    "Tara Clemente",
-    "David Karl",
-]
+# add_to_db_cruise_meta_df = pd.DataFrame(
+#     columns=[
+#         "ID",
+#         "Nickname",
+#         "Name",
+#         "Ship_Name",
+#         "Start_Time",
+#         "End_Time",
+#         "Lat_Min",
+#         "Lat_Max",
+#         "Lon_Min",
+#         "Lon_Max",
+#         "Chief_Name",
+#     ]
+# )
+# add_to_db_cruise_meta_df["Name"] = cruise_add_list
+# add_to_db_cruise_meta_df["Nickname"] = [
+#     "Investigating Diazotrophy in tropical and subtropical Pacific Ocean",
+#     "HOT304",
+#     "HOT313",
+#     "HOT314",
+#     "HOT315",
+# ]
+# add_to_db_cruise_meta_df["Ship_Name"] = [
+#     "Sally Ride",
+#     "R/V Kaimikai O Kanaloa",
+#     "R/V Kilo Moana",
+#     "R/V Kilo Moana",
+#     "R/V Kilo Moana",
+# ]
+# add_to_db_cruise_meta_df["Chief_Name"] = [
+#     "Kendra Turk-Kubo",
+#     "David Karl",
+#     "Daniel Sadler",
+#     "Tara Clemente",
+#     "David Karl",
+# ]
 
 
 def fill_ST_meta(cruise_meta_df, cruise_traj_df):
