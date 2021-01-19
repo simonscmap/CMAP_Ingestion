@@ -92,7 +92,7 @@ def vault_struct_retrieval(branch):
     if branch.lower() == "cruise":
         vs_struct = vs.cruise
     elif branch.lower() == "float":
-        vs_struct = vs.float
+        vs_struct = vs.float_dir
     elif branch.lower() == "station":
         vs_struct = vs.station
     elif branch.lower() == "satellite":
@@ -211,7 +211,7 @@ def find_File_Path_guess_tree(name):
             if "cruise" in fpath:
                 struct = vs.cruise
             elif "float" in fpath:
-                struct = vs.float
+                struct = vs.float_dir
             elif "station" in fpath:
                 struct = vs.station
             elif "satellite" in fpath:
