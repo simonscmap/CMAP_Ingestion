@@ -4,6 +4,7 @@ import os
 from cmapingest import credentials as cr
 import pyodbc
 import sqlalchemy
+import urllib
 import pyodbc
 import pandas.io.sql as sql
 import platform
@@ -75,7 +76,7 @@ def pyodbc_connection_string(server):
     elif platform.system().lower().find("linux") != -1:
         driver_str = "/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so"
 
-    conn_str = """DRIVER={driver_str};TDS_Version={TDS_Version},server={ip},port={port},uid={usr},pwd={psw}""".format(
+    conn_str = """DRIVER={driver_str};TDS_Version={TDS_Version};SERVER={ip};PORT={port};UID={usr};PWD={psw}""".format(
         driver_str=driver_str,
         TDS_Version=TDS_Version,
         ip=ip,
@@ -87,7 +88,7 @@ def pyodbc_connection_string(server):
 
 
 def dbConnect(server):
-    pyodbc_connection_string(server)
+    conn_str = pyodbc_connection_string(server)
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
 
@@ -113,13 +114,13 @@ def dbConnect(server):
     #     + psw
     # )
     # elif platform.system().lower().find("linux") != -1:
-    #     conn = pyodbc.connect(
-    #         DRIVER="/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so",
-    #         TDS_Version=TDS_Version,
-    #         server=ip,
-    #         port=port,
-    #         uid=usr,
-    #         pwd=psw,
+    # conn = pyodbc.connect(
+    #     DRIVER="/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so",
+    #     TDS_Version=TDS_Version,
+    #     server=ip,
+    #     port=port,
+    #     uid=usr,
+    #     pwd=psw,
     #     )
 
     return conn, cursor
@@ -136,14 +137,17 @@ def lineInsert(server, tableName, columnList, query):
 
 
 def urllib_pyodbc_format(conn_str):
-    quoted = urllib.parse.quote_plus(conn_str)
+    quoted_conn_str = urllib.parse.quote_plus(conn_str)
     return quoted_conn_str
 
 
 def toSQLpandas(df, tableName, server):
-    conn, cursor = dbConnect(server)
-    engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(quoted))
-    df.to_sql(tableName, engine=engine, method="multi")
+    conn_str = pyodbc_connection_string(server)
+    quoted_conn_str = urllib_pyodbc_format(conn_str)
+    engine = sqlalchemy.create_engine(
+        "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str)
+    )
+    df.to_sql(tableName, con=engine, if_exists="append", index=False, method="multi")
 
 
 def toSQLbcp(export_path, tableName, server):
