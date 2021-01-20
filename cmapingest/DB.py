@@ -3,6 +3,8 @@ import os
 
 from cmapingest import credentials as cr
 import pyodbc
+import sqlalchemy
+import pyodbc
 import pandas.io.sql as sql
 import platform
 import pandas as pd
@@ -38,6 +40,8 @@ def dbRead(query, server="Rainier"):
 
 
 def server_select_credentials(server):
+    db_name = "opedia"
+    TDS_Version = "7.3"
     if server.lower() == "rainier":
         usr = cr.usr_rainier
         psw = cr.psw_rainier
@@ -57,46 +61,66 @@ def server_select_credentials(server):
         print("invalid server selected. exiting...")
         sys.exit()
 
-    return usr, psw, ip, port
+    return usr, psw, ip, port, db_name, TDS_Version
 
 
-def dbConnect(server, db="Opedia", TDS_Version="7.3"):
-    usr, psw, ip, port = server_select_credentials(server)
-
+def pyodbc_connection_string(server):
+    usr, psw, ip, port, db_name, TDS_Version = server_select_credentials(server)
     server = ip + "," + port
 
     if platform.system().lower().find("windows") != -1:
-        conn = pyodbc.connect(
-            "DRIVER={SQL Server};SERVER="
-            + server
-            + ";DATABASE="
-            + db
-            + ";Uid="
-            + usr
-            + ";Pwd="
-            + psw
-        )
+        driver_str = "{SQL Server}"
     elif platform.system().lower().find("darwin") != -1:
-        conn = pyodbc.connect(
-            "DRIVER=/usr/local/lib/libtdsodbc.so;SERVER="
-            + server
-            + ";DATABASE="
-            + db
-            + ";Uid="
-            + usr
-            + ";Pwd="
-            + psw
-        )
+        driver_str = "/usr/local/lib/libtdsodbc.so"
     elif platform.system().lower().find("linux") != -1:
-        conn = pyodbc.connect(
-            DRIVER="/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so",
-            TDS_Version=TDS_Version,
-            server=ip,
-            port=port,
-            uid=usr,
-            pwd=psw,
-        )
+        driver_str = "/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so"
+
+    conn_str = """DRIVER={driver_str};TDS_Version={TDS_Version},server={ip},port={port},uid={usr},pwd={psw}""".format(
+        driver_str=driver_str,
+        TDS_Version=TDS_Version,
+        ip=ip,
+        port=port,
+        usr=usr,
+        psw=psw,
+    )
+    return conn_str
+
+
+def dbConnect(server):
+    pyodbc_connection_string(server)
+    conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
+
+    # conn = pyodbc.connect(
+    #     "DRIVER={SQL Server};SERVER="
+    #     + server
+    #     + ";DATABASE="
+    #     + db
+    #     + ";Uid="
+    #     + usr
+    #     + ";Pwd="
+    #     + psw
+    # )
+    # elif platform.system().lower().find("darwin") != -1:
+    # conn = pyodbc.connect(
+    #     "DRIVER=/usr/local/lib/libtdsodbc.so;SERVER="
+    #     + server
+    #     + ";DATABASE="
+    #     + db
+    #     + ";Uid="
+    #     + usr
+    #     + ";Pwd="
+    #     + psw
+    # )
+    # elif platform.system().lower().find("linux") != -1:
+    #     conn = pyodbc.connect(
+    #         DRIVER="/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so",
+    #         TDS_Version=TDS_Version,
+    #         server=ip,
+    #         port=port,
+    #         uid=usr,
+    #         pwd=psw,
+    #     )
 
     return conn, cursor
 
@@ -111,9 +135,20 @@ def lineInsert(server, tableName, columnList, query):
     conn.commit()
 
 
+def urllib_pyodbc_format(conn_str):
+    quoted = urllib.parse.quote_plus(conn_str)
+    return quoted_conn_str
+
+
+def toSQLpandas(df, tableName, server):
+    conn, cursor = dbConnect(server)
+    engine = create_engine("mssql+pyodbc:///?odbc_connect={}".format(quoted))
+    df.to_sql(tableName, engine=engine, method="multi")
+
+
 def toSQLbcp(export_path, tableName, server):
 
-    usr, psw, ip, port = server_select_credentials(server)
+    usr, psw, ip, port, db_name = server_select_credentials(server)
     bcp_str = (
         """bcp Opedia.dbo."""
         + tableName
