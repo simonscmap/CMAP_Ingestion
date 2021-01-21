@@ -206,6 +206,7 @@ def data_df_to_db(df, tableName, server, clean_data_df_flag=True):
     temp_file_path = vs.BCP + tableName + ".csv"
     df.to_csv(temp_file_path, index=False, header=False)
     DB.toSQLbcp(temp_file_path, tableName, server)
+    os.remove(temp_file_path)
 
 
 ##############   Data Transform    ############

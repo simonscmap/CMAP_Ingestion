@@ -314,13 +314,17 @@ def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server="Rainier"):
     """
     matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
     if matched_cruises == []:
-        print(
-            "Building cruise trajectory and metadata from this dataset and user input. "
+        build_traj_yn = input(
+            "Do you want to build cruise trajectory and metadata from this dataset? [Y/n]: "
         )
-        user_input_build_cruise(data_df, dataset_metadata_df)
-        matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
-            dataset_metadata_df
-        )
+        if build_traj_yn.lower() == "y":
+            print(
+                "Building cruise trajectory and metadata from this dataset and user input. "
+            )
+            user_input_build_cruise(data_df, dataset_metadata_df)
+            matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
+                dataset_metadata_df
+            )
     cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
     dataset_ID = cmn.getDatasetID_DS_Name(
         dataset_metadata_df["dataset_short_name"].iloc[0]
