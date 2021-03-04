@@ -9,6 +9,7 @@ import pyodbc
 import pandas.io.sql as sql
 import platform
 import pandas as pd
+import bcpandas 
 import pycmap
 
 pycmap.API(cr.api_key)
@@ -76,11 +77,12 @@ def pyodbc_connection_string(server):
     elif platform.system().lower().find("linux") != -1:
         driver_str = "/usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so"
 
-    conn_str = """DRIVER={driver_str};TDS_Version={TDS_Version};SERVER={ip};PORT={port};UID={usr};PWD={psw}""".format(
+    conn_str = """DRIVER={driver_str};TDS_Version={TDS_Version};SERVER={ip};PORT={port};database={db_name};UID={usr};PWD={psw}""".format(
         driver_str=driver_str,
         TDS_Version=TDS_Version,
         ip=ip,
         port=port,
+        db_name=db_name,
         usr=usr,
         psw=psw,
     )
@@ -144,15 +146,34 @@ def urllib_pyodbc_format(conn_str):
 def toSQLpandas(df, tableName, server):
     conn_str = pyodbc_connection_string(server)
     quoted_conn_str = urllib_pyodbc_format(conn_str)
+    # engine = sqlalchemy.create_engine(
+    #     "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str),fast_executemany=True
+    # )
     engine = sqlalchemy.create_engine(
-        "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str)
-    )
-    df.to_sql(tableName, con=engine, if_exists="append", index=False, method="multi")
+        "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str)) 
+    df.to_sql(tableName, con=engine, if_exists="append",method="multi",index=False)
 
+
+def toSQLbcpandas(df,tableName,server):
+    usr, psw, ip, port, db_name, TDS_Version = server_select_credentials(server)
+    creds = bcpandas.SqlCreds(ip,db_name,usr,psw)
+    bcpandas.to_sql(df, tableName, creds, index=False,if_exists="append")
+
+def retrive_from_SOT(tableName,server="Rainier"):
+    qry = f"""SELECT * FROM {tableName}"""
+    df = dbRead(qry, server=server)
+    df[list(df)] = df[list(df)].astype(str)
+    return df
+
+def toSQLbcp_wrapper(df,tableName, server):
+    export_path = 'temp_bcp.csv'
+    df.to_csv(export_path,index=False)
+    toSQLbcp(export_path, tableName, server)
+    os.remove(export_path)
 
 def toSQLbcp(export_path, tableName, server):
 
-    usr, psw, ip, port, db_name = server_select_credentials(server)
+    usr, psw, ip, port, db_name, TDS_Version = server_select_credentials(server)
     bcp_str = (
         """bcp Opedia.dbo."""
         + tableName
@@ -170,3 +191,5 @@ def toSQLbcp(export_path, tableName, server):
         + port
     )
     os.system(bcp_str)
+
+
