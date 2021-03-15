@@ -53,14 +53,15 @@ def format_time_col(df, time_col, format="%Y-%m-%d %H:%M:%S"):
     df
         Pandas DataFrame with time col formatted
     """
-    df["time"] = pd.to_datetime(df[time_col].astype(str), errors="coerce")
+    df[time_col] = pd.to_datetime(df[time_col].astype(str), errors="coerce")
     # df["time"].dt.strftime(format)
 
-    df["time"] = df["time"].dt.strftime(format)
+    df[time_col] = df[time_col].dt.strftime(format)
     return df
 
 
 def mapTo180180(df):
+    df["lon"] = pd.to_numeric(df["lon"])
     df.loc[df["lon"] > 180, "lon"] = df.loc[df["lon"] > 180, "lon"] - 360
     return df
 
@@ -154,7 +155,7 @@ def add_day_week_month_year_clim(df):
     """
     df["year"] = pd.to_datetime(df["time"]).dt.year
     df["month"] = pd.to_datetime(df["time"]).dt.month
-    df["week"] = pd.to_datetime(df["time"]).dt.weekofyear
+    df["week"] = pd.to_datetime(df["time"]).dt.isocalendar().week
     df["dayofyear"] = pd.to_datetime(df["time"]).dt.dayofyear
     return df
 
@@ -203,7 +204,7 @@ def data_df_to_db(df, tableName, server, clean_data_df_flag=True):
     """Inserts dataframe into SQL tbl"""
     if clean_data_df_flag == True:
         clean_data_df(df)
-    temp_file_path = vs.BCP + tableName + ".csv"
+    temp_file_path = tableName + ".csv"
     df.to_csv(temp_file_path, index=False, header=False)
     DB.toSQLbcp(temp_file_path, tableName, server)
     os.remove(temp_file_path)
