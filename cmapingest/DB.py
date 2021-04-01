@@ -9,7 +9,7 @@ import pyodbc
 import pandas.io.sql as sql
 import platform
 import pandas as pd
-import bcpandas 
+import bcpandas
 import pycmap
 
 pycmap.API(cr.api_key)
@@ -150,26 +150,30 @@ def toSQLpandas(df, tableName, server):
     #     "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str),fast_executemany=True
     # )
     engine = sqlalchemy.create_engine(
-        "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str)) 
-    df.to_sql(tableName, con=engine, if_exists="append",method="multi",index=False)
+        "mssql+pyodbc:///?odbc_connect={}".format(quoted_conn_str)
+    )
+    df.to_sql(tableName, con=engine, if_exists="append", method="multi", index=False)
 
 
-def toSQLbcpandas(df,tableName,server):
+def toSQLbcpandas(df, tableName, server):
     usr, psw, ip, port, db_name, TDS_Version = server_select_credentials(server)
-    creds = bcpandas.SqlCreds(ip,db_name,usr,psw)
-    bcpandas.to_sql(df, tableName, creds, index=False,if_exists="append")
+    creds = bcpandas.SqlCreds(ip, db_name, usr, psw)
+    bcpandas.to_sql(df, tableName, creds, index=False, if_exists="append")
 
-def retrive_from_SOT(tableName,server="Rainier"):
+
+def retrive_from_SOT(tableName, server="Rainier"):
     qry = f"""SELECT * FROM {tableName}"""
     df = dbRead(qry, server=server)
     df[list(df)] = df[list(df)].astype(str)
     return df
 
-def toSQLbcp_wrapper(df,tableName, server):
-    export_path = 'temp_bcp.csv'
-    df.to_csv(export_path,index=False)
+
+def toSQLbcp_wrapper(df, tableName, server):
+    export_path = "temp_bcp.csv"
+    df.to_csv(export_path, index=False)
     toSQLbcp(export_path, tableName, server)
     os.remove(export_path)
+
 
 def toSQLbcp(export_path, tableName, server):
 
@@ -181,7 +185,7 @@ def toSQLbcp(export_path, tableName, server):
         + """'"""
         + export_path
         + """'"""
-        + """ -e error -c -t, -U  """
+        + """ -e error -F 2 -c -t, -U  """
         + usr
         + """ -P """
         + psw
@@ -191,5 +195,3 @@ def toSQLbcp(export_path, tableName, server):
         + port
     )
     os.system(bcp_str)
-
-
