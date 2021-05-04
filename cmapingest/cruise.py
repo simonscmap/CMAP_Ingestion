@@ -56,6 +56,7 @@ def resample_trajectory(df, interval="1min"):
     rs_df = df.resample(interval).mean()
     rs_df = rs_df.dropna()
     rs_df.reset_index(inplace=True)
+    rs_df = rs_df[["Cruise_ID", "time", "lat", "lon"]]
     return rs_df
 
 
@@ -139,21 +140,21 @@ def update_tblCruises():
                 "(Nickname,Name,Ship_Name,Start_Time,End_Time,Lat_Min,Lat_Max,Lon_Min,Lon_Max,Chief_Name)",
                 tuple(meta_df.iloc[0].astype(str).to_list()),
             )
-            cruise_traj_flag = cmn.cruise_has_trajectory(cruise)
-            if cruise_traj_flag == False:
-                traj_df = cmn.nanToNA(
-                    pd.read_csv(
-                        vs.r2r_cruise
-                        + cruise.upper()
-                        + "/"
-                        + cruise.upper()
-                        + "_trajectory.csv"
-                    )
-                )
-                Cruise_ID = cmn.get_cruise_IDS([cruise])
-                traj_df["Cruise_ID"] = Cruise_ID[0]
-                traj_df = traj_df[["Cruise_ID", "time", "lat", "lon"]]
-                data.data_df_to_db(traj_df, "tblCruise_Trajectory", clean_data_df=False)
+            # cruise_traj_flag = cmn.cruise_has_trajectory(cruise)
+            # if cruise_traj_flag == False:
+            #     traj_df = cmn.nanToNA(
+            #         pd.read_csv(
+            #             vs.r2r_cruise
+            #             + cruise.upper()
+            #             + "/"
+            #             + cruise.upper()
+            #             + "_trajectory.csv"
+            #         )
+            #     )
+            #     Cruise_ID = cmn.get_cruise_IDS([cruise])
+            #     traj_df["Cruise_ID"] = Cruise_ID[0]
+            #     traj_df = traj_df[["Cruise_ID", "time", "lat", "lon"]]
+            #     data.data_df_to_db(traj_df, "tblCruise_Trajectory", clean_data_df=False)
 
             print(cruise, " Ingested into DB")
 
@@ -343,6 +344,40 @@ def parse_cruise_metadata(cruise_name="", cruise_url=""):
 # get_cruise_metadata(cmdf, "MV0907")
 # get_cruise_traj(cmdf, "MV0907")
 # clean_cruise_traj("MV0907")
+
+
+def download_hot_cruises():
+    cruise_links = gather_cruise_links()
+    for cruise_name, cruise_link in zip(
+        cruise_links["cruise_name"], cruise_links["cruise_link"]
+    ):
+
+        try:
+            cmdf = parse_cruise_metadata(cruise_name)
+            cruise_name_str = (
+                cmdf[cmdf["id_col"] == "dcterms:title"]["info_col"].iloc[0].lower()
+            )
+            if "hot" in cruise_name_str:
+                get_cruise_metadata(cmdf, cruise_name)
+
+            else:
+                print(cruise_name_str, " NOT HOT")
+            # if not cmdf.empty:
+            #     try:
+            # get_cruise_metadata(cmdf, cruise_name)
+            #         print(cruise_name, " Downloaded")
+            #     except:
+            #         print(
+            #             cruise_name,
+            #             " cruise data not downloaded b/c trajectory or metadata mising...",
+            # )
+        except:
+            print("##########################")
+            print(cruise_name, " No applicable cruise data -- cmdf empty")
+            print("##########################")
+
+
+# download_hot_cruises()
 
 
 def download_all_cruises():

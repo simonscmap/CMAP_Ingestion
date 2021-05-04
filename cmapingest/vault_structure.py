@@ -44,7 +44,9 @@ staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging
 collected_data = str(Path.home()) + r"/Vault/collected_data/"
 download_transfer = str(Path.home()) + r"/Vault/download_transfer/"
 spatial_data = str(Path.home()) + r"/Vault/spatial_data/"
-
+dataset_audit = (
+    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
+)
 
 ################# Static Mission Icon Directory ##################
 static = "/home/nrhagen/Documents/CMAP/cmapingest/static/mission_icons/"

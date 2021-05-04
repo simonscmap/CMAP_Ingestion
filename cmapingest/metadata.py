@@ -49,6 +49,7 @@ def import_metadata(branch, tableName):
 
 
 def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
+    last_dataset_ID = cmn.get_last_ID("tblDatasets", server) + 1
     dataset_metadata_df = cmn.nanToNA(dataset_metadata_df)
     dataset_metadata_df.replace({"'": "''"}, regex=True, inplace=True)
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
@@ -79,6 +80,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
     )
 
     query = (
+        last_dataset_ID,
         Db,
         Dataset_Name,
         Dataset_Long_Name,
@@ -95,7 +97,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
         Dataset_Release_Date,
         Dataset_History,
     )
-    columnList = "(DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)"
+    columnList = "(ID,DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)"
     DB.lineInsert(server, "[opedia].[dbo].[tblDatasets]", columnList, query)
     print("Metadata inserted into tblDatasets.")
 
@@ -107,7 +109,9 @@ def tblDataset_References_Insert(
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
     IDvar = cmn.getDatasetID_DS_Name(Dataset_Name)
     columnList = "(Dataset_ID, Reference)"
-    reference_list = dataset_metadata_df["dataset_references"].to_list()
+    reference_list = (
+        dataset_metadata_df["dataset_references"].str.replace(u"\xa0", u" ").to_list()
+    )
     if DOI_link_append != None:
         reference_list.append(DOI_link_append)
 
@@ -173,7 +177,7 @@ def tblVariables_Insert(
     Comment_list = cmn.nanToNA(variable_metadata_df["var_comment"]).to_list()
     Visualize_list = cmn.nanToNA(variable_metadata_df["visualize"]).tolist()
     Data_Type_list = cmn.getTableName_Dtypes(Table_Name)["DATA_TYPE"].tolist()
-    columnList = "(DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize, Data_Type)"
+    columnList = "(ID,DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize, Data_Type)"
 
     for (
         Db,
@@ -222,7 +226,9 @@ def tblVariables_Insert(
         Visualize_list,
         Data_Type_list,
     ):
+        last_var_ID = cmn.get_last_ID("tblVariables", server) + 1
         query = (
+            last_var_ID,
             Db,
             IDvar,
             Table_Name,
@@ -305,43 +311,42 @@ def user_input_build_cruise(df, dataset_metadata_df):
 
 
 def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server="Rainier"):
-    """possible options:
-    1. some cruises are matched. continue with dataset_cruise link
-    2. cruises exist, but there are no matches (ie. matched_cruises = [])
-        -attempt build cruise traj/metadata
-        -return to continue with dataset cruise link
 
-    """
     matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
-    if matched_cruises == []:
-        build_traj_yn = input(
-            "Do you want to build cruise trajectory and metadata from this dataset? [Y/n]: "
-        )
-        if build_traj_yn.lower() == "y":
-            print(
-                "Building cruise trajectory and metadata from this dataset and user input. "
-            )
-            user_input_build_cruise(data_df, dataset_metadata_df)
-            matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
-                dataset_metadata_df
-            )
-    cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
-    dataset_ID = cmn.getDatasetID_DS_Name(
-        dataset_metadata_df["dataset_short_name"].iloc[0]
-    )
-    for cruise_ID in cruise_ID_list:
-        query = (dataset_ID, cruise_ID)
-        DB.lineInsert(
-            server,
-            "[opedia].[dbo].[tblDataset_Cruises]",
-            "(Dataset_ID, Cruise_ID)",
-            query,
-        )
-    print("Dataset matched to cruises: ", matched_cruises)
+    print("matched: ")
+    print(matched_cruises)
+    print("\n")
+    print("umatched: ")
+    print(unmatched_cruises)
+    # if matched_cruises == []:
+    #     build_traj_yn = input(
+    #         "Do you want to build cruise trajectory and metadata from this dataset? [Y/n]: "
+    #     )
+    #     if build_traj_yn.lower() == "y":
+    #         print(
+    #             "Building cruise trajectory and metadata from this dataset and user input. "
+    #         )
+    #         user_input_build_cruise(data_df, dataset_metadata_df)
+    #         matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
+    #             dataset_metadata_df
+    #         )
+    # cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
+    # dataset_ID = cmn.getDatasetID_DS_Name(
+    #     dataset_metadata_df["dataset_short_name"].iloc[0]
+    # )
+    # for cruise_ID in cruise_ID_list:
+    #     query = (dataset_ID, cruise_ID)
+    #     DB.lineInsert(
+    #         server,
+    #         "[opedia].[dbo].[tblDataset_Cruises]",
+    #         "(Dataset_ID, Cruise_ID)",
+    #         query,
+    #     )
+    # print("Dataset matched to cruises: ", matched_cruises)
 
 
 def deleteFromtblKeywords(Dataset_ID, server):
-    Keyword_ID_list = cmn.getKeywordsIDDataset(Dataset_ID)
+    Keyword_ID_list = cmn.getKeywordsIDDataset(Dataset_ID, server)
     Keyword_ID_str = "','".join(str(key) for key in Keyword_ID_list)
     # print(Keyword_ID_str)
     cur_str = (
@@ -412,13 +417,13 @@ def dropTable(tableName, server):
     print(tableName, " Removed from DB")
 
 
-def deleteCatalogTables(tableName, server="Rainier"):
+def deleteCatalogTables(tableName, server):
     contYN = input(
         "Are you sure you want to delete all of the catalog tables for "
         + tableName
         + " ?  [yes/no]: "
     )
-    Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName)
+    Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName, server)
     if contYN == "yes":
         deleteFromtblKeywords(Dataset_ID, server)
         deleteFromtblDataset_Stats(Dataset_ID, server)
@@ -428,7 +433,7 @@ def deleteCatalogTables(tableName, server="Rainier"):
         deleteFromtblVariables(Dataset_ID, server)
         deleteFromtblDatasets(Dataset_ID, server)
         dropTable(tableName, server)
-        dropTable(tableName, "Mariana")
+        # dropTable(tableName, "Mariana")
     else:
         print("Catalog tables for " + datasetName + " not deleted")
 
@@ -474,7 +479,7 @@ def addKeywords(keywords_list, tableName, var_short_name_list="*", server="Raini
             )
             try:
                 DB.lineInsert(server, "[opedia].[dbo].[tblKeywords]", columnList, query)
-                print("Added keyword: ")
+                print("Added keyword: " + keyword)
             except Exception as e:
                 print(e)
 
@@ -489,7 +494,7 @@ def addKeywords(keywords_list, tableName, var_short_name_list="*", server="Raini
 
 
 def geopandas_load_gpkg(input_df):
-    """[summary]
+    """
 
     Args:
         input_df (Pandas DataFrame): CMAP formatted DataFrame
@@ -539,7 +544,7 @@ def classified_gdf_to_list(classified_gdf):
     return region_set
 
 
-def ocean_region_classification(data_df, dataset_name):
+def ocean_region_classification(data_df, dataset_name, server):
     """This function geographically classifes a sparse dataset into a specific ocean region
 
     Args:
@@ -561,24 +566,24 @@ def ocean_region_classification(data_df, dataset_name):
     for region_ID in region_ID_list:
         query = (dataset_ID, region_ID)
         DB.lineInsert(
-            "Rainier",
+            server,
             "[opedia].[dbo].[tblDataset_Regions]",
             "(Dataset_ID, Region_ID)",
             query,
         )
 
 
-insitu_df = DB.dbRead(
-    """select distinct tblD.Dataset_Name, tblV.Table_Name from tblDatasets tblD 
-inner join
-tblVariables tblV 
-on tblD.ID = tblV.Dataset_ID
+# insitu_df = DB.dbRead(
+#     """select distinct tblD.Dataset_Name, tblV.Table_Name from tblDatasets tblD
+# inner join
+# tblVariables tblV
+# on tblD.ID = tblV.Dataset_ID
 
-where tblV.Make_ID = 1
-and tblV.Sensor_ID <> 1
-AND
-tblD.Dataset_Name <>  'Argo_BGC_REP' AND tblD.Dataset_Name <>  'ESV' AND tblD.Dataset_Name <>  'Global_Drifter_Program' AND tblD.Dataset_Name <> 'WOA_Climatology'"""
-)
+# where tblV.Make_ID = 1
+# and tblV.Sensor_ID <> 1
+# AND
+# tblD.Dataset_Name <>  'Argo_BGC_REP' AND tblD.Dataset_Name <>  'ESV' AND tblD.Dataset_Name <>  'Global_Drifter_Program' AND tblD.Dataset_Name <> 'WOA_Climatology'"""
+# )
 
 
 def if_exists_dataset_region(dataset_name):

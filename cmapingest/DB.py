@@ -132,7 +132,6 @@ def lineInsert(server, tableName, columnList, query):
     insertQuery = """INSERT INTO {} {} VALUES {} """.format(
         tableName, columnList, query
     )
-    # print(insertQuery)
     conn, cursor = dbConnect(server)
     cursor.execute(insertQuery)
     conn.commit()

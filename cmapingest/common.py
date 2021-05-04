@@ -108,6 +108,33 @@ def vault_struct_retrieval(branch):
     return vs_struct
 
 
+def get_name_pkey(tableName, server):
+    """Returns the name of the primary key column for a given table
+
+    Args:
+        tableName (string): CMAP table name
+        Server (string): Valid CMAP server name
+    """
+    query = f"""
+    SELECT Col.Column_Name from 
+        INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab, 
+        INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col 
+    WHERE 
+        Col.Constraint_Name = Tab.Constraint_Name
+        AND Col.Table_Name = Tab.Table_Name
+        AND Constraint_Type = 'PRIMARY KEY'
+        AND Col.Table_Name = '{tableName}'"""
+    pkey_name = DB.dbRead(query, server).iloc[0][0]
+    return pkey_name
+
+
+def get_last_ID(tableName, server):
+    pkey_col_name = get_name_pkey(tableName, server)
+    last_ID_qry = f"""SELECT TOP 1 * FROM {tableName} ORDER BY {pkey_col_name} DESC"""
+    last_ID = DB.dbRead(last_ID_qry, server).iloc[0][0]
+    return last_ID
+
+
 def getDatasetID_DS_Name(datasetName):
     """Get DatasetID from input dataset name """
     cur_str = (
@@ -121,14 +148,14 @@ def getDatasetID_DS_Name(datasetName):
     return dsID
 
 
-def getDatasetID_Tbl_Name(tableName):
+def getDatasetID_Tbl_Name(tableName, server):
     """Get DatasetID from input table name """
     cur_str = (
         """select distinct [Dataset_ID] FROM [Opedia].[dbo].[tblVariables] WHERE [Table_Name] = '"""
         + tableName
         + """'"""
     )
-    query_return = DB.dbRead(cur_str, server="Rainier")
+    query_return = DB.dbRead(cur_str, server=server)
 
     # query_return = DB.DB_query(cur_str)
     dsID = query_return.iloc[0][0]
@@ -149,12 +176,12 @@ def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
     return query_return
 
 
-def getKeywordsIDDataset(dataset_ID):
+def getKeywordsIDDataset(dataset_ID, server):
     """Get list of keyword ID's from input dataset ID"""
     cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(
         dataset_ID=str(dataset_ID)
     )
-    query_return = DB.dbRead(cur_str, server="Rainier")["ID"].to_list()
+    query_return = DB.dbRead(cur_str, server=server)["ID"].to_list()
 
     # query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return
@@ -182,8 +209,8 @@ def getCruiseDetails(cruiseName):
 
 def getListCruises():
     """Get list of available cruises using uspCruises"""
-    query = """EXEC uspCruises"""
-    query_return = DB.dbRead(query)
+    query = """SELECT * FROM tblCruise"""
+    query_return = DB.dbRead(query, server="Rainier")
     return query_return
 
 
@@ -243,10 +270,14 @@ def get_cruise_IDS(cruise_name_list):
     """Returns IDs of input cruise names"""
     cruise_db_df = getListCruises()
     cruise_name_list = lowercase_List(cruise_name_list)
-    cruise_ID_list = cruise_db_df["ID"][
+    cruise_ID_list_name = cruise_db_df["ID"][
         cruise_db_df["Name"].str.lower().isin(cruise_name_list)
     ].to_list()
-    return cruise_ID_list
+    cruise_ID_list_nickname = cruise_db_df["ID"][
+        cruise_db_df["Nickname"].str.lower().isin(cruise_name_list)
+    ].to_list()
+    combined_cruise_id = list(set(cruise_ID_list_name + cruise_ID_list_nickname))
+    return combined_cruise_id
 
 
 def get_region_IDS(region_name_list):

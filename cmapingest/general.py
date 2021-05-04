@@ -1,19 +1,3 @@
-# dev note: make sure keywords are set(). keyword with bcp insert? slow section
-"""
-two options:
-dataset that can easily fit in memory:
--fully ingested, stats made, tests run on ingested DB. if tests fail, option for full deletion. If passes normal checks, "report" of plots etc zipped and rdy to send to data owner"
-
-- partial ingestion (sat/model/large etc.)
-- single file(1st in glob?) ingested, stats(from stats?) created. tests ran. if passed, 
--all ingested, light tests ran? report of single file?
-
--also needs flag for appending to table... 
------ give data file directory, glob files to iterate through, 
-    ---update stats of stats from /stats/
-
-"""
-#
 import sys
 import os
 import glob
@@ -91,28 +75,34 @@ def insertData(data_dict, tableName, server):
 
 
 def insertMetadata(data_dict, tableName, DOI_link_append, server):
-    metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName)
-    metadata.tblDataset_References_Insert(
-        data_dict["dataset_metadata_df"], DOI_link_append
-    )
-    metadata.tblVariables_Insert(
-        data_dict["data_df"],
-        data_dict["dataset_metadata_df"],
-        data_dict["variable_metadata_df"],
-        tableName,
-        process_level="REP",
-        CRS="CRS",
-        server=server,
-    )
+    # metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName, server)
+    # metadata.tblDataset_References_Insert(
+    #     data_dict["dataset_metadata_df"], DOI_link_append, server
+    # )
+    # metadata.tblVariables_Insert(
+    #     data_dict["data_df"],
+    #     data_dict["dataset_metadata_df"],
+    #     data_dict["variable_metadata_df"],
+    #     tableName,
+    #     process_level="REP",
+    #     CRS="CRS",
+    #     server=server,
+    # )
     metadata.tblKeywords_Insert(
-        data_dict["variable_metadata_df"], data_dict["dataset_metadata_df"], tableName
+        data_dict["variable_metadata_df"],
+        data_dict["dataset_metadata_df"],
+        tableName,
+        server,
     )
-    metadata.ocean_region_classification(
-        data_dict["data_df"],
-        data_dict["dataset_metadata_df"]["dataset_short_name"].iloc[0],
-    )
-    if data_dict["dataset_metadata_df"]["cruise_names"].dropna().empty == False:
-        metadata.tblDataset_Cruises_Insert(data_dict["dataset_metadata_df"])
+    # metadata.ocean_region_classification(
+    #     data_dict["data_df"],
+    #     data_dict["dataset_metadata_df"]["dataset_short_name"].iloc[0],
+    #     server,
+    # )
+    # if data_dict["dataset_metadata_df"]["cruise_names"].dropna().empty == False:
+    #     metadata.tblDataset_Cruises_Insert(
+    #         data_dict["data_df"], data_dict["dataset_metadata_df"], server
+    #     )
 
 
 ###   TESTING SUITE   ###
@@ -142,21 +132,21 @@ def push_icon():
 
 def full_ingestion(args):
     print("Full Ingestion")
-    splitExcel(args.staging_filename, args.metadata_filename)
-    staging_to_vault(
-        args.staging_filename,
-        getBranch_Path(args),
-        args.tableName,
-        remove_file_flag=True,
-    )
+    # splitExcel(args.staging_filename, args.metadata_filename)
+    # staging_to_vault(
+    #     args.staging_filename,
+    #     getBranch_Path(args),
+    #     args.tableName,
+    #     remove_file_flag=True,
+    # )
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
-    insertData(data_dict, args.tableName, args.Server)
-    if args.Server == "Rainier":
-        insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
-        insert_small_stats(data_dict, args.tableName, args.Server)
-        createIcon(data_dict, args.tableName)
-        push_icon()
+    # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
+    # insertData(data_dict, args.tableName, args.Server)
+    insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
+    # insert_small_stats(data_dict, args.tableName, args.Server)
+    # if args.Server == "Rainier":
+    #     createIcon(data_dict, args.tableName)
+    #     push_icon()
 
 
 def append_ingestion(args):
