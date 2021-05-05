@@ -257,10 +257,11 @@ def verify_cruise_lists(dataset_metadata_df):
     cruise_series = strip_leading_trailing_whitespace_column(
         dataset_metadata_df, "cruise_names"
     )["cruise_names"]
-    # cruise_series = dataset_metadata_df["cruise_names"]
     """ check that every cruise_name in column exists in the database. map those that don't exist into return"""
     cruise_set = set(lowercase_List(cruise_series.to_list()))
-    db_cruise_set = set(lowercase_List(getListCruises()["Name"].to_list()))
+    nickname_list = lowercase_List(getListCruises()["Nickname"].to_list())
+    name_list = lowercase_List(getListCruises()["Name"].to_list())
+    db_cruise_set = set(nickname_list + name_list)
     matched = list(cruise_set.intersection(db_cruise_set))
     unmatched = list(cruise_set.difference(db_cruise_set))
     return matched, unmatched
