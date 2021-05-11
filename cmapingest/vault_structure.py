@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-
 def makedir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -28,28 +27,21 @@ def leafStruc(base):
 
 
 """synced dropbox path"""
-dbx_vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
-dbx_staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
-dbx_collected_data = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
+vault = str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
+staging = str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
+collected_data = (
+    str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
 )
-dbx_download_transfer = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/"
-)
-"""mounted NAS - dropbox sync paths"""
-
-vault = str(Path.home()) + r"/Vault/vault/"
-# staging = str(Path.home()) + r"/Vault/staging/"
-staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
-collected_data = str(Path.home()) + r"/Vault/collected_data/"
-download_transfer = str(Path.home()) + r"/Vault/download_transfer/"
-spatial_data = str(Path.home()) + r"/Vault/spatial_data/"
+spatial_data = str(Path('/data')) + r"/CMAP Data Submission Dropbox/spatial_data/"
 dataset_audit = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
+    str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
 )
+download_transfer = (
+    str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/")
 
+    
 ################# Static Mission Icon Directory ##################
-static = "/home/nrhagen/Documents/CMAP/cmapingest/static/mission_icons/"
+static = "/home/exx/Documents/CMAP/CMAP_Ingestion/static/"
 
 ################# Download Transfer Structure   ##################
 makedir(download_transfer)
