@@ -48,8 +48,8 @@ def import_metadata(branch, tableName):
     return dataset_metadata_df, vars_metadata_df
 
 
-def tblDatasets_Insert(dataset_metadata_df, tableName, server="Rainier"):
-    last_dataset_ID = cmn.get_last_ID("tblDatasets", server) + 1
+def tblDatasets_Insert(dataset_metadata_df, tableName, server):
+    last_dataset_ID = cmn.get_last_ID("tblDatasets", "Rainier") + 1
     dataset_metadata_df = cmn.nanToNA(dataset_metadata_df)
     dataset_metadata_df.replace({"'": "''"}, regex=True, inplace=True)
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
@@ -107,7 +107,7 @@ def tblDataset_References_Insert(
 ):
 
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
-    IDvar = cmn.getDatasetID_DS_Name(Dataset_Name)
+    IDvar = cmn.getDatasetID_DS_Name(Dataset_Name, server)
     columnList = "(Dataset_ID, Reference)"
     reference_list = (
         dataset_metadata_df["dataset_references"].str.replace(u"\xa0", u" ").to_list()
@@ -134,7 +134,9 @@ def tblVariables_Insert(
 ):
     Db_list = len(variable_metadata_df) * ["Opedia"]
     IDvar_list = len(variable_metadata_df) * [
-        cmn.getDatasetID_DS_Name(dataset_metadata_df["dataset_short_name"].iloc[0])
+        cmn.getDatasetID_DS_Name(
+            dataset_metadata_df["dataset_short_name"].iloc[0], server
+        )
     ]
     Table_Name_list = len(variable_metadata_df) * [Table_Name]
     Short_Name_list = variable_metadata_df["var_short_name"].tolist()
@@ -260,7 +262,9 @@ def tblVariables_Insert(
 def tblKeywords_Insert(
     variable_metadata_df, dataset_metadata_df, Table_Name, server="Rainier"
 ):
-    IDvar = cmn.getDatasetID_DS_Name(dataset_metadata_df["dataset_short_name"].iloc[0])
+    IDvar = cmn.getDatasetID_DS_Name(
+        dataset_metadata_df["dataset_short_name"].iloc[0], server
+    )
     for index, row in variable_metadata_df.iterrows():
         VarID = cmn.findVarID(
             IDvar, variable_metadata_df.loc[index, "var_short_name"], server
@@ -332,7 +336,7 @@ def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server="Rainier"):
     #         )
     # cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
     # dataset_ID = cmn.getDatasetID_DS_Name(
-    #     dataset_metadata_df["dataset_short_name"].iloc[0]
+    #     dataset_metadata_df["dataset_short_name"].iloc[0],server
     # )
     # for cruise_ID in cruise_ID_list:
     #     query = (dataset_ID, cruise_ID)
@@ -559,7 +563,7 @@ def ocean_region_classification(data_df, dataset_name, server):
     classified_gdf = classify_gdf_with_gpkg_regions(data_gdf, region_gdf)
     region_set = classified_gdf_to_list(classified_gdf)
 
-    dataset_ID = cmn.getDatasetID_DS_Name(dataset_name)
+    dataset_ID = cmn.getDatasetID_DS_Name(dataset_name, server)
     region_ID_list = cmn.get_region_IDS(region_set)
     print("Dataset matched to the following Regions: ", region_set)
 
@@ -593,7 +597,7 @@ def if_exists_dataset_region(dataset_name):
         dataset_name (string): The short name of the dataset in CMAP tblDatasets.
     Returns: Boolean
     """
-    ds_ID = cmn.getDatasetID_DS_Name(dataset_name)
+    ds_ID = cmn.getDatasetID_DS_Name(dataset_name, server)
     cur_str = """SELECT * FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = {Dataset_ID}""".format(
         Dataset_ID=ds_ID
     )
