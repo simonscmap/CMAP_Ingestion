@@ -135,14 +135,14 @@ def get_last_ID(tableName, server):
     return last_ID
 
 
-def getDatasetID_DS_Name(datasetName):
+def getDatasetID_DS_Name(datasetName, server):
     """Get DatasetID from input dataset name """
     cur_str = (
         """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '"""
         + datasetName
         + """'"""
     )
-    query_return = DB.dbRead(cur_str, server="Rainier")
+    query_return = DB.dbRead(cur_str, server)
     # query_return = DB.DB_query(cur_str)
     dsID = query_return.iloc[0][0]
     return dsID
