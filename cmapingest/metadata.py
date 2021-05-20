@@ -51,7 +51,7 @@ def import_metadata(branch, tableName):
 
 
 def tblDatasets_Insert(dataset_metadata_df, tableName, server):
-    last_dataset_ID = cmn.get_last_ID("tblDatasets", "Rainier") + 1
+    last_dataset_ID = cmn.get_last_ID("tblDatasets", server) + 1
     dataset_metadata_df = cmn.nanToNA(dataset_metadata_df)
     dataset_metadata_df.replace({"'": "''"}, regex=True, inplace=True)
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
