@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 def makedir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -25,24 +26,18 @@ def leafStruc(base):
     makedir(code)
     return nrt, rep, metadata, stats, doc, code
 
-home = 
 
 """synced dropbox path"""
-vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
-staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
-collected_data = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
-)
-spatial_data = str(Path.home()) + r"/CMAP Data Submission Dropbox/spatial_data/"
-dataset_audit = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
-)
-download_transfer = (
-    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/")
+vault = r"/data/CMAP Data Submission Dropbox/Simons CMAP/vault/"
+staging = r"/data/CMAP Data Submission Dropbox/Simons CMAP/staging/"
+collected_data = r"/data/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
+spatial_data = r"/data/CMAP Data Submission Dropbox/Simons CMAP/spatial_data/"
+dataset_audit = r"/data/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
+download_transfer = r"/data/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/"
 
-    
+
 ################# Static Mission Icon Directory ##################
-static = "/home/nrahgen/Documents/CMAP/CMAP_Ingestion/static/"
+static = str(Path.home()) + "/Documents/CMAP/CMAP/cmapingest/"
 
 ################# Download Transfer Structure   ##################
 makedir(download_transfer)

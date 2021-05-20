@@ -82,7 +82,7 @@ def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
     """Takes sparse data geodataframe and classifies it to an ocean region
 
     Args:
-        data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe. 
+        data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe.
         region_gdf (geopandas geodataframe): A geodataframe created from ocean region gpkg.
     """
     classified_gdf = sjoin(data_gdf, region_gdf, how="left", op="within")

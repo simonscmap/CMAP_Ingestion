@@ -2,6 +2,7 @@ import sys
 import os
 import glob
 import pandas as pd
+import numpy as np
 
 sys.path.append("../login/")
 import credentials as cr
@@ -76,33 +77,33 @@ def insertData(data_dict, tableName, server):
 
 def insertMetadata(data_dict, tableName, DOI_link_append, server):
     metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName, server)
-    # metadata.tblDataset_References_Insert(
-    #     data_dict["dataset_metadata_df"], DOI_link_append, server
-    # )
-    # metadata.tblVariables_Insert(
-    #     data_dict["data_df"],
-    #     data_dict["dataset_metadata_df"],
-    #     data_dict["variable_metadata_df"],
-    #     tableName,
-    #     process_level="REP",
-    #     CRS="CRS",
-    #     server=server,
-    # )
-    # metadata.tblKeywords_Insert(
-    #     data_dict["variable_metadata_df"],
-    #     data_dict["dataset_metadata_df"],
-    #     tableName,
-    #     server,
-    # )
-    # metadata.ocean_region_classification(
-    #     data_dict["data_df"],
-    #     data_dict["dataset_metadata_df"]["dataset_short_name"].iloc[0],
-    #     server,
-    # )
-    # if data_dict["dataset_metadata_df"]["cruise_names"].dropna().empty == False:
-    #     metadata.tblDataset_Cruises_Insert(
-    #         data_dict["data_df"], data_dict["dataset_metadata_df"], server
-    #     )
+    metadata.tblDataset_References_Insert(
+        data_dict["dataset_metadata_df"], DOI_link_append, server
+    )
+    metadata.tblVariables_Insert(
+        data_dict["data_df"],
+        data_dict["dataset_metadata_df"],
+        data_dict["variable_metadata_df"],
+        tableName,
+        process_level="REP",
+        CRS="CRS",
+        server=server,
+    )
+    metadata.tblKeywords_Insert(
+        data_dict["variable_metadata_df"],
+        data_dict["dataset_metadata_df"],
+        tableName,
+        server,
+    )
+    metadata.ocean_region_classification(
+        data_dict["data_df"],
+        data_dict["dataset_metadata_df"]["dataset_short_name"].iloc[0],
+        server,
+    )
+    if data_dict["dataset_metadata_df"]["cruise_names"].dropna().empty == False:
+        metadata.tblDataset_Cruises_Insert(
+            data_dict["data_df"], data_dict["dataset_metadata_df"], server
+        )
 
 
 ###   TESTING SUITE   ###
@@ -132,22 +133,22 @@ def push_icon():
 
 def full_ingestion(args):
     print("Full Ingestion")
-    # splitExcel(args.staging_filename, args.metadata_filename)
-    # staging_to_vault(
-    #     args.staging_filename,
-    #     getBranch_Path(args),
-    #     args.tableName,
-    #     remove_file_flag=True,
-    # )
+    splitExcel(args.staging_filename, args.metadata_filename)
+    staging_to_vault(
+        args.staging_filename,
+        getBranch_Path(args),
+        args.tableName,
+        remove_file_flag=True,
+    )
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    # print(data_dict)
-    # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
-    # insertData(data_dict, args.tableName, args.Server)
+    print(data_dict)
+    SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
+    insertData(data_dict, args.tableName, args.Server)
     insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
-    # insert_small_stats(data_dict, args.tableName, args.Server)
-    # if args.Server == "Rainier":
-    #     createIcon(data_dict, args.tableName)
-    #     push_icon()
+    insert_small_stats(data_dict, args.tableName, args.Server)
+    if args.Server == "Rainier":
+        createIcon(data_dict, args.tableName)
+        push_icon()
 
 
 def append_ingestion(args):
@@ -236,7 +237,9 @@ def main():
     )
     parser.add_argument("-p", "--process_level", nargs="?", default="rep")
     parser.add_argument(
-        "-m", "--metadata_filename", nargs="?",
+        "-m",
+        "--metadata_filename",
+        nargs="?",
     )
     parser.add_argument(
         "-d",

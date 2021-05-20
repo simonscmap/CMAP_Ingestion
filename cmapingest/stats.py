@@ -39,7 +39,7 @@ def updateStats_Small(tableName, server, data_df=None):
     else:
         query = "SELECT * FROM {tableName}".format(tableName=tableName)
         data_df = DB.dbRead(query, server)
-    Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName)
+    Dataset_ID = cmn.getDatasetID_Tbl_Name(tableName, server)
     stats_df = data_df.describe()
     min_max_df = pd.DataFrame(
         {"time": [data_df["time"].min(), data_df["time"].max()]}, index=["min", "max"]

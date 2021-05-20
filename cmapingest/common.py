@@ -35,7 +35,7 @@ def strip_leading_trailing_whitespace_column(df, col_name):
 
 
 def nanToNA(df):
-    """Replaces and numpy nans with '' """
+    """Replaces and numpy nans with ''"""
     df = df.replace(np.nan, "", regex=True)
     return df
 
@@ -136,7 +136,7 @@ def get_last_ID(tableName, server):
 
 
 def getDatasetID_DS_Name(datasetName, server):
-    """Get DatasetID from input dataset name """
+    """Get DatasetID from input dataset name"""
     cur_str = (
         """select [ID] FROM [Opedia].[dbo].[tblDatasets] WHERE [Dataset_Name] = '"""
         + datasetName
@@ -149,7 +149,7 @@ def getDatasetID_DS_Name(datasetName, server):
 
 
 def getDatasetID_Tbl_Name(tableName, server):
-    """Get DatasetID from input table name """
+    """Get DatasetID from input table name"""
     cur_str = (
         """select distinct [Dataset_ID] FROM [Opedia].[dbo].[tblVariables] WHERE [Table_Name] = '"""
         + tableName
@@ -178,8 +178,10 @@ def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
 
 def getKeywordsIDDataset(dataset_ID, server):
     """Get list of keyword ID's from input dataset ID"""
-    cur_str = """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(
-        dataset_ID=str(dataset_ID)
+    cur_str = (
+        """select [ID] from tblVariables where Dataset_ID = '{dataset_ID}'""".format(
+            dataset_ID=str(dataset_ID)
+        )
     )
     query_return = DB.dbRead(cur_str, server=server)["ID"].to_list()
 
@@ -188,7 +190,7 @@ def getKeywordsIDDataset(dataset_ID, server):
 
 
 def getTableName_Dtypes(tableName):
-    """Get data types from input table name """
+    """Get data types from input table name"""
     query = (
         """ select COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"""
         + tableName
@@ -214,7 +216,7 @@ def getListCruises():
     return query_return
 
 
-def findVarID(datasetID, Short_Name, server="Rainier"):
+def findVarID(datasetID, Short_Name, server):
     """Get ID value from tblVariables for specific variable"""
     cur_str = (
         """select [ID] FROM [Opedia].[dbo].[tblVariables] WHERE [Dataset_ID] = '"""
@@ -223,8 +225,7 @@ def findVarID(datasetID, Short_Name, server="Rainier"):
         + Short_Name
         + """'"""
     )
-    # query = DB.DB_query(cur_str)
-    query = DB.dbRead(cur_str, server="Rainier")
+    query = DB.dbRead(cur_str, server)
     print(query)
     VarID = query.iloc[0][0]
     return VarID

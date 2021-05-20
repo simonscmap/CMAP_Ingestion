@@ -10,6 +10,8 @@ from geopandas.tools import sjoin
 import markdown
 import pandas as pd
 import pycmap
+import numpy as np
+
 
 from cmapingest import common as cmn
 from cmapingest import cruise
@@ -98,7 +100,9 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
         Dataset_History,
     )
     columnList = "(ID,DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)"
-    DB.lineInsert(server, "[opedia].[dbo].[tblDatasets]", columnList, query,ID_insert=True)
+    DB.lineInsert(
+        server, "[opedia].[dbo].[tblDatasets]", columnList, query, ID_insert=True
+    )
     print("Metadata inserted into tblDatasets.")
 
 
@@ -110,7 +114,11 @@ def tblDataset_References_Insert(
     IDvar = cmn.getDatasetID_DS_Name(Dataset_Name, server)
     columnList = "(Dataset_ID, Reference)"
     reference_list = (
-        dataset_metadata_df["dataset_references"].str.replace(u"\xa0", u" ").to_list()
+        dataset_metadata_df["dataset_references"]
+        .str.replace(u"\xa0", u" ")
+        .replace("", np.nan)
+        .dropna()
+        .to_list()
     )
     if DOI_link_append != None:
         reference_list.append(DOI_link_append)
@@ -255,13 +263,13 @@ def tblVariables_Insert(
             Data_Type,
         )
 
-        DB.lineInsert(server, "[opedia].[dbo].[tblVariables]", columnList, query)
+        DB.lineInsert(
+            server, "[opedia].[dbo].[tblVariables]", columnList, query, ID_insert=True
+        )
     print("Inserting data into tblVariables")
 
 
-def tblKeywords_Insert(
-    variable_metadata_df, dataset_metadata_df, Table_Name, server="Rainier"
-):
+def tblKeywords_Insert(variable_metadata_df, dataset_metadata_df, Table_Name, server):
     IDvar = cmn.getDatasetID_DS_Name(
         dataset_metadata_df["dataset_short_name"].iloc[0], server
     )
@@ -527,7 +535,7 @@ def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
     """Takes sparse data geodataframe and classifies it to an ocean region
 
     Args:
-        data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe. 
+        data_gdf (geopandas geodataframe): A geodataframe created from the input CMAP dataframe.
         region_gdf (geopandas geodataframe): A geodataframe created from ocean region gpkg.
     """
     classified_gdf = sjoin(data_gdf, region_gdf, how="left", op="within")
@@ -553,7 +561,7 @@ def ocean_region_classification(data_df, dataset_name, server):
 
     Args:
         df (Pandas DataFrame): Input CMAP formatted DataFrame (ST Index: time,lat,lon,<depth>)
-        dataset_name (string): name of dataset in CMAP 
+        dataset_name (string): name of dataset in CMAP
     """
 
     data_gdf = geopandas_load_gpkg(data_df)

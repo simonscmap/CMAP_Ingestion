@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import glob
 import xarray as xr
-import vaex
 
 from cmapingest import vault_structure as vs
 from cmapingest import DB
@@ -172,7 +171,7 @@ def read_csv(path_and_filename, delim=","):
 
 
 def fetch_single_datafile(branch, tableName, process_level="REP", file_ext=".csv"):
-    """Finds first file in glob with input path to vault structure. Returns path_filename """
+    """Finds first file in glob with input path to vault structure. Returns path_filename"""
     vault_path = cmn.vault_struct_retrieval(branch)
     print(vault_path)
     flist = glob.glob(
@@ -222,7 +221,7 @@ def netcdf4_to_vaexdf(netcdf_file, data_var=None):
 
 
 def netcdf4_to_pandas(netcdf_file, data_var=None):
-    """Imports a netcdf file into a pandas dataframe """
+    """Imports a netcdf file into a pandas dataframe"""
     xdf = xr.open_dataset(netcdf_file)
     if data_var != None:
         xdf = xdf[data_var]

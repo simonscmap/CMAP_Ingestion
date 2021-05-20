@@ -54,6 +54,11 @@ def server_select_credentials(server):
         psw = cr.psw_mariana
         ip = cr.ip_mariana
         port = cr.port_mariana
+    elif server.lower() == "rossby":
+        usr = cr.usr_rossby
+        psw = cr.psw_rossby
+        ip = cr.ip_rossby
+        port = cr.port_rossby
     elif server.lower() == "beast":
         usr = cr.usr_beast
         psw = cr.psw_beast
@@ -128,12 +133,16 @@ def dbConnect(server):
     return conn, cursor
 
 
-def lineInsert(server, tableName, columnList, query,ID_insert=False):
+def lineInsert(server, tableName, columnList, query, ID_insert=False):
     insertQuery = """INSERT INTO {} {} VALUES {} """.format(
-    tableName, columnList, query)
+        tableName, columnList, query
+    )
     if ID_insert == True:
-        insertQuery = f"""SET IDENTITY_INSERT ({tableName}) ON """ + insertQuery + f""" SET IDENTITY_INSERT ({tableName}) OFF """
-    print(insertQuery)
+        insertQuery = (
+            f"""SET IDENTITY_INSERT {tableName} ON """
+            + insertQuery
+            + f""" SET IDENTITY_INSERT {tableName} OFF """
+        )
     conn, cursor = dbConnect(server)
     cursor.execute(insertQuery)
     conn.commit()
