@@ -25,23 +25,24 @@ def leafStruc(base):
     makedir(code)
     return nrt, rep, metadata, stats, doc, code
 
+home = 
 
 """synced dropbox path"""
-vault = str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
-staging = str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
+vault = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/vault/"
+staging = str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/staging/"
 collected_data = (
-    str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
+    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/collected_data/"
 )
-spatial_data = str(Path('/data')) + r"/CMAP Data Submission Dropbox/spatial_data/"
+spatial_data = str(Path.home()) + r"/CMAP Data Submission Dropbox/spatial_data/"
 dataset_audit = (
-    str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
+    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/dataset_audit/"
 )
 download_transfer = (
-    str(Path('/data')) + r"/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/")
+    str(Path.home()) + r"/CMAP Data Submission Dropbox/Simons CMAP/download_transfer/")
 
     
 ################# Static Mission Icon Directory ##################
-static = "/home/exx/Documents/CMAP/CMAP_Ingestion/static/"
+static = "/home/nrahgen/Documents/CMAP/CMAP_Ingestion/static/"
 
 ################# Download Transfer Structure   ##################
 makedir(download_transfer)
