@@ -98,7 +98,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
         Dataset_History,
     )
     columnList = "(ID,DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)"
-    DB.lineInsert(server, "[opedia].[dbo].[tblDatasets]", columnList, query)
+    DB.lineInsert(server, "[opedia].[dbo].[tblDatasets]", columnList, query,ID_insert=True)
     print("Metadata inserted into tblDatasets.")
 
 

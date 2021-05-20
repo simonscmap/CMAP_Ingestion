@@ -128,10 +128,12 @@ def dbConnect(server):
     return conn, cursor
 
 
-def lineInsert(server, tableName, columnList, query):
+def lineInsert(server, tableName, columnList, query,ID_insert=False):
     insertQuery = """INSERT INTO {} {} VALUES {} """.format(
-        tableName, columnList, query
-    )
+    tableName, columnList, query)
+    if ID_insert == True:
+        insertQuery = f"""SET IDENTITY_INSERT ({tableName}) ON """ + insertQuery + f""" SET IDENTITY_INSERT ({tableName}) OFF """
+    print(insertQuery)
     conn, cursor = dbConnect(server)
     cursor.execute(insertQuery)
     conn.commit()

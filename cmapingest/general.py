@@ -75,7 +75,7 @@ def insertData(data_dict, tableName, server):
 
 
 def insertMetadata(data_dict, tableName, DOI_link_append, server):
-    # metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName, server)
+    metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName, server)
     # metadata.tblDataset_References_Insert(
     #     data_dict["dataset_metadata_df"], DOI_link_append, server
     # )
@@ -88,12 +88,12 @@ def insertMetadata(data_dict, tableName, DOI_link_append, server):
     #     CRS="CRS",
     #     server=server,
     # )
-    metadata.tblKeywords_Insert(
-        data_dict["variable_metadata_df"],
-        data_dict["dataset_metadata_df"],
-        tableName,
-        server,
-    )
+    # metadata.tblKeywords_Insert(
+    #     data_dict["variable_metadata_df"],
+    #     data_dict["dataset_metadata_df"],
+    #     tableName,
+    #     server,
+    # )
     # metadata.ocean_region_classification(
     #     data_dict["data_df"],
     #     data_dict["dataset_metadata_df"]["dataset_short_name"].iloc[0],
@@ -140,6 +140,7 @@ def full_ingestion(args):
     #     remove_file_flag=True,
     # )
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
+    # print(data_dict)
     # SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
     # insertData(data_dict, args.tableName, args.Server)
     insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
