@@ -49,7 +49,7 @@ def addMarkers(m, df):
 
 def html_to_static(m, tableName):
     """Outputs folium map to html and static map"""
-    m.save(vs.static + tableName + ".html")
+    m.save(vs.static + "mission_icons/" + tableName + ".html")
     options = FirefoxOptions()
     options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
