@@ -8,7 +8,7 @@ from cmapingest import SQL
 
 
 def test_build_SQL_suggestion_df():
-    """ What testing, ie. problems might arise with the SQL suggestion df?:
+    """What testing, ie. problems might arise with the SQL suggestion df?:
     That dtypes are correct:
     -possible breaks - time column wrong format?
     -object detection

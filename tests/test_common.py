@@ -41,21 +41,21 @@ def test_getColBounds():
 
 def test_getDatasetID_DS_Name():
     input_ds_name = "Flombaum"
-    ds_ID_func = cmn.getDatasetID_DS_Name(input_ds_name)
+    ds_ID_func = cmn.getDatasetID_DS_Name(input_ds_name, server="Rainier")
     ds_ID_expected = 83
     assert ds_ID_func == ds_ID_expected, "test get datasetID from dataset name failed."
 
 
 def test_getDatasetID_Tbl_Name():
     input_tblName = "tblFlombaum"
-    ds_ID_func = cmn.getDatasetID_Tbl_Name(input_tblName)
+    ds_ID_func = cmn.getDatasetID_Tbl_Name(input_tblName, server="Rainier")
     ds_ID_expected = 83
     assert ds_ID_func == ds_ID_expected, "test get datasetID from table name failed."
 
 
 def test_getKeywordsIDDataset():
     input_DS_id = 83
-    keyword_id_list_func = cmn.getKeywordsIDDataset(input_DS_id)
+    keyword_id_list_func = cmn.getKeywordsIDDataset(input_DS_id, server="Rainier")
     keyword_id_list_expected = [1126, 1127]
     assert (
         keyword_id_list_func == keyword_id_list_expected
@@ -73,11 +73,26 @@ def test_getTableName_Dtypes():
                 "depth",
                 "prochlorococcus_abundance_flombaum",
                 "synechococcus_abundance_flombaum",
+                "year",
+                "month",
+                "week",
+                "dayofyear",
             ],
-            "DATA_TYPE": ["date", "float", "float", "float", "float", "float"],
+            "DATA_TYPE": [
+                "date",
+                "float",
+                "float",
+                "float",
+                "float",
+                "float",
+                "smallint",
+                "tinyint",
+                "tinyint",
+                "smallint",
+            ],
         }
     )
-    func_df = cmn.getTableName_Dtypes(input_tblName)
+    func_df = cmn.getTableName_Dtypes(input_tblName, server="Rainier")
     assert_frame_equal(func_df, expected_df, obj="get tablename datatypes test failed.")
 
 
@@ -111,7 +126,7 @@ def test_getCruiseDetails():
         -157.858,
         "Virginia Armbrust",
     ]
-    func_df = cmn.getCruiseDetails(input_cruisename)
+    func_df = cmn.getCruiseDetails(input_cruisename, server="Rainier")
     assert_frame_equal(
         func_df, expected_df, check_dtype=False, obj="get cruise details test failed."
     )

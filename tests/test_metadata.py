@@ -58,7 +58,7 @@ def test_classified_gdf_to_list():
 
 
 def test_classify_gdf_with_gpkg_regions():
-    """testing idea: create simple polygon, see if points within are picked up. """
+    """testing idea: create simple polygon, see if points within are picked up."""
 
 
 def classify_gdf_with_gpkg_regions(data_gdf, region_gdf):
