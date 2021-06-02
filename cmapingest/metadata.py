@@ -71,6 +71,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
         .replace("’", "")
         .replace("‘", "")
         .replace("\n", "")
+        .replace("\xa0", "")
     )
     Climatology = dataset_metadata_df["climatology"].iloc[0]
     Db = "Opedia"

@@ -49,12 +49,12 @@ def addMarkers(m, df):
 
 def html_to_static(m, tableName):
     """Outputs folium map to html and static map"""
-    m.save(vs.static + "mission_icons/" + tableName + ".html")
+    m.save(vs.mission_icons + tableName + ".html")
     options = FirefoxOptions()
     options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     fpath = os.getcwd()
-    driver.get("file://" + vs.static + tableName + ".html")
+    driver.get("file://" + vs.static + "mission_icons/" + tableName + ".html")
     container = driver.find_element_by_class_name("leaflet-control-attribution")
     driver.execute_script(
         "document.getElementsByClassName('leaflet-control-attribution')[0].style.display = 'none';"
@@ -66,7 +66,7 @@ def html_to_static(m, tableName):
         "document.getElementsByClassName('leaflet-bottom leaflet-left')[0].style.display = 'none';"
     )
     time.sleep(4)
-    driver.save_screenshot(vs.static + tableName + ".png")
+    driver.save_screenshot(vs.mission_icons + tableName + ".png")
     driver.close()
 
 
