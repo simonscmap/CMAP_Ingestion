@@ -23,10 +23,9 @@ from cmapingest import vault_structure as vs
 api = pycmap.API(token=cr.api_key)
 
 
-def ID_Var_Map(series_to_map, res_col, tableName):
-    api = pycmap.API()
-    query = """SELECT * FROM """ + tableName
-    call = DB.dbRead(query)
+def ID_Var_Map(series_to_map, res_col, tableName, server):
+    query = f"""SELECT * FROM {tableName}"""
+    call = DB.dbRead(query, server)
     series = series_to_map.astype(str).str.lower()
     sdict = dict(zip(call[res_col].str.lower(), call.ID))
     mapped_series = series.map(sdict)
@@ -78,9 +77,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
     # Temps
     Variables = ""
     Doc_URL = ""
-    Icon_URL = "https://raw.githubusercontent.com/simonscmap/CMAP_Ingestion/master/static/mission_icons/{tableName}.png".format(
-        tableName=tableName
-    )
+    Icon_URL = f"""https://raw.githubusercontent.com/simonscmap/static/master/mission_icons/{tableName}.png"""
 
     query = (
         last_dataset_ID,
@@ -101,9 +98,14 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
         Dataset_History,
     )
     columnList = "(ID,DB,Dataset_Name,Dataset_Long_Name,Variables,Data_Source,Distributor,Description,Climatology,Acknowledgement,Doc_URL,Icon_URL,Contact_Email,Dataset_Version,Dataset_Release_Date,Dataset_History)"
-    DB.lineInsert(
-        server, "[opedia].[dbo].[tblDatasets]", columnList, query, ID_insert=True
-    )
+    try:
+        DB.lineInsert(
+            server, "[opedia].[dbo].[tblDatasets]", columnList, query, ID_insert=True
+        )
+    except:
+        DB.lineInsert(
+            server, "[opedia].[dbo].[tblDatasets]", columnList, query, ID_insert=False
+        )
     print("Metadata inserted into tblDatasets.")
 
 
@@ -116,7 +118,7 @@ def tblDataset_References_Insert(
     columnList = "(Dataset_ID, Reference)"
     reference_list = (
         dataset_metadata_df["dataset_references"]
-        .str.replace(u"\xa0", u" ")
+        .str.replace("\xa0", " ")
         .replace("", np.nan)
         .dropna()
         .to_list()
@@ -137,9 +139,9 @@ def tblVariables_Insert(
     dataset_metadata_df,
     variable_metadata_df,
     Table_Name,
+    server,
     process_level="REP",
     CRS="CRS",
-    server="Rainier",
 ):
     Db_list = len(variable_metadata_df) * ["Opedia"]
     IDvar_list = len(variable_metadata_df) * [
@@ -155,11 +157,13 @@ def tblVariables_Insert(
         variable_metadata_df["var_temporal_res"],
         "Temporal_Resolution",
         "tblTemporal_Resolutions",
+        server,
     )
     Spatial_Res_ID_list = ID_Var_Map(
         variable_metadata_df["var_spatial_res"],
         "Spatial_Resolution",
         "tblSpatial_Resolutions",
+        server,
     )
     Temporal_Coverage_Begin_list, Temporal_Coverage_End_list = cmn.getColBounds(
         data_df, "time", list_multiplier=len(variable_metadata_df)
@@ -172,22 +176,28 @@ def tblVariables_Insert(
     )
     Grid_Mapping_list = [CRS] * len(variable_metadata_df)
     Sensor_ID_list = ID_Var_Map(
-        variable_metadata_df["var_sensor"], "Sensor", "tblSensors"
+        variable_metadata_df["var_sensor"], "Sensor", "tblSensors", server
     )
     Make_ID_list = len(variable_metadata_df) * list(
-        ID_Var_Map(dataset_metadata_df["dataset_make"].head(1), "Make", "tblMakes")
+        ID_Var_Map(
+            dataset_metadata_df["dataset_make"].head(1), "Make", "tblMakes", server
+        )
     )
     Process_ID_list = ID_Var_Map(
         pd.Series(len(variable_metadata_df) * [process_level]),
         "Process_Stage",
         "tblProcess_Stages",
+        server,
     )
     Study_Domain_ID_list = ID_Var_Map(
-        variable_metadata_df["var_discipline"], "Study_Domain", "tblStudy_Domains"
+        variable_metadata_df["var_discipline"],
+        "Study_Domain",
+        "tblStudy_Domains",
+        server,
     )
     Comment_list = cmn.nanToNA(variable_metadata_df["var_comment"]).to_list()
     Visualize_list = cmn.nanToNA(variable_metadata_df["visualize"]).tolist()
-    Data_Type_list = cmn.getTableName_Dtypes(Table_Name)["DATA_TYPE"].tolist()
+    Data_Type_list = cmn.getTableName_Dtypes(Table_Name, server)["DATA_TYPE"].tolist()
     columnList = "(ID,DB, Dataset_ID, Table_Name, Short_Name, Long_Name, Unit, Temporal_Res_ID, Spatial_Res_ID, Temporal_Coverage_Begin, Temporal_Coverage_End, Lat_Coverage_Begin, Lat_Coverage_End, Lon_Coverage_Begin, Lon_Coverage_End, Grid_Mapping, Make_ID, Sensor_ID, Process_ID, Study_Domain_ID, Comment, Visualize, Data_Type)"
 
     for (
@@ -323,9 +333,11 @@ def user_input_build_cruise(df, dataset_metadata_df):
     )
 
 
-def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server="Rainier"):
+def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server):
 
-    matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(dataset_metadata_df)
+    matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
+        dataset_metadata_df, server
+    )
     print("matched: ")
     print(matched_cruises)
     print("\n")
@@ -448,7 +460,7 @@ def deleteCatalogTables(tableName, server):
         dropTable(tableName, server)
         # dropTable(tableName, "Mariana")
     else:
-        print("Catalog tables for " + datasetName + " not deleted")
+        print("Catalog tables for ID" + Dataset_ID + " not deleted")
 
 
 def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainier"):
