@@ -38,6 +38,7 @@ download_transfer = r"/data/CMAP Data Submission Dropbox/Simons CMAP/download_tr
 
 ################# Static Mission Icon Directory ##################
 static = r"/data/CMAP Data Submission Dropbox/Simons CMAP/static/"
+mission_icons = static + r"mission_icons/"
 
 ################# Download Transfer Structure   ##################
 makedir(download_transfer)
