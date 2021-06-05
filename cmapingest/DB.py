@@ -34,7 +34,7 @@ def DB_modify(cmnd, server):
         conn.close()
 
 
-def dbRead(query, server="Rainier"):
+def dbRead(query, server):
     conn, cursor = dbConnect(server)
     df = sql.read_sql(query, conn)
     conn.close()

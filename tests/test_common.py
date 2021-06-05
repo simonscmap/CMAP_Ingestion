@@ -111,6 +111,7 @@ def test_getCruiseDetails():
             "Lon_Min",
             "Lon_Max",
             "Chief_Name",
+            "Cruise_Series",
         ]
     )
     expected_df.loc[len(expected_df), :] = [
@@ -118,14 +119,17 @@ def test_getCruiseDetails():
         "Gradients_1",
         "KOK1606",
         "R/V Kaimikai O Kanaloa",
-        "2016-04-20T00:04:37.000Z",
-        "2016-05-04T02:33:45.000Z",
+        "2016-04-20 00:04:37",
+        "2016-04-20 00:04:37",
         21.4542,
         37.8864,
         -158.3355,
         -157.858,
         "Virginia Armbrust",
+        1,
     ]
+    # right is script, left is DB
+
     func_df = cmn.getCruiseDetails(input_cruisename, server="Rainier")
     assert_frame_equal(
         func_df, expected_df, check_dtype=False, obj="get cruise details test failed."
@@ -136,7 +140,7 @@ def test_findVarID():
     input_datasetID = 83
     input_Short_Name = "prochlorococcus_abundance_flombaum"
     VarID_expected = 1126
-    varID_func = cmn.findVarID(input_datasetID, input_Short_Name)
+    varID_func = cmn.findVarID(input_datasetID, input_Short_Name, server="Rainier")
     assert varID_func == VarID_expected, "find variable ID test failed."
 
 
@@ -144,7 +148,9 @@ def test_verify_cruise_lists():
     test_df = pd.DataFrame({"cruise_names": ["KOK1606", "cruise_not_in_database"]})
     expected_list_matched = ["kok1606"]
     expected_list_unmatched = ["cruise_not_in_database"]
-    func_match_list, func_unmatched_list = cmn.verify_cruise_lists(test_df)
+    func_match_list, func_unmatched_list = cmn.verify_cruise_lists(
+        test_df, server="Rainier"
+    )
     assert func_match_list == expected_list_matched, "verify_cruise_lists match failed."
     assert (
         func_unmatched_list == expected_list_unmatched
@@ -154,7 +160,7 @@ def test_verify_cruise_lists():
 def test_get_cruise_IDS():
     test_cruise_name_list = ["kok1606", "mgl1704"]
     expected_ID_list = [589, 593]
-    func_ID_list = cmn.get_cruise_IDS(test_cruise_name_list)
+    func_ID_list = cmn.get_cruise_IDS(test_cruise_name_list, server="Rainier")
     assert func_ID_list == expected_ID_list, "Get cruise IDs test failed."
 
 

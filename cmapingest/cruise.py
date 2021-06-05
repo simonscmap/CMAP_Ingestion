@@ -14,6 +14,8 @@ from cmapingest import data
 from cmapingest import vault_structure as vs
 from cmapingest import common as cmn
 from cmapingest import DB
+from cmapingest import transfer
+from cmapingest import region_classification as rc
 
 ##############################################
 ########## Cruise Helper Funcs ###############
@@ -90,10 +92,10 @@ def download_cruise_data_from_url(cruise_name, download_url_str, dataset_categor
 def ST_bounds_from_df(df):
     time_min = np.min(df["time"])
     time_max = np.max(df["time"])
-    lat_min = np.min(df["lat"])
-    lat_max = np.max(df["lat"])
-    lon_min = np.min(df["lon"])
-    lon_max = np.max(df["lon"])
+    lat_min = round(np.min(df["lat"]), 4)
+    lat_max = round(np.max(df["lat"]), 4)
+    lon_min = round(np.min(df["lon"]), 4)
+    lon_max = round(np.max(df["lon"]), 4)
     return time_min, time_max, lat_min, lat_max, lon_min, lon_max
 
 
@@ -119,7 +121,7 @@ def fill_ST_bounds_metadata(cruise_name):
     meta_df.to_csv(meta_path, sep=",", index=False)
 
 
-def update_tblCruises():
+def update_tblCruises(server):
     cruises_in_vault = cmn.lowercase_List(vault_cruises())
     DB_cruises = set(cmn.lowercase_List(cmn.getListCruises()["Name"].to_list()))
     new_cruises = sorted(list(set(cruises_in_vault) - set(DB_cruises)))
@@ -135,7 +137,7 @@ def update_tblCruises():
                 )
             )
             DB.lineInsert(
-                "Rainier",
+                server,
                 "tblCruise",
                 "(Nickname,Name,Ship_Name,Start_Time,End_Time,Lat_Min,Lat_Max,Lon_Min,Lon_Max,Chief_Name)",
                 tuple(meta_df.iloc[0].astype(str).to_list()),
@@ -532,3 +534,16 @@ def fill_ST_meta(cruise_meta_df, cruise_traj_df):
 # traj_df["Cruise_ID"] = Cruise_ID[0]
 # traj_df = traj_df[["Cruise_ID", "time", "lat", "lon"]]
 # data.data_df_to_db(traj_df, "tblCruise_Trajectory", clean_data_df=False)
+
+
+"""update cruises that are missing regions...
+step 1: SQL query from SOT(rainier) to get cruises missing region ID that also have trajectory
+    ie. join tblCruiseTraj with tblCruise_Regions to find null
+
+     2: DB in DB_list:
+            for cruise_ID in id_list:
+                retrieve df from tblCruise_Trajectory
+                classify with Region ID
+                Insert cruise_ID, RegionID(s)
+
+"""

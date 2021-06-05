@@ -162,7 +162,7 @@ def getDatasetID_Tbl_Name(tableName, server):
     return dsID
 
 
-def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
+def getKeywordIDsTableNameVarName(tableName, var_short_name_list, server):
     """Get list of keyword ID's from input dataset ID"""
     cur_str = """select [ID] from tblVariables where Table_Name = '{tableName}' AND [Short_Name] in {vsnp}""".format(
         tableName=tableName, vsnp=tuple(var_short_name_list)
@@ -170,7 +170,7 @@ def getKeywordIDsTableNameVarName(tableName, var_short_name_list):
     if len(var_short_name_list) == 1:
         cur_str = cur_str.replace(",)", ")")
 
-    query_return = DB.dbRead(cur_str, server="Rainier")["ID"].to_list()
+    query_return = DB.dbRead(cur_str, server=server)["ID"].to_list()
 
     # query_return = DB.DB_query(cur_str)["ID"].to_list()
     return query_return
@@ -189,7 +189,7 @@ def getKeywordsIDDataset(dataset_ID, server):
     return query_return
 
 
-def getTableName_Dtypes(tableName):
+def getTableName_Dtypes(tableName, server):
     """Get data types from input table name"""
     query = (
         """ select COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"""
@@ -197,22 +197,22 @@ def getTableName_Dtypes(tableName):
         + """'"""
     )
     # query_return = DB.DB_query(query)
-    query_return = DB.dbRead(query, server="Rainier")
+    query_return = DB.dbRead(query, server)
 
     return query_return
 
 
-def getCruiseDetails(cruiseName):
+def getCruiseDetails(cruiseName, server):
     """Get cruise details from cruise name using uspCruiseByName"""
     query = """EXEC uspCruiseByName '""" + cruiseName + """'"""
-    query_return = DB.DB_query(query)
+    query_return = DB.dbRead(query, server)
     return query_return
 
 
-def getListCruises():
+def getListCruises(server):
     """Get list of available cruises using uspCruises"""
     query = """SELECT * FROM tblCruise"""
-    query_return = DB.dbRead(query, server="Rainier")
+    query_return = DB.dbRead(query, server=server)
     return query_return
 
 
@@ -253,24 +253,24 @@ def find_File_Path_guess_tree(name):
             return struct
 
 
-def verify_cruise_lists(dataset_metadata_df):
+def verify_cruise_lists(dataset_metadata_df, server):
     """Returns matching and non matching cruises"""
     cruise_series = strip_leading_trailing_whitespace_column(
         dataset_metadata_df, "cruise_names"
     )["cruise_names"]
     """ check that every cruise_name in column exists in the database. map those that don't exist into return"""
     cruise_set = set(lowercase_List(cruise_series.to_list()))
-    nickname_list = lowercase_List(getListCruises()["Nickname"].to_list())
-    name_list = lowercase_List(getListCruises()["Name"].to_list())
+    nickname_list = lowercase_List(getListCruises(server)["Nickname"].to_list())
+    name_list = lowercase_List(getListCruises(server)["Name"].to_list())
     db_cruise_set = set(nickname_list + name_list)
     matched = list(cruise_set.intersection(db_cruise_set))
     unmatched = list(cruise_set.difference(db_cruise_set))
     return matched, unmatched
 
 
-def get_cruise_IDS(cruise_name_list):
+def get_cruise_IDS(cruise_name_list, server):
     """Returns IDs of input cruise names"""
-    cruise_db_df = getListCruises()
+    cruise_db_df = getListCruises(server)
     cruise_name_list = lowercase_List(cruise_name_list)
     cruise_ID_list_name = cruise_db_df["ID"][
         cruise_db_df["Name"].str.lower().isin(cruise_name_list)

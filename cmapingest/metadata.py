@@ -109,9 +109,7 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
     print("Metadata inserted into tblDatasets.")
 
 
-def tblDataset_References_Insert(
-    dataset_metadata_df, DOI_link_append=None, server="Rainier"
-):
+def tblDataset_References_Insert(dataset_metadata_df, server, DOI_link_append=None):
 
     Dataset_Name = dataset_metadata_df["dataset_short_name"].iloc[0]
     IDvar = cmn.getDatasetID_DS_Name(Dataset_Name, server)
@@ -305,7 +303,7 @@ def tblKeywords_Insert(variable_metadata_df, dataset_metadata_df, Table_Name, se
                     print(e)
 
 
-def user_input_build_cruise(df, dataset_metadata_df):
+def user_input_build_cruise(df, dataset_metadata_df, server):
     tblCruise_df, cruise_name = cruise.build_cruise_metadata_from_user_input(df)
     print("The cruise metadata dataframe you generated looks like: ")
     print(tblCruise_df)
@@ -316,7 +314,7 @@ def user_input_build_cruise(df, dataset_metadata_df):
         tblCruise_df, cruise_name = cruise.build_cruise_metadata_from_user_input(df)
     elif meta_cont.lower() == "y":
         DB.lineInsert(
-            "Rainier",
+            server,
             "tblCruise",
             "(Nickname,Name,Ship_Name,Start_Time,End_Time,Lat_Min,Lat_Max,Lon_Min,Lon_Max,Chief_Name)",
             tuple(tblCruise_df.iloc[0].astype(str).to_list()),
@@ -324,12 +322,12 @@ def user_input_build_cruise(df, dataset_metadata_df):
     elif meta_cont.lower() == "n":
         sys.exit()
 
-    Cruise_ID = cmn.get_cruise_IDS([cruise_name])
+    Cruise_ID = cmn.get_cruise_IDS([cruise_name], server)
     rdf = cruise.resample_trajectory(df)
     traj_df = cruise.return_cruise_trajectory_from_df(rdf, Cruise_ID)
     # Dev note, in future generate map for QA? add user input
     data.data_df_to_db(
-        traj_df, "tblCruise_Trajectory", "Rainier", clean_data_df_flag=False
+        traj_df, "tblCruise_Trajectory", server, clean_data_df_flag=False
     )
 
 
@@ -343,31 +341,31 @@ def tblDataset_Cruises_Insert(data_df, dataset_metadata_df, server):
     print("\n")
     print("umatched: ")
     print(unmatched_cruises)
-    # if matched_cruises == []:
-    #     build_traj_yn = input(
-    #         "Do you want to build cruise trajectory and metadata from this dataset? [Y/n]: "
-    #     )
-    #     if build_traj_yn.lower() == "y":
-    #         print(
-    #             "Building cruise trajectory and metadata from this dataset and user input. "
-    #         )
-    #         user_input_build_cruise(data_df, dataset_metadata_df)
-    #         matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
-    #             dataset_metadata_df
-    #         )
-    # cruise_ID_list = cmn.get_cruise_IDS(matched_cruises)
-    # dataset_ID = cmn.getDatasetID_DS_Name(
-    #     dataset_metadata_df["dataset_short_name"].iloc[0],server
-    # )
-    # for cruise_ID in cruise_ID_list:
-    #     query = (dataset_ID, cruise_ID)
-    #     DB.lineInsert(
-    #         server,
-    #         "[opedia].[dbo].[tblDataset_Cruises]",
-    #         "(Dataset_ID, Cruise_ID)",
-    #         query,
-    #     )
-    # print("Dataset matched to cruises: ", matched_cruises)
+    if matched_cruises == []:
+        build_traj_yn = input(
+            "Do you want to build cruise trajectory and metadata from this dataset? [Y/n]: "
+        )
+        if build_traj_yn.lower() == "y":
+            print(
+                "Building cruise trajectory and metadata from this dataset and user input. "
+            )
+            user_input_build_cruise(data_df, dataset_metadata_df, server)
+            matched_cruises, unmatched_cruises = cmn.verify_cruise_lists(
+                dataset_metadata_df, server
+            )
+    cruise_ID_list = cmn.get_cruise_IDS(matched_cruises, server)
+    dataset_ID = cmn.getDatasetID_DS_Name(
+        dataset_metadata_df["dataset_short_name"].iloc[0], server
+    )
+    for cruise_ID in cruise_ID_list:
+        query = (dataset_ID, cruise_ID)
+        DB.lineInsert(
+            server,
+            "[opedia].[dbo].[tblDataset_Cruises]",
+            "(Dataset_ID, Cruise_ID)",
+            query,
+        )
+    print("Dataset matched to cruises")
 
 
 def deleteFromtblKeywords(Dataset_ID, server):
@@ -463,7 +461,7 @@ def deleteCatalogTables(tableName, server):
         print("Catalog tables for ID" + Dataset_ID + " not deleted")
 
 
-def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainier"):
+def removeKeywords(keywords_list, var_short_name_list, tableName, server):
     """Removes a list of keywords for list of variables in a table"""
 
     keywords_list = cmn.lowercase_List(keywords_list)
@@ -486,7 +484,7 @@ def removeKeywords(keywords_list, var_short_name_list, tableName, server="Rainie
     )
 
 
-def addKeywords(keywords_list, tableName, var_short_name_list="*", server="Rainier"):
+def addKeywords(keywords_list, tableName, server, var_short_name_list="*"):
     if var_short_name_list == "*":
         var_short_name_list = cmn.get_var_list_dataset(tableName)
     """Inserts list of keywords for list of variables in a table"""
@@ -611,7 +609,7 @@ def ocean_region_classification(data_df, dataset_name, server):
 # )
 
 
-def if_exists_dataset_region(dataset_name):
+def if_exists_dataset_region(dataset_name, server):
     """Checks if dataset ID is already in tblDatasets_Regions
 
     Args:
@@ -622,7 +620,7 @@ def if_exists_dataset_region(dataset_name):
     cur_str = """SELECT * FROM [Opedia].[dbo].[tblDataset_Regions] WHERE [Dataset_ID] = {Dataset_ID}""".format(
         Dataset_ID=ds_ID
     )
-    query_return = DB.dbRead(cur_str, server="Rainier")
+    query_return = DB.dbRead(cur_str, server)
     if query_return.empty:
         bool_return = False
     else:
