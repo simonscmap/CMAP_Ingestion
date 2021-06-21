@@ -60,7 +60,9 @@ def tblDatasets_Insert(dataset_metadata_df, tableName, server):
     Dataset_Make = dataset_metadata_df["dataset_make"].iloc[0]
     Data_Source = dataset_metadata_df["dataset_source"].iloc[0]
     Distributor = dataset_metadata_df["dataset_distributor"].iloc[0]
-    Acknowledgement = dataset_metadata_df["dataset_acknowledgement"].iloc[0]
+    Acknowledgement = (
+        dataset_metadata_df["dataset_acknowledgement"].iloc[0].replace("\xa0", " ")
+    )
     Contact_Email = ""  # dataset_metadata_df["contact_email"].iloc[0]
     Dataset_History = dataset_metadata_df["dataset_history"].iloc[0]
     Description = (
