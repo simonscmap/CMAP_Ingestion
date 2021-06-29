@@ -277,6 +277,7 @@ def tblVariables_Insert(
         DB.lineInsert(
             server, "[opedia].[dbo].[tblVariables]", columnList, query, ID_insert=True
         )
+
     print("Inserting data into tblVariables")
 
 

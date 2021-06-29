@@ -6,8 +6,8 @@ import geopandas as gpd
 from geopandas.tools import sjoin
 from tqdm import tqdm
 
-sys.path.append("../login/")
-import credentials as cr
+from cmapingest import credentials as cr
+
 
 import pycmap
 
