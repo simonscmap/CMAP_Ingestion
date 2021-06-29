@@ -78,16 +78,16 @@ def insertData(data_dict, tableName, server):
 def insertMetadata(data_dict, tableName, DOI_link_append, server):
     metadata.tblDatasets_Insert(data_dict["dataset_metadata_df"], tableName, server)
     metadata.tblDataset_References_Insert(
-        data_dict["dataset_metadata_df"], DOI_link_append, server
+        data_dict["dataset_metadata_df"], server, DOI_link_append
     )
     metadata.tblVariables_Insert(
         data_dict["data_df"],
         data_dict["dataset_metadata_df"],
         data_dict["variable_metadata_df"],
         tableName,
+        server,
         process_level="REP",
         CRS="CRS",
-        server=server,
     )
     metadata.tblKeywords_Insert(
         data_dict["variable_metadata_df"],
@@ -127,7 +127,7 @@ def createIcon(data_dict, tableName):
 
 
 def push_icon():
-    os.chdir(vs.static)
+    os.chdir(vs.mission_icons)
     os.system('git add . && git commit -m "add mission icons to git repo" && git push')
 
 
@@ -141,7 +141,6 @@ def full_ingestion(args):
         remove_file_flag=True,
     )
     data_dict = data.importDataMemory(args.branch, args.tableName, args.process_level)
-    print(data_dict)
     SQL_suggestion(data_dict, args.tableName, args.branch, args.Server)
     insertData(data_dict, args.tableName, args.Server)
     insertMetadata(data_dict, args.tableName, args.DOI_link_append, args.Server)
@@ -149,69 +148,6 @@ def full_ingestion(args):
     if args.Server == "Rainier":
         createIcon(data_dict, args.tableName)
         push_icon()
-
-
-def append_ingestion(args):
-    """The Append Ingestion function is for appending data onto a table. Example: Extending satellite or model datasets in time"""
-    print("append Ingestion")
-    # start_date = input("please input start_date in YYYY-mm-dd")
-    # end_date = input("please input end_date in YYYY-mm-dd")
-    # dir_path = vs.satellite + 'tblModis_PAR/rep/'
-    base_path = (
-        cmn.vault_struct_retrieval(args.branch)
-        + args.tableName
-        + "/"
-        + args.process_level
-        + "/"
-    )
-    flist = glob.glob(base_path + "*.parquet")
-    # startdate = '2010002'
-    # enddate = '201030'
-    startdate = "2010336"
-    enddate = "2010366"
-    flist_base = [os.path.basename(filename) for filename in flist]
-    files_in_range = []
-    for i in flist_base:
-        strpted_time = i.replace(".L3m_DAY_PAR_par_9km.parquet", "").replace("A", "")
-        zfill_time = strpted_time[:4] + strpted_time[4:].zfill(3)
-        fdate = pd.to_datetime(zfill_time, format="%Y%j")
-        if (
-            pd.to_datetime(startdate, format="%Y%j")
-            <= fdate
-            <= pd.to_datetime(enddate, format="%Y%j")
-        ):
-            files_in_range.append(i)
-    for selfile in files_in_range:
-        df = pd.read_parquet(base_path + selfile)
-        data.data_df_to_db(df, args.tableName, args.Server, clean_data_df_flag=False)
-        print("processed: " + selfile)
-
-    # print(flist[0], args.tableName, args.Server)
-    # wait_test = input("""Do you want to continue, [y/n]: """)
-    # if wait_test == "y":
-    #     adll_flist = flist[1:]
-    #     for adlfile in adll_flist:
-    #         print(adlfile)
-    #         # data.data_df_to_db(adlfile, args.tableName, args.server)
-
-    # #     pass
-    # else:
-    #     print("exiting..")
-    #     sys.exit()
-
-    # """
-    # 1. input start date and end date as input()
-    # 2. gather all files in range of start_end
-    # 3. user continue - > does this range look right?
-    # 4. BCP data ingestion
-    # 5. testing suite for that day
-    # 6.if OK, user input, Finish bcp all files in range
-    # 7. LARGE STATS TABLE ID: once tables are written to hdf5 or parquet, read all(in range) in vaex, df.describe().to_csv("stats_table_range_dates)
-    # 8. update stats
-    # 9. final test on random date/spatial range in bounds
-
-    # """
-    # pass
 
 
 def partial_ingestion(args):
